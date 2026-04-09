@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Merlion Health Chat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-bright": "#f7fafc",
+              "outline": "#6e7979",
+              "primary-fixed": "#93f2f2",
+              "on-tertiary-container": "#ebffe3",
+              "on-error-container": "#93000a",
+              "tertiary": "#156820",
+              "surface": "#f7fafc",
+              "tertiary-container": "#338236",
+              "surface-tint": "#006a6a",
+              "on-secondary-fixed-variant": "#004a75",
+              "outline-variant": "#bdc9c8",
+              "primary": "#006565",
+              "on-background": "#181c1e",
+              "surface-container-high": "#e5e9eb",
+              "on-error": "#ffffff",
+              "tertiary-fixed": "#a3f69c",
+              "secondary-fixed-dim": "#96ccff",
+              "primary-fixed-dim": "#76d6d5",
+              "on-secondary-container": "#035584",
+              "surface-container-highest": "#e0e3e5",
+              "on-tertiary-fixed-variant": "#005312",
+              "secondary": "#206393",
+              "background": "#f7fafc",
+              "surface-variant": "#e0e3e5",
+              "surface-container-lowest": "#ffffff",
+              "on-surface-variant": "#3e4949",
+              "on-primary": "#ffffff",
+              "on-primary-container": "#e3fffe",
+              "on-primary-fixed": "#002020",
+              "secondary-fixed": "#cee5ff",
+              "on-tertiary-fixed": "#002204",
+              "inverse-surface": "#2d3133",
+              "on-surface": "#181c1e",
+              "on-primary-fixed-variant": "#004f4f",
+              "surface-container-low": "#f1f4f6",
+              "on-secondary-fixed": "#001d32",
+              "on-tertiary": "#ffffff",
+              "primary-container": "#008080",
+              "error": "#ba1a1a",
+              "tertiary-fixed-dim": "#88d982",
+              "on-secondary": "#ffffff",
+              "surface-container": "#ebeef0",
+              "inverse-on-surface": "#eef1f3",
+              "inverse-primary": "#76d6d5",
+              "surface-dim": "#d7dadc",
+              "error-container": "#ffdad6",
+              "secondary-container": "#90c9ff"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#f7fafc]/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm dark:shadow-none flex items-center justify-between px-4 py-2 w-full">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container overflow-hidden">
+<img alt="AI Assistant Bot" class="w-full h-full object-cover" data-alt="Friendly AI health assistant avatar with a modern teal background and glowing digital eye" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFhoT-4l5HvsDvjC195hRapbEqxGTYamPggPHQ8lIOvImHg6deM1wdJwNMmlHKWdkz_PUfezgTWStflkNFvyhEout3rfBoODeF8GJxt-MyP9Q3jSsBecATcbs7mGDpy7pb6bWuY2WY4uaSzkhLkFIEHF1v3L2sT2R_VJKcYJefd4vODm9-Bqr4CYGydeJEoUMQiL_yUOQFYkI5fPju4ff3uxKsLoOVifDj8VAXFpthMcbQXqAJUyU8RdJdODMX98DNzRsLmynC4rk"/>
+</div>
+<div class="flex flex-col">
+<span class="text-lg font-bold text-[#006565] dark:text-[#93f2f2] font-manrope tracking-tight">Merlion Health</span>
+<span class="text-[10px] text-on-surface-variant font-medium flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Medi-Nudge AI • Online
+                </span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-[#e0e3e5] dark:hover:bg-slate-700 transition-colors active:scale-95 text-[#006565]">
+<span class="material-symbols-outlined">call</span>
+</button>
+<button class="p-2 rounded-full hover:bg-[#e0e3e5] dark:hover:bg-slate-700 transition-colors active:scale-95 text-[#006565]">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</div>
+</header>
+<main class="flex-1 mt-16 mb-20 px-4 pt-4 overflow-y-auto hide-scrollbar">
+<!-- Health Summary Card (Vitals) -->
+<section class="mb-8">
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/15">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-on-surface font-manrope font-bold text-sm tracking-wide">HEALTH SUMMARY</h2>
+<span class="text-[10px] font-semibold text-primary uppercase tracking-widest">Live Updates</span>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<!-- Blood Pressure Card -->
+<div class="bg-surface-container-low rounded-lg p-3">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-error text-lg">favorite</span>
+<span class="text-[11px] font-medium text-on-surface-variant">Blood Pressure</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="text-xl font-bold font-headline text-on-surface">138/88</span>
+<span class="text-[10px] text-on-surface-variant">mmHg</span>
+</div>
+<div class="mt-2 flex items-center gap-1">
+<div class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container text-[9px] font-bold">
+                                ELEVATED
+                            </div>
+</div>
+</div>
+<!-- Step Count Card (Contextual placeholder) -->
+<div class="bg-surface-container-low rounded-lg p-3">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-tertiary text-lg">directions_walk</span>
+<span class="text-[11px] font-medium text-on-surface-variant">Daily Steps</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="text-xl font-bold font-headline text-on-surface">4,120</span>
+<span class="text-[10px] text-on-surface-variant">steps</span>
+</div>
+<div class="mt-2 flex items-center gap-1">
+<div class="px-2 py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container text-[9px] font-bold">
+                                ON TRACK
+                            </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Chat Sequence -->
+<div class="space-y-6 pb-4">
+<!-- Timestamp Separator -->
+<div class="flex justify-center">
+<span class="text-[10px] font-bold text-on-surface-variant bg-surface-container-high px-3 py-1 rounded-full uppercase tracking-tighter">Today</span>
+</div>
+<!-- Bot Message 1 -->
+<div class="flex items-start gap-2 max-w-[85%]">
+<div class="flex-shrink-0 w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm">smart_toy</span>
+</div>
+<div class="bg-surface-container-highest text-on-surface p-3 rounded-xl rounded-tl-sm shadow-sm">
+<p class="text-[13px] leading-relaxed">Hi Mr Tan 👋 It's your weekly blood pressure check-in. Please reply with your BP reading in this format: <b>SYS/DIA</b> — e.g. 130/85. If you haven't taken it yet, reply <b>SKIP</b> and we'll remind you tomorrow.</p>
+<div class="text-[9px] text-on-surface-variant mt-1 text-right">09:15 AM</div>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex flex-col items-end gap-1">
+<div class="bg-secondary-container text-on-secondary-container p-3 rounded-xl rounded-tr-sm shadow-sm max-w-[80%]">
+<p class="text-[14px] font-semibold">138/88</p>
+<div class="flex items-center justify-end gap-1 mt-1">
+<span class="text-[9px] text-on-secondary-container/70">09:18 AM</span>
+<span class="material-symbols-outlined text-[12px] text-primary" style="font-variation-settings: 'FILL' 1;">done_all</span>
+</div>
+</div>
+</div>
+<!-- Bot Message 2 -->
+<div class="flex items-start gap-2 max-w-[85%]">
+<div class="flex-shrink-0 w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm">smart_toy</span>
+</div>
+<div class="bg-surface-container-highest text-on-surface p-3 rounded-xl rounded-tl-sm shadow-sm">
+<p class="text-[13px] leading-relaxed">
+                        Thank you, Mr Tan. Your reading today: <b>138/88 mmHg</b> — recorded ✅ 
+                        <br/><br/>
+                        This is slightly above your target of 135/85. No immediate action needed, but do try to reduce salt intake and rest well. Your care team can see this reading. See you next week! 💊
+                    </p>
+<div class="text-[9px] text-on-surface-variant mt-1 text-right">09:18 AM</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Message Input Bar -->
+<div class="fixed bottom-14 left-0 w-full px-4 py-3 bg-surface/90 backdrop-blur-md z-40">
+<div class="flex items-center gap-2">
+<div class="flex-1 flex items-center bg-surface-container-highest rounded-full px-4 py-2 shadow-inner">
+<span class="material-symbols-outlined text-on-surface-variant mr-2">sentiment_satisfied</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-on-surface-variant/50" placeholder="Type a message..." type="text"/>
+<span class="material-symbols-outlined text-on-surface-variant ml-2">attach_file</span>
+<span class="material-symbols-outlined text-on-surface-variant ml-2">photo_camera</span>
+</div>
+<button class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-on-primary shadow-md active:scale-90 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">mic</span>
+</button>
+</div>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pb-safe pt-2 px-2 bg-white dark:bg-slate-950 border-t border-[#bdc9c8]/15 shadow-[0_-2px_10px_rgba(0,0,0,0.04)]">
+<a class="flex flex-col items-center justify-center bg-[#008080]/10 text-[#006565] dark:text-[#93f2f2] rounded-2xl px-5 py-1 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+<span class="font-inter text-[11px] font-medium">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#181c1e]/50 dark:text-[#e0e3e5]/50 px-5 py-1 hover:text-[#006565] dark:hover:text-[#93f2f2] active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-inter text-[11px] font-medium">Vitals</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#181c1e]/50 dark:text-[#e0e3e5]/50 px-5 py-1 hover:text-[#006565] dark:hover:text-[#93f2f2] active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-inter text-[11px] font-medium">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#181c1e]/50 dark:text-[#e0e3e5]/50 px-5 py-1 hover:text-[#006565] dark:hover:text-[#93f2f2] active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-inter text-[11px] font-medium">Profile</span>
+</a>
+</nav>
+</body></html>

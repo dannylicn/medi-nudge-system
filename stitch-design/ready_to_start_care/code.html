@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-low": "#f1f4f6",
+              "surface-container-highest": "#e0e3e5",
+              "on-tertiary-container": "#ebffe3",
+              "on-surface-variant": "#3e4949",
+              "secondary-fixed": "#cee5ff",
+              "primary-fixed": "#93f2f2",
+              "on-tertiary-fixed-variant": "#005312",
+              "surface-tint": "#006a6a",
+              "tertiary-container": "#338236",
+              "surface-dim": "#d7dadc",
+              "primary-container": "#008080",
+              "on-primary-fixed": "#002020",
+              "surface-variant": "#e0e3e5",
+              "on-background": "#181c1e",
+              "surface-container-high": "#e5e9eb",
+              "outline": "#6e7979",
+              "surface": "#f7fafc",
+              "on-secondary-fixed-variant": "#004a75",
+              "error": "#ba1a1a",
+              "primary": "#006565",
+              "on-tertiary": "#ffffff",
+              "inverse-primary": "#76d6d5",
+              "background": "#f7fafc",
+              "on-secondary-fixed": "#001d32",
+              "secondary-fixed-dim": "#96ccff",
+              "secondary": "#206393",
+              "on-secondary-container": "#035584",
+              "on-secondary": "#ffffff",
+              "tertiary-fixed": "#a3f69c",
+              "primary-fixed-dim": "#76d6d5",
+              "outline-variant": "#bdc9c8",
+              "surface-bright": "#f7fafc",
+              "on-error": "#ffffff",
+              "surface-container": "#ebeef0",
+              "on-surface": "#181c1e",
+              "inverse-on-surface": "#eef1f3",
+              "error-container": "#ffdad6",
+              "on-primary": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "tertiary": "#156820",
+              "on-primary-fixed-variant": "#004f4f",
+              "on-error-container": "#93000a",
+              "on-tertiary-fixed": "#002204",
+              "secondary-container": "#90c9ff",
+              "tertiary-fixed-dim": "#88d982",
+              "on-primary-container": "#e3fffe",
+              "inverse-surface": "#2d3133"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #006565 0%, #008080 100%);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased min-h-screen">
+<header class="fixed top-0 w-full z-50 bg-slate-50/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
+<div class="flex justify-between items-center px-6 h-16 w-full max-w-7xl mx-auto">
+<div class="text-xl font-bold tracking-tight text-teal-800 font-headline">Clinical Serenity</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-100 transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-4 max-w-4xl mx-auto">
+<div class="flex flex-col items-center text-center mb-12">
+<div class="w-24 h-24 bg-tertiary-container text-on-tertiary-container rounded-full flex items-center justify-center mb-6 shadow-lg shadow-tertiary-container/20">
+<span class="material-symbols-outlined !text-5xl" data-icon="verified_user" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+<h1 class="font-headline text-4xl md:text-5xl font-extrabold tracking-tight text-on-background mb-4">You're All Set</h1>
+<p class="text-on-surface-variant text-lg max-w-xl">System calibration is complete. Clinical Serenity is now monitoring your environment with high-precision medical oversight.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/15">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 bg-primary-container/10 text-primary flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined" data-icon="database_sync">sync</span>
+</div>
+<h3 class="font-headline font-bold text-xl">System Status</h3>
+</div>
+<ul class="space-y-4">
+<li class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+<span class="text-on-surface-variant font-medium">Neural Engine</span>
+<span class="text-tertiary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                            Active
+                        </span>
+</li>
+<li class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+<span class="text-on-surface-variant font-medium">Data Integrity</span>
+<span class="text-tertiary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                            99.9%
+                        </span>
+</li>
+<li class="flex items-center justify-between py-2">
+<span class="text-on-surface-variant font-medium">Cloud Sync</span>
+<span class="text-tertiary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="cloud_done" style="font-variation-settings: 'FILL' 1;">cloud_done</span>
+                            Live
+                        </span>
+</li>
+</ul>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/15">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 bg-secondary-container/20 text-secondary flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+</div>
+<h3 class="font-headline font-bold text-xl">Active Alerts</h3>
+</div>
+<div class="space-y-3">
+<div class="p-3 bg-surface-container-low rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-0.5" data-icon="info">info</span>
+<div>
+<p class="font-semibold text-sm">Vital Deviation</p>
+<p class="text-xs text-on-surface-variant">Immediate notification on bpm variance &gt; 15%</p>
+</div>
+</div>
+<div class="p-3 bg-surface-container-low rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-0.5" data-icon="emergency">emergency</span>
+<div>
+<p class="font-semibold text-sm">Critical Thresholds</p>
+<p class="text-xs text-on-surface-variant">Push alerts for all Type-A emergencies</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+<button class="hero-gradient text-on-primary px-10 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-primary/20 transition-all scale-95 active:duration-100 flex items-center gap-2">
+                Go to Dashboard
+                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<button class="bg-surface-container-high text-on-surface px-10 py-4 rounded-full font-bold text-lg hover:bg-surface-container-highest transition-all scale-95 active:duration-100 flex items-center gap-2">
+                Invite Team Members
+                <span class="material-symbols-outlined" data-icon="group_add">group_add</span>
+</button>
+</div>
+<div class="mt-16 bg-surface-container-low rounded-2xl overflow-hidden relative">
+<img alt="Hospital monitoring station" class="w-full h-48 object-cover opacity-60" data-alt="clean modern medical office with soft natural light bokeh background and high-tech digital monitoring interfaces in soft teal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-8q9sceTf8mfMwyV00WLSvrSqdc3mTjz1X657_PxZL-ZkJAfLT_-ot4hhLozbLIw-vC1pC6E9R_SzjHlrukldAecoZCctZZgNxNuioJAzvyPHok6Sbbnl-OPN_z3_tmEqh_VOYjrqaRlWZs2871USxmTsoT9xThDqj62paTznEAvufaCdlqHGYsJn0C8KEm16LGlji9td7h0CUIgDxV0_382sFQnfSyil88M1D1BQZ7OGgyiG0Y7_xlegsjXUPy-4_OPN6Y_0W_c"/>
+<div class="absolute inset-0 flex items-center justify-center bg-primary/10">
+<div class="text-center">
+<p class="font-headline font-bold text-primary text-xl">Trust in Precision.</p>
+<p class="text-sm text-on-surface-variant italic">Secure, Encrypted, and Always Active.</p>
+</div>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-4 pb-safe bg-white/90 backdrop-blur-xl border-t border-slate-100 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] rounded-t-2xl z-50">
+<div class="flex flex-col items-center justify-center text-slate-400 px-5 py-1 transition-all duration-300 ease-in-out hover:text-teal-500">
+<span class="material-symbols-outlined" data-icon="door_open">door_open</span>
+<span class="text-[11px] font-semibold tracking-wide font-label mt-1">Welcome</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 px-5 py-1 transition-all duration-300 ease-in-out hover:text-teal-500">
+<span class="material-symbols-outlined" data-icon="database_sync">sync</span>
+<span class="text-[11px] font-semibold tracking-wide font-label mt-1">Data</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 px-5 py-1 transition-all duration-300 ease-in-out hover:text-teal-500">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+<span class="text-[11px] font-semibold tracking-wide font-label mt-1">Alerts</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-teal-50 text-teal-700 rounded-xl px-5 py-1 transition-all duration-300 ease-in-out">
+<span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[11px] font-semibold tracking-wide font-label mt-1">Finish</span>
+</div>
+</nav>
+</body></html>

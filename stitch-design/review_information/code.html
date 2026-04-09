@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Review &amp; Confirm Extraction - Care Portal</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#e0e3e5",
+              "on-background": "#181c1e",
+              "primary-fixed-dim": "#76d6d5",
+              "on-primary-fixed-variant": "#004f4f",
+              "error-container": "#ffdad6",
+              "surface": "#f7fafc",
+              "on-error-container": "#93000a",
+              "on-secondary-container": "#035584",
+              "tertiary-fixed-dim": "#88d982",
+              "secondary-fixed": "#cee5ff",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed-variant": "#005312",
+              "tertiary-container": "#338236",
+              "on-secondary-fixed-variant": "#004a75",
+              "on-primary": "#ffffff",
+              "error": "#ba1a1a",
+              "outline": "#6e7979",
+              "inverse-on-surface": "#eef1f3",
+              "secondary-container": "#90c9ff",
+              "on-tertiary-fixed": "#002204",
+              "on-error": "#ffffff",
+              "background": "#f7fafc",
+              "surface-container-high": "#e5e9eb",
+              "secondary-fixed-dim": "#96ccff",
+              "outline-variant": "#bdc9c8",
+              "on-primary-fixed": "#002020",
+              "on-surface-variant": "#3e4949",
+              "tertiary-fixed": "#a3f69c",
+              "surface-container-lowest": "#ffffff",
+              "primary-fixed": "#93f2f2",
+              "secondary": "#206393",
+              "surface-bright": "#f7fafc",
+              "on-tertiary-container": "#ebffe3",
+              "inverse-primary": "#76d6d5",
+              "primary": "#006565",
+              "surface-tint": "#006a6a",
+              "on-secondary": "#ffffff",
+              "on-secondary-fixed": "#001d32",
+              "surface-container-low": "#f1f4f6",
+              "on-surface": "#181c1e",
+              "on-primary-container": "#e3fffe",
+              "surface-container": "#ebeef0",
+              "primary-container": "#008080",
+              "tertiary": "#156820",
+              "surface-dim": "#d7dadc",
+              "surface-container-highest": "#e0e3e5",
+              "inverse-surface": "#2d3133"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .ocr-box {
+        position: absolute;
+        border: 2px solid #008080;
+        background-color: rgba(0, 128, 128, 0.1);
+        border-radius: 2px;
+        pointer-events: none;
+      }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface flex min-h-screen">
+<!-- SideNavBar (Shared Component) -->
+<aside class="h-screen w-64 left-0 sticky bg-[#f1f4f6] dark:bg-slate-800 flex flex-col p-4 gap-2 no-border tonal-layering">
+<div class="mb-8 px-2">
+<h1 class="font-headline font-extrabold text-[#006565] text-xl">Clinical Serenity</h1>
+<p class="text-slate-500 text-xs font-medium">Empathetic Architect</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-[#e0e3e5] rounded-lg transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-inter text-sm font-medium">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-white dark:bg-slate-700 text-[#006565] rounded-lg shadow-sm transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="photo_camera" style="font-variation-settings: 'FILL' 1;">photo_camera</span>
+<span class="font-inter text-sm font-medium">Capture</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-[#e0e3e5] rounded-lg transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="fact_check">fact_check</span>
+<span class="font-inter text-sm font-medium">Review</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-[#e0e3e5] rounded-lg transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-inter text-sm font-medium">History</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 hover:bg-[#e0e3e5] rounded-lg transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-inter text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto">
+<button class="w-full py-3 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-full font-headline font-bold text-sm flex items-center justify-center gap-2 shadow-sm active:opacity-80 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                New Extraction
+            </button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col min-w-0">
+<!-- TopNavBar (Shared Component) -->
+<header class="w-full top-0 sticky z-50 bg-[#f7fafc] flex justify-between items-center px-8 h-16 max-w-full mx-auto shadow-sm">
+<div class="flex items-center gap-8">
+<span class="text-[#006565] font-bold text-xl tracking-tighter font-headline">Care Portal</span>
+<nav class="hidden md:flex gap-6 items-center h-full">
+<a class="text-slate-600 font-medium font-manrope text-sm tracking-tight hover:text-[#008080] transition-colors" href="#">Dashboard</a>
+<a class="text-[#006565] font-bold border-b-2 border-[#006565] pb-1 font-manrope text-sm tracking-tight" href="#">Patients</a>
+<a class="text-slate-600 font-medium font-manrope text-sm tracking-tight hover:text-[#008080] transition-colors" href="#">Prescriptions</a>
+<a class="text-slate-600 font-medium font-manrope text-sm tracking-tight hover:text-[#008080] transition-colors" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-slate-400" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border-none rounded-full text-sm focus:ring-2 focus:ring-primary-fixed w-64" placeholder="Search records..." type="text"/>
+</div>
+<button class="p-2 text-slate-500 hover:bg-surface-container transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-surface-container transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<img alt="Clinical Coordinator Profile" class="w-8 h-8 rounded-full border border-outline-variant/20" data-alt="professional portrait of a female healthcare coordinator in a clinical environment, soft natural lighting, high resolution" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_CTjR44Pfge1ODYboEEwyaFy84d_sJrMxXtLg8B9BpKcxEek2CJn4l48rVhfTTCrrBvFzR6lLakuHwxOZHxwJLdRgEfdjW0jpe6zFiWj49_L5ajyFLIJVL2ZkifOzDiCj6hfEWOsxi2zusscTu59DvlBf_Q58DN5M5dnM_jXKI1JZmkg_2Rc-3aKuZRoth5ilOJ69xql6HBEDz3IlH4CgmGz7PkK8kX8-WWmUifnQvoqTNeKVg0paiKOiVtIYHBaRqeDmzBAPFM8"/>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<div class="p-8 space-y-8 flex-1 overflow-y-auto bg-surface">
+<!-- Breadcrumbs / Title Section -->
+<div class="flex items-center justify-between">
+<div class="space-y-1">
+<h2 class="text-3xl font-headline font-extrabold tracking-tight text-on-surface">Review Information</h2>
+<p class="text-on-surface-variant font-body">Verify and refine the extracted clinical data from the prescription.</p>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1.5 px-3 py-1 bg-tertiary-container text-on-tertiary-container rounded-full text-xs font-semibold">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                        OCR 98% Confidence
+                    </span>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Left: Prescription Preview (Glassmorphism Effect) -->
+<div class="col-span-12 lg:col-span-7 bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden flex flex-col">
+<div class="p-4 border-b border-surface-container flex justify-between items-center bg-surface-container-low/50 backdrop-blur-md">
+<span class="font-headline font-bold text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="image">image</span>
+                            Prescription Scan
+                        </span>
+<div class="flex gap-2">
+<button class="p-1.5 hover:bg-surface-container rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="zoom_in">zoom_in</span>
+</button>
+<button class="p-1.5 hover:bg-surface-container rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="refresh">refresh</span>
+</button>
+</div>
+</div>
+<div class="relative flex-1 bg-surface-container-highest flex items-center justify-center p-8 overflow-hidden group">
+<!-- Image Container with Bounding Boxes -->
+<div class="relative shadow-2xl rounded-sm transform group-hover:scale-[1.02] transition-transform duration-500">
+<img alt="Medical Prescription Document" class="max-h-[600px] rounded-sm" data-alt="close-up view of a professional medical prescription form with handwritten clinical notes on white textured paper" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWO8Mf-3xm4KzLpVvP4V44z5RifaRkOMIrhcQN78LcLN-nzRBZwAXhICpIRyMYHo2D20getvrbKP6nRlnul2zfzsZ4ky1fdZYfw0Ss31bVcDESK1PBV5qErF9zrnzKD7z8Rnm-0GfG3fgB5N7F7yxpwdIXhjl9B2mQrgDZp49BpjUKkYotEFg_QZ1aLx5SL5UiPsekzZ0CDpw1jZSPFZO49-vcBKAcH6-kEGdgQqwCvJdNF6zFmnwOsBZGtoN9k_m-kZomnmZMMwo"/>
+<!-- Mock OCR Bounding Boxes -->
+<div class="ocr-box" style="top: 15%; left: 10%; width: 30%; height: 5%;"></div> <!-- Patient Name -->
+<div class="ocr-box" style="top: 25%; left: 10%; width: 40%; height: 6%;"></div> <!-- Medication -->
+<div class="ocr-box" style="top: 35%; left: 10%; width: 15%; height: 4%;"></div> <!-- Dosage -->
+<div class="ocr-box" style="top: 45%; left: 10%; width: 25%; height: 4%;"></div> <!-- Frequency -->
+</div>
+<!-- Overlay Legend -->
+<div class="absolute bottom-4 left-4 right-4 bg-white/80 backdrop-blur-sm p-3 rounded-lg flex items-center gap-4 text-xs font-medium text-on-surface-variant border border-white/40">
+<span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-primary/20 border border-primary"></span> Extracted Zone</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs" data-icon="info">info</span> Hover over fields to highlight corresponding area</span>
+</div>
+</div>
+</div>
+<!-- Right: Structured Data Form -->
+<div class="col-span-12 lg:col-span-5 flex flex-col gap-6">
+<div class="bg-surface-container-low rounded-xl p-6 space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="font-headline font-bold text-lg">Extracted Fields</h3>
+<span class="text-xs text-on-surface-variant bg-surface-container-highest px-2 py-1 rounded">5 Fields Found</span>
+</div>
+<!-- Form Groups -->
+<div class="space-y-5">
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/70 px-1">Patient Name</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-none rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-primary-fixed shadow-sm" type="text" value="Tan Ah Teck"/>
+<span class="material-symbols-outlined absolute right-4 top-3 text-tertiary text-sm" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/70 px-1">Medication Name</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-none rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-primary-fixed shadow-sm" type="text" value="Amlodipine"/>
+<span class="material-symbols-outlined absolute right-4 top-3 text-primary text-sm" data-icon="edit">edit</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/70 px-1">Dosage</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-primary-fixed shadow-sm" type="text" value="5mg"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/70 px-1">Frequency</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-primary-fixed shadow-sm">
+<option selected="">Once daily</option>
+<option>Twice daily</option>
+<option>Every 8 hours</option>
+<option>As needed</option>
+</select>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/70 px-1">Expiry Date</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-none rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-primary-fixed shadow-sm" type="date" value="2024-12-31"/>
+</div>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="pt-4 space-y-3">
+<button class="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-full font-headline font-bold text-base flex items-center justify-center gap-2 shadow-lg hover:brightness-110 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined" data-icon="sync">sync</span>
+                                Confirm &amp; Sync
+                            </button>
+<button class="w-full py-3 bg-white text-primary border border-primary/20 rounded-full font-headline font-bold text-sm flex items-center justify-center gap-2 hover:bg-surface-container-low active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="photo_camera">photo_camera</span>
+                                Retake Photo
+                            </button>
+</div>
+</div>
+<!-- Side Note / Metadata -->
+<div class="bg-primary/5 rounded-xl p-4 flex gap-4 border border-primary/10">
+<span class="material-symbols-outlined text-primary" data-icon="lightbulb">lightbulb</span>
+<div class="space-y-1">
+<p class="text-xs font-bold text-primary">Pro Tip</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">Ensure the expiry date matches the bottom-right stamp on the physical document for accurate inventory tracking.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

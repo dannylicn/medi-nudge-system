@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Medi‑Nudge — Patient Onboarding Journey</title>
+  <style>
+    :root { color-scheme: light; }
+    body { font-family: -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; background: #f7f7f8; color: #111; }
+    header { padding: 20px 24px; background: white; border-bottom: 1px solid #e6e6e7; }
+    h1 { font-size: 20px; margin: 0 0 6px; }
+    .sub { color: #555; font-size: 13px; margin: 0; }
+    main { max-width: 1100px; margin: 0 auto; padding: 20px 24px 60px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 980px) { .grid { grid-template-columns: 1.2fr 0.8fr; } }
+    .card { background: white; border: 1px solid #e6e6e7; border-radius: 12px; padding: 16px; }
+    h2 { font-size: 16px; margin: 0 0 10px; }
+    h3 { font-size: 13px; margin: 14px 0 6px; color: #333; }
+    .pill { display: inline-block; font-size: 12px; border: 1px solid #ddd; padding: 2px 8px; border-radius: 999px; color: #333; background: #fafafa; }
+    ul { margin: 8px 0 0; padding-left: 18px; }
+    li { margin: 6px 0; line-height: 1.35; }
+    .flow { display: grid; grid-template-columns: repeat(1, 1fr); gap: 10px; }
+    @media (min-width: 700px) { .flow { grid-template-columns: repeat(2, 1fr); } }
+    .step { border: 1px solid #e8e8ea; border-radius: 10px; padding: 10px 12px; background: #fcfcfd; }
+    .step b { display: block; margin-bottom: 4px; }
+    .arrow { text-align: center; color: #777; font-size: 12px; padding: 2px 0; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; }
+    .note { font-size: 12px; color: #555; margin-top: 10px; }
+    .twoCol { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 980px) { .twoCol { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Patient Onboarding Journey</h1>
+    <p class="sub">Medi‑Nudge System — WhatsApp-first, with optional web capture for OCR and voice enrolment</p>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <h2>Primary Journey (WhatsApp-first)</h2>
+        <div class="flow">
+          <div class="step"><span class="pill">Entry</span><b>1) Enrollment trigger</b>Care team enrolls patient (clinic) or patient self-initiates via QR/link.</div>
+          <div class="step"><span class="pill">Consent</span><b>2) WhatsApp opt-in + consent</b>Patient agrees to receive medication reminders and to share messages for care follow-up.</div>
+          <div class="step"><span class="pill">Identity</span><b>3) Verify phone & language</b>Confirm preferred language (en/zh/ms/ta) and confirm it's the patient (basic verification).</div>
+          <div class="step"><span class="pill">Meds</span><b>4) Add medication list</b>Pick one: (a) upload sticker/photo for OCR, (b) manual entry, (c) import from dispensing feed.</div>
+          <div class="step"><span class="pill">Review</span><b>5) Confirm extracted meds</b>Patient (and/or care coordinator) confirms name/dose/frequency and refill interval.</div>
+          <div class="step"><span class="pill">Schedule</span><b>6) Set reminder preferences</b>Allowed windows, frequency (refill reminders vs dose reminders), quiet hours.</div>
+          <div class="step"><span class="pill">Optional</span><b>7) Voice reminders (optional)</b>Invite loved-one voice donor → dual consent → sample upload → test playback approval.</div>
+          <div class="step"><span class="pill">Done</span><b>8) Welcome + first check-in</b>Send a welcome message and a short “reply guide” (YES/NO/HELP/SIDE EFFECTS).</div>
+        </div>
+        <p class="note">Design intent: minimize friction; if OCR/voice fails, fall back to text + manual review.</p>
+      </section>
+
+      <aside class="card">
+        <h2>Artifacts Created</h2>
+        <h3>Minimum to start nudging</h3>
+        <ul>
+          <li><span class="mono">Patient</span>: phone, language, consent/active flag</li>
+          <li><span class="mono">PatientMedication</span>: medication, dosage, refill interval</li>
+          <li><span class="mono">DispensingRecord</span>: last dispense date + days_supply (from feed or confirmed OCR)</li>
+        </ul>
+
+        <h3>Optional enhancements</h3>
+        <ul>
+          <li><span class="mono">PrescriptionScan</span> + <span class="mono">ExtractedMedicationField</span> (OCR)</li>
+          <li><span class="mono">VoiceProfile</span> + <span class="mono">VoiceSample</span> (voice clone)</li>
+        </ul>
+
+        <h3>WhatsApp message guide</h3>
+        <ul>
+          <li>Confirm: “YES”, “Collected”, “Done”</li>
+          <li>Question: “HELP …”</li>
+          <li>Side effects: “SIDE EFFECT …” (auto-escalate)</li>
+        </ul>
+      </aside>
+    </div>
+
+    <section class="card" style="margin-top:16px;">
+      <h2>Two Entry Modes</h2>
+      <div class="twoCol">
+        <div>
+          <h3>A) Clinic-enrolled (recommended for v1)</h3>
+          <ul>
+            <li>Care coordinator creates patient with phone + language (and optionally imports dispensing feed).</li>
+            <li>System sends a WhatsApp invite: consent + simple verification + onboarding steps.</li>
+            <li>OCR/voice steps are optional; coordinator can review OCR fields before confirming.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>B) Self-enrolled (QR/link)</h3>
+          <ul>
+            <li>Patient scans QR at clinic/pharmacy → opens web page to enter phone, then continues on WhatsApp.</li>
+            <li>Web page can collect the first prescription photo to reduce WhatsApp friction.</li>
+            <li>Care team review required before medication records are committed.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

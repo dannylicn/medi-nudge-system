@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Merlion Health | Doctor Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed": "#a3f69c",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#ebeef0",
+              "on-error-container": "#93000a",
+              "secondary-fixed-dim": "#96ccff",
+              "outline-variant": "#bdc9c8",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed-variant": "#005312",
+              "tertiary-fixed-dim": "#88d982",
+              "secondary-fixed": "#cee5ff",
+              "on-secondary-fixed-variant": "#004a75",
+              "inverse-primary": "#76d6d5",
+              "surface-container-highest": "#e0e3e5",
+              "primary-fixed": "#93f2f2",
+              "tertiary": "#156820",
+              "on-primary-fixed-variant": "#004f4f",
+              "primary-container": "#008080",
+              "on-tertiary-fixed": "#002204",
+              "secondary-container": "#90c9ff",
+              "secondary": "#206393",
+              "surface-bright": "#f7fafc",
+              "inverse-surface": "#2d3133",
+              "surface": "#f7fafc",
+              "on-primary-container": "#e3fffe",
+              "on-error": "#ffffff",
+              "surface-variant": "#e0e3e5",
+              "on-tertiary-container": "#ebffe3",
+              "on-secondary-fixed": "#001d32",
+              "on-primary-fixed": "#002020",
+              "primary-fixed-dim": "#76d6d5",
+              "on-surface": "#181c1e",
+              "on-secondary": "#ffffff",
+              "surface-tint": "#006a6a",
+              "error": "#ba1a1a",
+              "background": "#f7fafc",
+              "inverse-on-surface": "#eef1f3",
+              "surface-dim": "#d7dadc",
+              "on-background": "#181c1e",
+              "primary": "#006565",
+              "surface-container-high": "#e5e9eb",
+              "surface-container-low": "#f1f4f6",
+              "outline": "#6e7979",
+              "on-surface-variant": "#3e4949",
+              "on-secondary-container": "#035584",
+              "error-container": "#ffdad6",
+              "tertiary-container": "#338236"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        vertical-align: middle;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+      }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 w-full z-50 bg-[#f7fafc] dark:bg-slate-900 shadow-sm dark:shadow-none flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-2">
+<span class="text-xl font-extrabold text-[#006565] dark:text-teal-300 font-headline tracking-tight">Merlion Health</span>
+</div>
+<div class="hidden md:flex flex-1 justify-center max-w-xl mx-8">
+<div class="relative w-full group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-highest border-none rounded-full py-2.5 pl-12 pr-4 focus:ring-2 focus:ring-primary-fixed outline-none text-sm font-body transition-all" placeholder="Search Patient by NRIC or Name..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">notifications</span>
+</button>
+<div class="flex items-center gap-2 pl-2 border-l border-outline-variant/30">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-bold font-headline leading-none text-primary">Dr. Tan</p>
+<p class="text-[10px] text-on-surface-variant">General Practitioner</p>
+</div>
+<span class="material-symbols-outlined text-3xl text-primary">account_circle</span>
+</div>
+</div>
+</header>
+<div class="flex pt-16 min-h-screen">
+<!-- SideNavBar Shell -->
+<aside class="hidden lg:flex flex-col py-4 h-[calc(100vh-64px)] w-64 bg-[#f7fafc] dark:bg-slate-900 sticky top-16">
+<nav class="flex-1 px-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 bg-teal-50 dark:bg-teal-900/30 text-[#006565] dark:text-teal-300 rounded-lg mx-2 transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-inter text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-[#006565] dark:hover:text-teal-300 hover:bg-[#f1f4f6] dark:hover:bg-slate-800 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-inter text-sm font-medium">Patients</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-[#006565] dark:hover:text-teal-300 hover:bg-[#f1f4f6] dark:hover:bg-slate-800 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">pill</span>
+<span class="font-inter text-sm font-medium">Prescriptions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-[#006565] dark:hover:text-teal-300 hover:bg-[#f1f4f6] dark:hover:bg-slate-800 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-inter text-sm font-medium">Schedules</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-[#006565] dark:hover:text-teal-300 hover:bg-[#f1f4f6] dark:hover:bg-slate-800 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="font-inter text-sm font-medium">AI Support</span>
+</a>
+</nav>
+<div class="mt-auto px-6 pb-8">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-full py-3 px-4 flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
+<span class="material-symbols-outlined text-lg">person_add</span>
+<span class="text-sm font-bold font-headline">New Patient Intake</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 p-6 lg:p-10 max-w-7xl mx-auto w-full pb-24 lg:pb-10">
+<!-- Hero Bento Header -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+<div class="lg:col-span-2 bg-gradient-to-br from-primary to-secondary p-8 rounded-3xl relative overflow-hidden shadow-2xl shadow-primary/10">
+<div class="relative z-10">
+<h1 class="text-3xl lg:text-4xl font-extrabold font-headline text-white mb-2 leading-tight">Welcome back, Dr. Tan</h1>
+<p class="text-white/80 max-w-md font-body text-sm mb-6">You have 12 appointments scheduled for today. 4 new patients are awaiting intake verification.</p>
+<div class="flex gap-4">
+<button class="bg-white/20 backdrop-blur-md text-white border border-white/30 px-6 py-2.5 rounded-full text-sm font-bold font-headline hover:bg-white/30 transition-colors">View Schedule</button>
+<button class="bg-white text-primary px-6 py-2.5 rounded-full text-sm font-bold font-headline hover:bg-surface-bright transition-colors">Verify Intakes</button>
+</div>
+</div>
+<div class="absolute right-[-20%] bottom-[-20%] opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-[300px]" style="font-variation-settings: 'wght' 700;">medical_services</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-8 rounded-3xl flex flex-col justify-between">
+<div>
+<h3 class="font-headline font-bold text-lg text-on-surface mb-1">Quick Search</h3>
+<p class="text-xs text-on-surface-variant font-body mb-4">Find patients by ID, Name or NRIC</p>
+</div>
+<div class="space-y-3">
+<div class="p-3 bg-white rounded-xl shadow-sm flex items-center gap-3">
+<span class="material-symbols-outlined text-primary/60">fingerprint</span>
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">NRIC Search</p>
+<p class="text-xs font-semibold">S123XXXXA</p>
+</div>
+</div>
+<div class="p-3 bg-white rounded-xl shadow-sm flex items-center gap-3">
+<span class="material-symbols-outlined text-primary/60">person_search</span>
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Last Search</p>
+<p class="text-xs font-semibold">Lim Wei Ming</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Recently Added Patients Section -->
+<section class="mb-10">
+<div class="flex items-center justify-between mb-6 px-2">
+<h2 class="text-2xl font-bold font-headline text-on-surface">Recently Added Patients</h2>
+<button class="text-primary text-sm font-bold font-headline flex items-center gap-1 hover:underline">
+                        View All Patients <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Patient Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow group">
+<div class="flex items-start justify-between mb-4">
+<div class="h-12 w-12 rounded-2xl bg-tertiary-fixed-dim flex items-center justify-center overflow-hidden">
+<img class="h-full w-full object-cover" data-alt="portrait of a young adult male patient with a friendly expression and clean background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRFSpNF3RlYASv9m2Ehf0ocRyJEK2vS3dpUHuW4MPU13wmyVNOhGdMRnFwjyUfGPdGQrO6jmsF_JDNW789NntRjkNqfgzQ4OLzyKmqAyxgQhnCXdNhydhW-dAHH8twfLT7ONNgSfg6ualYkCdA9ep4l4FsUY_d6sp8VGJWexs63KkC4mAJvjD3ifwFkOujZzsVqbx-_nGLqn2nkJdIOuNyKe-l6IBodkRcCM4lOUAUBTqPGuZZ6qmFRZRBnKrOa0Q47qANCsWKF2w"/>
+</div>
+<span class="px-3 py-1 bg-tertiary-container text-on-tertiary-container text-[10px] font-bold font-label rounded-full">ACTIVE</span>
+</div>
+<h4 class="font-headline font-bold text-lg text-on-surface group-hover:text-primary transition-colors">Chen Kun</h4>
+<p class="text-xs text-on-surface-variant font-body mb-4">NRIC: SXXXX567G • 34 yrs</p>
+<div class="flex items-center gap-4 text-[11px] text-on-surface-variant mb-6">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">bloodtype</span>
+<span>A+</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">calendar_month</span>
+<span>Added 2h ago</span>
+</div>
+</div>
+<button class="w-full py-2 bg-surface-container-low text-on-surface-variant rounded-xl text-xs font-bold font-headline hover:bg-primary-container hover:text-on-primary-container transition-colors">Open Profile</button>
+</div>
+<!-- Patient Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow group">
+<div class="flex items-start justify-between mb-4">
+<div class="h-12 w-12 rounded-2xl bg-secondary-fixed flex items-center justify-center overflow-hidden">
+<img class="h-full w-full object-cover" data-alt="portrait of an elderly female patient with kind eyes and short grey hair" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDq8x6zKj_qZJ0ouJzM49IuNcFfYXFXoKMmlbs7xmPjfjdYvQ4zuYmfS2pRy6jJtQ5CSUqp8ndSibqolV-aI4hreCa0N2u-lA8UeqHCbG6xmZaTDM6BiU5SfXh-dQgzxSnMTdLJ5LLS3fmHrMXOO4n5Dcc0TRcXrJvKVO00mSVPQ3DuOPIg4jmjCW_-b6oI8fj5vP64GVlmiBIb-RtkPy2O5Wfr8yezpC_ybs750NVvhZY636lTBSctxPkrI2nYmWOqifWLhsYQZrM"/>
+</div>
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold font-label rounded-full">SETUP PENDING</span>
+</div>
+<h4 class="font-headline font-bold text-lg text-on-surface group-hover:text-primary transition-colors">Saraswathi Devi</h4>
+<p class="text-xs text-on-surface-variant font-body mb-4">NRIC: SXXXX892F • 68 yrs</p>
+<div class="flex items-center gap-4 text-[11px] text-on-surface-variant mb-6">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">history_edu</span>
+<span>Waiting for Records</span>
+</div>
+</div>
+<button class="w-full py-2 bg-secondary text-white rounded-xl text-xs font-bold font-headline hover:bg-secondary/90 transition-colors">Complete Intake</button>
+</div>
+<!-- Patient Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow group">
+<div class="flex items-start justify-between mb-4">
+<div class="h-12 w-12 rounded-2xl bg-error-container flex items-center justify-center overflow-hidden">
+<img class="h-full w-full object-cover" data-alt="portrait of a middle-aged male patient with glasses and serious expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcUQscpfBvWAbddXKgza6IcX45-OfDz795jSwoIuhTC5dsvXxCPel0ERH6GaxtsupwKux8bBQgM8Yvr243NRqSj8EYICCbyaX8P1IBB0fbZO1Ipnua0YCO_1B6g-PeSW53p7emluqybCaWfXn9dMKVy434rYtiqJPBUXOmZ7b-Hzb-4qgtjKCuN8yhUmySUWWvXUWBX0D_ljDVV16brVss00VabAjGr8ojSdG24oO-y4qpP7Ww9htw3yVNkZo6Xa4etAIBneXoH-0"/>
+</div>
+<span class="px-3 py-1 bg-error-container text-on-error-container text-[10px] font-bold font-label rounded-full">HIGH RISK</span>
+</div>
+<h4 class="font-headline font-bold text-lg text-on-surface group-hover:text-primary transition-colors">Ahmad bin Razali</h4>
+<p class="text-xs text-on-surface-variant font-body mb-4">NRIC: SXXXX223D • 52 yrs</p>
+<div class="flex items-center gap-4 text-[11px] text-on-surface-variant mb-6">
+<div class="flex items-center gap-1 text-error">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">error</span>
+<span>Blood Pressure Alert</span>
+</div>
+</div>
+<button class="w-full py-2 bg-error text-white rounded-xl text-xs font-bold font-headline hover:bg-error/90 transition-colors">Urgent Action Required</button>
+</div>
+</div>
+</section>
+<!-- Bottom Dashboard Ticker/Stats -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-white p-5 rounded-2xl shadow-sm flex items-center gap-4">
+<div class="h-10 w-10 rounded-full bg-teal-50 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">group</span>
+</div>
+<div>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase">Total Patients</p>
+<p class="text-xl font-bold font-headline">1,248</p>
+</div>
+</div>
+<div class="bg-white p-5 rounded-2xl shadow-sm flex items-center gap-4">
+<div class="h-10 w-10 rounded-full bg-orange-50 flex items-center justify-center">
+<span class="material-symbols-outlined text-orange-600 text-xl">pending_actions</span>
+</div>
+<div>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase">Pending</p>
+<p class="text-xl font-bold font-headline">14</p>
+</div>
+</div>
+<div class="bg-white p-5 rounded-2xl shadow-sm flex items-center gap-4">
+<div class="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
+<span class="material-symbols-outlined text-blue-600 text-xl">ecg</span>
+</div>
+<div>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase">Critical Monitor</p>
+<p class="text-xl font-bold font-headline">3</p>
+</div>
+</div>
+<div class="bg-white p-5 rounded-2xl shadow-sm flex items-center gap-4">
+<div class="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center">
+<span class="material-symbols-outlined text-green-600 text-xl">verified_user</span>
+</div>
+<div>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase">Adherence Rate</p>
+<p class="text-xl font-bold font-headline">92%</p>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar Shell (Mobile) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-[#bdc9c8]/15 shadow-[0_-4px_24px_rgba(24,28,30,0.04)] z-50 rounded-t-3xl">
+<a class="flex flex-col items-center justify-center bg-teal-100 dark:bg-teal-900/50 text-[#006565] dark:text-teal-100 rounded-2xl px-5 py-2 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-inter text-[10px] font-semibold">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">medication</span>
+<span class="font-inter text-[10px] font-semibold">Meds</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">forum</span>
+<span class="font-inter text-[10px] font-semibold">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-inter text-[10px] font-semibold">Profile</span>
+</a>
+</nav>
+<!-- Contextual FAB (Only for Mobile Search/Add) -->
+<button class="lg:hidden fixed bottom-24 right-6 h-14 w-14 rounded-2xl bg-primary text-white shadow-2xl flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-2xl">person_add</span>
+</button>
+</body></html>

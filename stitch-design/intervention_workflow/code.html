@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Patient Intervention Workflow | Clinical Serenity</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary": "#ffffff",
+              "inverse-primary": "#76d6d5",
+              "surface-container-highest": "#e0e3e5",
+              "secondary-fixed": "#cee5ff",
+              "on-surface-variant": "#3e4949",
+              "on-secondary": "#ffffff",
+              "on-secondary-fixed": "#001d32",
+              "primary": "#006565",
+              "tertiary": "#156820",
+              "on-error-container": "#93000a",
+              "surface-dim": "#d7dadc",
+              "on-primary-fixed": "#002020",
+              "background": "#f7fafc",
+              "inverse-surface": "#2d3133",
+              "surface": "#f7fafc",
+              "primary-fixed-dim": "#76d6d5",
+              "surface-container-low": "#f1f4f6",
+              "secondary-container": "#90c9ff",
+              "on-tertiary-container": "#ebffe3",
+              "surface-container": "#ebeef0",
+              "surface-container-high": "#e5e9eb",
+              "on-surface": "#181c1e",
+              "secondary-fixed-dim": "#96ccff",
+              "tertiary-fixed-dim": "#88d982",
+              "primary-fixed": "#93f2f2",
+              "tertiary-fixed": "#a3f69c",
+              "on-secondary-fixed-variant": "#004a75",
+              "on-primary-container": "#e3fffe",
+              "inverse-on-surface": "#eef1f3",
+              "surface-container-lowest": "#ffffff",
+              "on-error": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-tertiary-fixed": "#002204",
+              "secondary": "#206393",
+              "on-background": "#181c1e",
+              "tertiary-container": "#338236",
+              "on-tertiary-fixed-variant": "#005312",
+              "surface-tint": "#006a6a",
+              "outline-variant": "#bdc9c8",
+              "primary-container": "#008080",
+              "surface-bright": "#f7fafc",
+              "surface-variant": "#e0e3e5",
+              "on-secondary-container": "#035584",
+              "error": "#ba1a1a",
+              "on-primary-fixed-variant": "#004f4f",
+              "outline": "#6e7979",
+              "on-tertiary": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface antialiased">
+<!-- TopNavBar -->
+<header class="w-full sticky top-0 z-50 bg-slate-50/80 backdrop-blur-md shadow-sm flex items-center justify-between px-6 h-16 w-full max-w-full font-['Manrope'] tracking-tight">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold text-teal-800">Clinical Serenity</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-slate-600">
+<span class="material-symbols-outlined hover:bg-teal-50/50 p-2 rounded-lg transition-colors cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined hover:bg-teal-50/50 p-2 rounded-lg transition-colors cursor-pointer" data-icon="help_outline">help_outline</span>
+</div>
+<div class="h-8 w-8 rounded-full overflow-hidden bg-slate-200">
+<img alt="User profile avatar" data-alt="professional portrait of a senior medical administrator in a bright modern clinical setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDh3M9EWWcz5Zm_L5TRfSQI0OS-ts4xB45Gaqug4ht0iR9AyTOEgzk_YttJZ9WXrE9YwnC8sBNMnHsQL5gMIyiBxLptfkQSAupVK5dn8SnpATFrhjD9BC_8uWZF-Hy9ixGmMz3LFGOCEmkUahcMV14y0VKGMD4pr4S3uLlvK9TyszzPBjbQ_8BUf5fJASzHDZ3cWyU3KD6f0Nul3EN3dD9JSrCU3UuAqjv8FkwprFmqbMKFLeijVY0M_Ml_Lc_tE70qIgYhu41i9rE"/>
+</div>
+</div>
+</header>
+<div class="flex min-h-[calc(100vh-64px)]">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col h-[calc(100vh-64px)] w-64 fixed left-0 top-16 bg-slate-50 border-r-0 py-6 font-['Inter'] text-sm font-medium z-40">
+<div class="px-6 mb-8">
+<h2 class="font-['Manrope'] font-extrabold text-teal-800 text-lg">Care Portal</h2>
+<p class="text-xs text-slate-500">Medication Adherence</p>
+</div>
+<nav class="flex-grow space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-teal-600 mx-2 hover:bg-slate-100 rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-teal-700 bg-teal-50 rounded-lg mx-2 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Patients</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-teal-600 mx-2 hover:bg-slate-100 rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span>Tasks</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-teal-600 mx-2 hover:bg-slate-100 rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-teal-600 mx-2 hover:bg-slate-100 rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-teal-600 mx-2 hover:bg-slate-100 rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-grow md:ml-64 p-6 bg-background">
+<!-- Patient Header Context -->
+<div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="flex items-center gap-5">
+<div class="relative">
+<img alt="Patient portrait" class="w-20 h-20 rounded-2xl object-cover shadow-sm" data-alt="Close-up portrait of an elderly woman with kind eyes, neutral clinical background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlhS_Psf-ud29EyhXbXYcHvrPji49gmXdU2lsMuMliBU4nrfqb_CfmFsBLDpe3xXfzK8DP7ZR9_XVDHrJd1wzAryMFCL-1hJQMzv_MkfubQ2cYkpoXXWi82ZdtF6YtqnAJSy7pkuitnt5ziLq6kvkhj5VT69Wqaca8nBWlzsVHc0Ryl251A7wxxbmWE0qeaRNt-W6-2xlFQ9SBG7VaDWd-ff_8hPQaKuzrfxo2ZP2_NMVqt1gBLJaAaAu4lrHPHVdRmWP5mUgezXs"/>
+<div class="absolute -bottom-1 -right-1 bg-error border-4 border-background w-6 h-6 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-white" data-icon="priority_high">priority_high</span>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-3 mb-1">
+<h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">Mdm. Tan Ah Hua</h1>
+<span class="px-3 py-1 bg-error-container text-on-error-container text-[10px] font-bold rounded-full uppercase tracking-wider">High Risk</span>
+</div>
+<p class="text-on-surface-variant flex items-center gap-2 font-medium">
+<span class="material-symbols-outlined text-lg" data-icon="emergency">emergency</span>
+                            Chronic Hypertension • Type 2 Diabetes
+                        </p>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="bg-surface-container-low px-4 py-3 rounded-xl">
+<p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Adherence Rate</p>
+<p class="text-2xl font-headline font-bold text-error">42%</p>
+</div>
+<div class="bg-surface-container-low px-4 py-3 rounded-xl">
+<p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Last Contact</p>
+<p class="text-2xl font-headline font-bold text-secondary">3 days ago</p>
+</div>
+</div>
+</div>
+<!-- Main Workflow Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+<!-- Left Column: WhatsApp Chat History -->
+<div class="xl:col-span-7 flex flex-col h-[650px] bg-surface-container-low rounded-3xl overflow-hidden shadow-sm">
+<div class="bg-white/60 backdrop-blur px-6 py-4 flex items-center justify-between border-b border-outline-variant/10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-[#25D366] rounded-full flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">WhatsApp Intervention</p>
+<p class="text-xs text-tertiary font-medium flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                    Automated Nudges Active
+                                </p>
+</div>
+</div>
+<button class="text-slate-400 hover:text-slate-600 transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="flex-grow overflow-y-auto p-6 space-y-6 custom-scrollbar">
+<!-- System Timestamp -->
+<div class="flex justify-center">
+<span class="px-4 py-1 bg-surface-container-high rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest">Monday, 23 Oct</span>
+</div>
+<!-- Automated Nudge -->
+<div class="flex flex-col items-start max-w-[85%]">
+<div class="bg-white rounded-xl rounded-tl-sm p-4 shadow-sm border border-outline-variant/5">
+<p class="text-sm leading-relaxed text-on-surface">Hi <span class="font-semibold">Mdm. Tan</span>, your refill for Amlodipine is due tomorrow. Would you like us to arrange a delivery to your home?</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-[10px] text-primary font-bold uppercase">Automated Nudge</span>
+<span class="text-[10px] text-slate-400">09:00 AM</span>
+</div>
+</div>
+</div>
+<!-- Patient Reply -->
+<div class="flex flex-col items-end w-full">
+<div class="max-w-[85%] bg-secondary-container rounded-xl rounded-tr-sm p-4 shadow-sm">
+<p class="text-sm leading-relaxed text-on-secondary-container">Not now, I am busy with my grandson. Maybe later.</p>
+<div class="mt-2 flex justify-end">
+<span class="text-[10px] text-on-secondary-container/60">10:45 AM</span>
+</div>
+</div>
+</div>
+<div class="flex justify-center">
+<span class="px-4 py-1 bg-surface-container-high rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest">Today</span>
+</div>
+<!-- Escalated Automated Nudge -->
+<div class="flex flex-col items-start max-w-[85%]">
+<div class="bg-white rounded-xl rounded-tl-sm p-4 shadow-sm border border-outline-variant/5">
+<p class="text-sm leading-relaxed text-on-surface">Hi Mdm. Tan, we noticed you haven't confirmed your refill yet. It is important for your blood pressure management. Please reply YES to confirm delivery.</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-[10px] text-primary font-bold uppercase">Automated Nudge</span>
+<span class="text-[10px] text-slate-400">08:15 AM</span>
+</div>
+</div>
+</div>
+<!-- Alert Break -->
+<div class="flex items-center gap-4 py-2">
+<div class="h-[1px] flex-grow bg-error/20"></div>
+<span class="text-[10px] text-error font-extrabold uppercase tracking-[0.2em] px-2">Escalation Triggered</span>
+<div class="h-[1px] flex-grow bg-error/20"></div>
+</div>
+<p class="text-center text-xs text-slate-400 italic">No response received for 6 hours. System flagged for manual intervention.</p>
+</div>
+<div class="p-6 bg-white/60 border-t border-outline-variant/10">
+<div class="flex items-center gap-4 bg-surface-container-highest rounded-2xl px-4 py-2">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+</button>
+<input class="flex-grow bg-transparent border-none focus:ring-0 text-sm py-2" placeholder="Type an intervention message..." type="text"/>
+<button class="bg-primary text-white p-2 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Column: Intervention Panel -->
+<div class="xl:col-span-5 flex flex-col gap-6">
+<!-- Take Action Card -->
+<div class="bg-white rounded-3xl p-8 shadow-sm border border-outline-variant/5">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-xl font-headline font-bold text-on-surface">Take Action</h3>
+<span class="material-symbols-outlined text-primary" data-icon="bolt" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div class="space-y-4">
+<!-- Action 1: Manual Message -->
+<button class="w-full group flex items-center gap-4 p-5 rounded-2xl bg-surface-container-low hover:bg-primary transition-all duration-300 text-left">
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-primary group-hover:bg-primary-container group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="mail">mail</span>
+</div>
+<div class="flex-grow">
+<p class="font-bold text-on-surface group-hover:text-white">Send Custom Message</p>
+<p class="text-xs text-on-surface-variant group-hover:text-primary-fixed">Personalized nudge from coordinator</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-white" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- Action 2: Call -->
+<button class="w-full group flex items-center gap-4 p-5 rounded-2xl bg-surface-container-low hover:bg-secondary transition-all duration-300 text-left">
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-secondary group-hover:bg-secondary-container group-hover:text-on-secondary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="call">call</span>
+</div>
+<div class="flex-grow">
+<p class="font-bold text-on-surface group-hover:text-white">Call Patient</p>
+<p class="text-xs text-on-surface-variant group-hover:text-secondary-fixed">Direct outreach via Care Line</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-white" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- Action 3: Home Visit -->
+<button class="w-full group flex items-center gap-4 p-5 rounded-2xl bg-surface-container-low hover:bg-tertiary transition-all duration-300 text-left">
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-tertiary group-hover:bg-tertiary-container group-hover:text-on-tertiary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="home_health">home_health</span>
+</div>
+<div class="flex-grow">
+<p class="font-bold text-on-surface group-hover:text-white">Schedule Home Visit</p>
+<p class="text-xs text-on-surface-variant group-hover:text-tertiary-fixed">Community nurse escalation</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-white" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<div class="mt-8 pt-8 border-t border-outline-variant/10">
+<h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Risk Factors Observed</h4>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container-highest text-on-surface-variant text-[11px] font-medium rounded-full">Non-responsive to SMS</span>
+<span class="px-3 py-1 bg-surface-container-highest text-on-surface-variant text-[11px] font-medium rounded-full">History of stroke</span>
+<span class="px-3 py-1 bg-surface-container-highest text-on-surface-variant text-[11px] font-medium rounded-full">Caregiver unavailable</span>
+</div>
+</div>
+</div>
+<!-- Coordinator Insight Bento -->
+<div class="bg-primary text-white rounded-3xl p-6 relative overflow-hidden">
+<!-- Abstract decoration -->
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="lightbulb">lightbulb</span>
+<span class="text-xs font-bold uppercase tracking-widest">Coordinator's Note</span>
+</div>
+<p class="text-sm leading-relaxed mb-6">"Patient mentions being busy with family frequently. High risk of forgetting evening dosages during these periods. Recommend syncing medication time with family dinner."</p>
+<div class="flex items-center gap-3">
+<img alt="Staff avatar" class="w-8 h-8 rounded-full border-2 border-primary-container" data-alt="Female clinical pharmacist with glasses, smiling warmly, professional medical setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClIepg0AXJm_I-B-2X830FsIlDDtQOAvrbh0RV_iScfmOipU_eF_lnwap6iy4XzT3ErluTgnldWKeIxpP4nXJX3X4wNlZIx1Hn7tvYGPT89JDfOW-Y2RYKCHF1nFBGHWIYWWLyih54qjD_NJ8YcTr7h2GDOXeebPSPovL3EPKh7UDqECytmIJBuT3Y1Nv2QnnXmaZtkrnIrPWkJODKBvfLD33p5RHQfeewyFdBW6LAxjZf14ms3piVxa80kNsHeSwUaZxbvsbRAIE"/>
+<div>
+<p class="text-xs font-bold">Dr. Sarah Lim</p>
+<p class="text-[10px] text-primary-fixed-dim">Clinical Coordinator</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

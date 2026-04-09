@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Serenity | Care Portal</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary": "#ffffff",
+              "inverse-primary": "#76d6d5",
+              "surface-container-highest": "#e0e3e5",
+              "secondary-fixed": "#cee5ff",
+              "on-surface-variant": "#3e4949",
+              "on-secondary": "#ffffff",
+              "on-secondary-fixed": "#001d32",
+              "primary": "#006565",
+              "tertiary": "#156820",
+              "on-error-container": "#93000a",
+              "surface-dim": "#d7dadc",
+              "on-primary-fixed": "#002020",
+              "background": "#f7fafc",
+              "inverse-surface": "#2d3133",
+              "surface": "#f7fafc",
+              "primary-fixed-dim": "#76d6d5",
+              "surface-container-low": "#f1f4f6",
+              "secondary-container": "#90c9ff",
+              "on-tertiary-container": "#ebffe3",
+              "surface-container": "#ebeef0",
+              "surface-container-high": "#e5e9eb",
+              "on-surface": "#181c1e",
+              "secondary-fixed-dim": "#96ccff",
+              "tertiary-fixed-dim": "#88d982",
+              "primary-fixed": "#93f2f2",
+              "tertiary-fixed": "#a3f69c",
+              "on-secondary-fixed-variant": "#004a75",
+              "on-primary-container": "#e3fffe",
+              "inverse-on-surface": "#eef1f3",
+              "surface-container-lowest": "#ffffff",
+              "on-error": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-tertiary-fixed": "#002204",
+              "secondary": "#206393",
+              "on-background": "#181c1e",
+              "tertiary-container": "#338236",
+              "on-tertiary-fixed-variant": "#005312",
+              "surface-tint": "#006a6a",
+              "outline-variant": "#bdc9c8",
+              "primary-container": "#008080",
+              "surface-bright": "#f7fafc",
+              "surface-variant": "#e0e3e5",
+              "on-secondary-container": "#035584",
+              "error": "#ba1a1a",
+              "on-primary-fixed-variant": "#004f4f",
+              "outline": "#6e7979",
+              "on-tertiary": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f7fafc;
+        color: #181c1e;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+      }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<!-- Side Navigation Bar -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r-0 bg-slate-50 dark:bg-slate-950 flex flex-col py-6 z-40">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-lg">
+<span class="material-symbols-outlined" data-icon="clinical_notes">clinical_notes</span>
+</div>
+<div>
+<h1 class="font-['Manrope'] font-extrabold text-teal-800 dark:text-teal-200 text-lg leading-tight">Care Portal</h1>
+<p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Medication Adherence</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/30 rounded-lg mx-2 font-['Inter'] text-sm font-medium transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 mx-2 font-['Inter'] text-sm font-medium transition-all duration-200 ease-in-out hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+                Patients
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 mx-2 font-['Inter'] text-sm font-medium transition-all duration-200 ease-in-out hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+                Tasks
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 mx-2 font-['Inter'] text-sm font-medium transition-all duration-200 ease-in-out hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="mt-auto border-t border-slate-200/50 dark:border-slate-800/50 pt-4">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 mx-2 font-['Inter'] text-sm font-medium transition-all duration-200 ease-in-out hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 mx-2 font-['Inter'] text-sm font-medium transition-all duration-200 ease-in-out hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="w-full sticky top-0 z-50 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm h-16 flex items-center justify-between px-8">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-high border-none rounded-full text-sm focus:ring-2 focus:ring-primary-fixed transition-all" placeholder="Search patients, prescriptions, or IDs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-600 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 rounded-full transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-600 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 rounded-full transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2"></div>
+<div class="flex items-center gap-3 cursor-pointer group">
+<div class="text-right">
+<p class="text-xs font-bold text-on-surface">Dr. Sarah Lim</p>
+<p class="text-[10px] text-slate-500">Clinical Lead</p>
+</div>
+<img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover" data-alt="professional medical doctor headshot portrait with clean white coat and friendly expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY_mplPvjRzWxNuxKbQ4xqHtxslsyLeLWmTgRy_mmstXFSioT-qddy2PppXj18KkukyqAxD0peNqAyPLrrGCBQdWigTn9am9QWQlidKF40Cl2Hy3Wkpy51ahCuZuiiBcwSzn5rAHtemXfMIq_x02lKAWIorkux-Jqi2-AUDd5bNREOt42hYuCY05RAjDyrJffovaHn6WEL2_n6YB3LnaiML-6k2ZktIiQ45MQIByaCcofL9Plx_KsUx1EPL9zzkGwGZKo3DAIH-rk"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="p-8 max-w-7xl mx-auto">
+<!-- Hero Metrics Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+<div class="md:col-span-2 bg-gradient-to-br from-primary to-primary-container p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-primary-fixed-dim font-medium mb-1">Overall Adherence</p>
+<h2 class="text-5xl font-['Manrope'] font-extrabold mb-4">84.2%</h2>
+<div class="flex items-center gap-2 bg-white/10 w-fit px-3 py-1 rounded-full text-xs">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span>+2.4% from last month</span>
+</div>
+</div>
+<!-- Decorative element -->
+<div class="absolute -right-12 -bottom-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-full bg-error-container text-error flex items-center justify-center mb-4">
+<span class="material-symbols-outlined" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<p class="text-slate-500 text-sm font-medium">High Risk Patients</p>
+</div>
+<div>
+<h3 class="text-3xl font-['Manrope'] font-bold text-on-surface">12</h3>
+<p class="text-xs text-error font-semibold mt-1">Requires Immediate Action</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined" data-icon="pending_actions">pending_actions</span>
+</div>
+<p class="text-slate-500 text-sm font-medium">Pending Refills</p>
+</div>
+<div>
+<h3 class="text-3xl font-['Manrope'] font-bold text-on-surface">47</h3>
+<p class="text-xs text-slate-400 mt-1">Due within 48 hours</p>
+</div>
+</div>
+</div>
+<!-- Content Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Patient Adherence Table -->
+<div class="lg:col-span-2 bg-surface-container-lowest rounded-3xl shadow-sm overflow-hidden">
+<div class="p-6 flex items-center justify-between">
+<div>
+<h3 class="text-lg font-['Manrope'] font-bold text-on-surface">Patient Adherence Registry</h3>
+<p class="text-xs text-slate-500">Real-time tracking of medication compliance</p>
+</div>
+<div class="flex gap-2">
+<select class="text-xs border-none bg-surface-container text-on-surface rounded-full px-4 py-2 focus:ring-primary">
+<option>All Risks</option>
+<option>High Risk</option>
+<option>Delayed</option>
+</select>
+<button class="bg-primary text-on-primary text-xs px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span>
+                                Export
+                            </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-slate-500 text-[10px] uppercase tracking-wider">
+<th class="px-6 py-4 font-bold">Patient</th>
+<th class="px-6 py-4 font-bold">Risk Level</th>
+<th class="px-6 py-4 font-bold">Last Refill</th>
+<th class="px-6 py-4 font-bold">Adherence</th>
+<th class="px-6 py-4 font-bold text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<!-- Patient 1 -->
+<tr class="hover:bg-slate-50/50 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-slate-200 overflow-hidden">
+<img alt="Patient Avatar" class="w-full h-full object-cover" data-alt="close up portrait of a senior man with grey hair and friendly eyes in natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSQBx9ix9_4tONqMx1jIVlPVYzmUG_aZsOKn4KLG5W7C1z1xSsEFpZsPDpxDc3jTRhDztmhI2N9H97dvssktC8yzGSbl_Gr6cNColNLnNF_g0OYQ1fZ_1gSsjiyNStOb64Ki0IZhIov6T0YAEzt9WmOz9uav98HUzp1kFGZK64pQdu0wbJonNS7uB_9ZBpQMG7eNuFNEfMPA6HIQIsVBhaNHoXrFi73fTqN5vZXLQPd-b-IaH4fWFI8JTrVVH8D06mnrgXPv1ussQ"/>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Robert Tan</p>
+<p class="text-[10px] text-slate-400">ID: #MS-9921</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 rounded-full text-[10px] font-bold bg-error-container text-on-error-container">HIGH RISK</span>
+</td>
+<td class="px-6 py-5">
+<p class="text-xs text-on-surface">Oct 12, 2023</p>
+<p class="text-[10px] text-error font-medium">12 Days Overdue</p>
+</td>
+<td class="px-6 py-5">
+<div class="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-error w-[42%]"></div>
+</div>
+<p class="text-[10px] text-slate-500 mt-1">42% refills on time</p>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-xl" data-icon="chat" style="font-variation-settings: 'FILL' 1;">chat</span>
+</button>
+</td>
+</tr>
+<!-- Patient 2 -->
+<tr class="hover:bg-slate-50/50 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-slate-200 overflow-hidden">
+<img alt="Patient Avatar" class="w-full h-full object-cover" data-alt="portrait of an elderly woman smiling warmly with spectacles and grey hair" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1lzGRUBhVAOqXa6OuMfPmsffiFl_R1X7jrZPYDC3h93O5szU7WuP9vtLQd8hZQe6lZck-D_liZOwxHRei68NLgTv-VTDrusULngs20PMXJXEfxwzs485HAO_9M-ndX3E2DVzMrw2Qq1E44JDVlkHnCZWADyN97bCjcAGCp-PNGnyLvTf0WDkreWPz-sR2nw4Q0yKfa1axmMEimr3-HpRTVd2HOnugGSxoiOJy1bc8MIgT5dP6AvqrnWo2nRuqf1sDMOiCa26lsxs"/>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Amina Begum</p>
+<p class="text-[10px] text-slate-400">ID: #MS-8812</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 rounded-full text-[10px] font-bold bg-secondary-container text-on-secondary-container">DELAYED</span>
+</td>
+<td class="px-6 py-5">
+<p class="text-xs text-on-surface">Oct 28, 2023</p>
+<p class="text-[10px] text-secondary font-medium">3 Days Overdue</p>
+</td>
+<td class="px-6 py-5">
+<div class="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[78%]"></div>
+</div>
+<p class="text-[10px] text-slate-500 mt-1">78% refills on time</p>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="p-2 text-slate-400 hover:bg-teal-50 hover:text-teal-600 rounded-lg transition-colors inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-xl" data-icon="chat">chat</span>
+</button>
+</td>
+</tr>
+<!-- Patient 3 -->
+<tr class="hover:bg-slate-50/50 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-slate-200 overflow-hidden">
+<img alt="Patient Avatar" class="w-full h-full object-cover" data-alt="middle aged man with glasses looking into camera professionally" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY8e0tEEeqR_tKsG-6bhlHmlshzam2IJF83iYC1tGPLRYKnN4PpdorQaQvZqu6IYIAMkf2MSjIQckqF83GWbGdjgbfYlUMlhHaZuRnB8ggZh3k7TILBX7kkyp_jIb5t_NTNaB_PW2RbPUfN1BYnFOK_B6mTB7hLFo13OahAFPDTznH72a1dcQ0Vnc2MW5yGhg2hpDA8oFaQN9pRnzjC0wB9Ndf9SJNaIg7QcgCeOyjSyXd7qJYZ2NEzlm_LDzpa__OUr0O2U2u87Q"/>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">David Chen</p>
+<p class="text-[10px] text-slate-400">ID: #MS-1142</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 rounded-full text-[10px] font-bold bg-tertiary-container text-on-tertiary-container">ON TRACK</span>
+</td>
+<td class="px-6 py-5">
+<p class="text-xs text-on-surface">Nov 02, 2023</p>
+<p class="text-[10px] text-tertiary font-medium">Scheduled</p>
+</td>
+<td class="px-6 py-5">
+<div class="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[95%]"></div>
+</div>
+<p class="text-[10px] text-slate-500 mt-1">95% refills on time</p>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="p-2 text-slate-400 hover:bg-teal-50 hover:text-teal-600 rounded-lg transition-colors inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-xl" data-icon="chat">chat</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Sidebar Escalations & Tasks -->
+<div class="space-y-6">
+<!-- Pending Escalations -->
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-md font-['Manrope'] font-bold text-on-surface">Pending Escalations</h3>
+<span class="bg-error text-on-error text-[10px] px-2 py-0.5 rounded-full">3 NEW</span>
+</div>
+<div class="space-y-4">
+<div class="p-4 bg-error-container/30 rounded-2xl border-l-4 border-error">
+<p class="text-xs font-bold text-on-error-container">Unresponsive Patient</p>
+<p class="text-[11px] text-on-surface-variant mt-1">Robert Tan has missed 3 automated refill reminders.</p>
+<div class="mt-3 flex gap-2">
+<button class="text-[10px] bg-error text-white px-3 py-1 rounded-full font-bold">Call Patient</button>
+<button class="text-[10px] bg-white text-on-surface px-3 py-1 rounded-full border border-slate-200">Dismiss</button>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low rounded-2xl">
+<p class="text-xs font-bold text-on-surface">Pharmacy Conflict</p>
+<p class="text-[11px] text-slate-600 mt-1">Prescription #F9901 rejected for Amina Begum.</p>
+<div class="mt-3">
+<button class="text-[10px] text-primary font-bold hover:underline">Review Details</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Tasks -->
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-sm">
+<h3 class="text-md font-['Manrope'] font-bold text-on-surface mb-6">Care Tasks</h3>
+<div class="space-y-4">
+<label class="flex items-start gap-3 group cursor-pointer">
+<input class="mt-1 rounded text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<div>
+<p class="text-xs font-medium text-on-surface group-hover:text-primary transition-colors">Verify David Chen's dosage change</p>
+<p class="text-[10px] text-slate-400">Due by 4:00 PM</p>
+</div>
+</label>
+<label class="flex items-start gap-3 group cursor-pointer">
+<input class="mt-1 rounded text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<div>
+<p class="text-xs font-medium text-on-surface group-hover:text-primary transition-colors">Approve October adherence report</p>
+<p class="text-[10px] text-slate-400">Due Tomorrow</p>
+</div>
+</label>
+</div>
+<button class="w-full mt-6 py-2 border border-dashed border-slate-300 rounded-xl text-slate-500 text-[10px] font-bold hover:bg-slate-50 transition-colors">
+                            + ADD NEW TASK
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Only on Dashboard) -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-primary to-primary-container text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-105 transition-transform active:scale-95 group z-50">
+<span class="material-symbols-outlined text-2xl" data-icon="add">add</span>
+<div class="absolute right-full mr-4 bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+            New Patient Enrollment
+        </div>
+</button>
+</body></html>

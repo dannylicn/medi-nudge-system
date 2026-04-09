@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Medication Plan | Merlion Health</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Manrope & Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed": "#a3f69c",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#ebeef0",
+              "on-error-container": "#93000a",
+              "secondary-fixed-dim": "#96ccff",
+              "outline-variant": "#bdc9c8",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed-variant": "#005312",
+              "tertiary-fixed-dim": "#88d982",
+              "secondary-fixed": "#cee5ff",
+              "on-secondary-fixed-variant": "#004a75",
+              "inverse-primary": "#76d6d5",
+              "surface-container-highest": "#e0e3e5",
+              "primary-fixed": "#93f2f2",
+              "tertiary": "#156820",
+              "on-primary-fixed-variant": "#004f4f",
+              "primary-container": "#008080",
+              "on-tertiary-fixed": "#002204",
+              "secondary-container": "#90c9ff",
+              "secondary": "#206393",
+              "surface-bright": "#f7fafc",
+              "inverse-surface": "#2d3133",
+              "surface": "#f7fafc",
+              "on-primary-container": "#e3fffe",
+              "on-error": "#ffffff",
+              "surface-variant": "#e0e3e5",
+              "on-tertiary-container": "#ebffe3",
+              "on-secondary-fixed": "#001d32",
+              "on-primary-fixed": "#002020",
+              "primary-fixed-dim": "#76d6d5",
+              "on-surface": "#181c1e",
+              "on-secondary": "#ffffff",
+              "surface-tint": "#006a6a",
+              "error": "#ba1a1a",
+              "background": "#f7fafc",
+              "inverse-on-surface": "#eef1f3",
+              "surface-dim": "#d7dadc",
+              "on-background": "#181c1e",
+              "primary": "#006565",
+              "surface-container-high": "#e5e9eb",
+              "surface-container-low": "#f1f4f6",
+              "outline": "#6e7979",
+              "on-surface-variant": "#3e4949",
+              "on-secondary-container": "#035584",
+              "error-container": "#ffdad6",
+              "tertiary-container": "#338236"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .font-manrope { font-family: 'Manrope', sans-serif; }
+      .font-inter { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-fixed-dim">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 bg-[#f7fafc] dark:bg-slate-900 shadow-sm dark:shadow-none h-16 flex justify-between items-center px-6">
+<div class="flex items-center gap-2">
+<span class="text-xl font-bold text-[#006565] dark:text-teal-300 font-manrope tracking-tight">Merlion Health</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-surface-container-low px-4 py-1.5 rounded-full">
+<span class="material-symbols-outlined text-outline text-sm mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48" placeholder="Search patients..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-full hover:bg-teal-50 transition-colors text-slate-600">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden">
+<img class="h-full w-full object-cover" data-alt="professional portrait of a male doctor in clinical attire with a warm friendly expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2j40KDJn9CUFxgw0nIODdsAoFbGUx7r7Roupm1LCJGGRFdgCVivXpt2N8-4iAmMb8LVB1RgeQdxmQJUmkPXdjHXmPjZQxwT1kXuJKQ5uRU3dWouq-qosU4_htH4_-OWsNZHla8zrDDc8Cpmc_1FjVPgNhITC1Ki_lDLMoERN2IuEFWHp4eyZPzYMgpkydrcsqv0Fli3xSV7Mi4gDagymRVRgx7d0Q-wTZkjkpN7RoLCVaSXXdMB2Efu_IiPzeK_3t4UhAnm8F-EE"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex pt-16 h-screen">
+<!-- Sidebar Navigation -->
+<aside class="hidden lg:flex flex-col py-4 h-full w-64 bg-[#f7fafc] dark:bg-slate-900">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="h-10 w-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">medical_services</span>
+</div>
+<div>
+<p class="font-bold text-sm text-on-surface font-inter leading-tight">Dr. Tan</p>
+<p class="text-xs text-outline font-inter">General Practitioner</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1 px-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-[#f1f4f6] transition-all rounded-lg font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-teal-50 dark:bg-teal-900/30 text-[#006565] dark:text-teal-300 rounded-lg mx-2 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined">person</span> Patients
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-[#f1f4f6] transition-all rounded-lg font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined">pill</span> Prescriptions
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-[#f1f4f6] transition-all rounded-lg font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined">calendar_today</span> Schedules
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-[#f1f4f6] transition-all rounded-lg font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined">smart_toy</span> AI Support
+                </a>
+</nav>
+<div class="px-4 mt-auto">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary py-3 rounded-xl font-semibold text-sm shadow-md active:scale-95 transition-all">
+                    New Patient Intake
+                </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto bg-surface-container-low p-4 md:p-8">
+<div class="max-w-5xl mx-auto">
+<!-- Breadcrumb & Header -->
+<div class="mb-8">
+<div class="flex items-center gap-2 text-outline text-sm mb-2">
+<span>Patients</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span>Patient ID: MH-8821</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-primary font-medium">Plan Review</span>
+</div>
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h1 class="text-3xl font-extrabold font-headline tracking-tight text-on-surface mb-1">Clinical Medication Plan</h1>
+<p class="text-on-surface-variant">Reviewing OCR extracted data from physical prescription scan.</p>
+</div>
+<div class="flex items-center gap-3 bg-tertiary-container/20 px-4 py-2 rounded-full">
+<span class="material-symbols-outlined text-tertiary text-lg">verified_user</span>
+<span class="text-sm font-semibold text-tertiary">Verified Extraction (98% Confidence)</span>
+</div>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: Source Document -->
+<div class="lg:col-span-4 space-y-6">
+<div class="bg-surface-container-lowest rounded-3xl p-6 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline font-bold text-lg">Source Document</h3>
+<button class="text-primary text-sm font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">open_in_full</span> Expand
+                                </button>
+</div>
+<div class="aspect-[3/4] rounded-2xl overflow-hidden relative group">
+<img class="w-full h-full object-cover" data-alt="close-up of a medical prescription paper with handwritten notes and clinical stamps on a wooden desk" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIpQekGy5iorrtHj22ldMJHPeXdn0sPlNiJAsHR2s_AMVVb6f91K620Bo2ZndavSu4sCQXBQPcCk9DJVPbX4ToZDuoRHLk8c7AJStY_bCw7oOLxB4aGF8BSqAe6TQd9H6jQEjleGCAoUq-tI8gmrkvEEqKOd4a8WJj6RHKKkJ7QnyrKJPdYhBp7laZK7N5Spzaqx9AGYe-i9H3p8ADjbJ0Xq-y0b3qDqTclNlYxleGawePbLECYwwkeEKnhJRaS7ySDBcOT32rdHQ"/>
+<div class="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors border-2 border-dashed border-primary/30 rounded-2xl m-2"></div>
+<div class="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md p-3 rounded-xl flex items-center gap-3 shadow-lg">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">description</span>
+<div class="text-[10px] leading-tight">
+<p class="font-bold">prescription_v1.jpg</p>
+<p class="text-outline">Uploaded Oct 24, 2023</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-primary-container text-on-primary-container rounded-3xl p-6 shadow-lg">
+<h3 class="font-headline font-bold text-lg mb-3">Clinician Notes</h3>
+<p class="text-sm leading-relaxed opacity-90 italic">
+                                "Patient reports occasional dizziness in mornings. Check if dosage timing for Amlodipine needs adjustment from morning to evening."
+                            </p>
+<div class="mt-4 flex items-center gap-2">
+<div class="h-6 w-6 rounded-full bg-on-primary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-xs">edit</span>
+</div>
+<span class="text-xs font-semibold">Click to add amendment</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Extracted Data Review -->
+<div class="lg:col-span-8 space-y-6">
+<!-- Patient Mini Profile -->
+<div class="bg-white/40 backdrop-blur-xl rounded-3xl p-6 flex items-center gap-4">
+<div class="h-16 w-16 rounded-2xl overflow-hidden bg-secondary-fixed">
+<img class="h-full w-full object-cover" data-alt="portrait of an elderly woman with a gentle smile against a soft neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBExLk7WeEKb84HQPsHwyX9bNLksRA_3vDiLWN476k6Sbl1zqlovth5t7E1i4AMWR-pu2SZNvFlgaFNOe-Iski1M9Di7XekdYuDsgh66GxnCoKIDWNBJXRHu2cLA0KvLeKb-BRMGHBtFxsZUmRQLFIKS9VLHBE5VJUxHujE5qp3H_LKr9VAKIq15gLHNrK9WN_uaE8EhNwsR5r2Z9C4zeSRLoipQkuJeaDCLeTVbDMLkZ2dFFwq8J6IEc_SL_tGsz-QCwIoWLoogQM"/>
+</div>
+<div>
+<h2 class="text-xl font-bold font-manrope">Mdm. Lim Bee Kuan</h2>
+<p class="text-sm text-on-surface-variant">68 years old • Female • Hypertension &amp; Diabetes Type 2</p>
+</div>
+</div>
+<!-- Medication Plan Cards -->
+<div class="space-y-4">
+<!-- Card 1: Amlodipine -->
+<div class="bg-surface-container-lowest rounded-3xl p-6 border-l-4 border-primary transition-all hover:shadow-md">
+<div class="flex justify-between items-start mb-6">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary">pill</span>
+<h4 class="text-lg font-bold font-manrope">Amlodipine Besylate</h4>
+</div>
+<span class="inline-block px-3 py-0.5 rounded-full bg-surface-container text-outline text-[10px] font-bold uppercase tracking-wider">Antihypertensive</span>
+</div>
+<button class="text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<div>
+<label class="text-[10px] font-bold text-outline uppercase tracking-widest block mb-1">Dose</label>
+<div class="flex items-center bg-surface-container-low px-3 py-2 rounded-xl">
+<span class="text-sm font-semibold">5 mg</span>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-bold text-outline uppercase tracking-widest block mb-1">Frequency</label>
+<div class="flex items-center bg-surface-container-low px-3 py-2 rounded-xl">
+<span class="text-sm font-semibold">Once Daily</span>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-bold text-outline uppercase tracking-widest block mb-1">Duration</label>
+<div class="flex items-center bg-surface-container-low px-3 py-2 rounded-xl">
+<span class="text-sm font-semibold">90 Days</span>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-bold text-outline uppercase tracking-widest block mb-1">Nudge Frequency</label>
+<div class="flex items-center bg-secondary-container/30 px-3 py-2 rounded-xl text-on-secondary-container">
+<span class="material-symbols-outlined text-sm mr-1">chat</span>
+<span class="text-sm font-bold">Daily (WA)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2: Metformin -->
+<div class="bg-surface-container-lowest rounded-3xl p-6 border-l-4 border-secondary transition-all hover:shadow-md">
+<div class="flex justify-between items-start mb-6">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-secondary">pill</span>
+<h4 class="text-lg font-bold font-manrope">Metformin XR</h4>
+</div>
+<span class="inline-block px-3 py-0.5 rounded-full bg-surface-container text-outline text-[10px] font-bold uppercase tracking-wider">Antidiabetic</span>
+</div>
+<button class="text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<div>
+<label class="text-[10px] font-bold text-outline uppercase tracking-widest block mb-1">Dose</label>
+<div class="flex items-center bg-surface-container-low px-3 py-2 rounded-xl">
+<span class="text-sm font-semibold">500 mg</span>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-bold text-outline uppercase tracking-widest block mb-1">Frequency</label>
+<div class="flex items-center bg-surface-container-low px-3 py-2 rounded-xl">
+<span class="text-sm font-semibold">Twice Daily</span>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-bold text-outline uppercase tracking-widest block mb-1">Duration</label>
+<div class="flex items-center bg-surface-container-low px-3 py-2 rounded-xl">
+<span class="text-sm font-semibold">Ongoing</span>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-bold text-outline uppercase tracking-widest block mb-1">Nudge Frequency</label>
+<div class="flex items-center bg-secondary-container/30 px-3 py-2 rounded-xl text-on-secondary-container">
+<span class="material-symbols-outlined text-sm mr-1">chat</span>
+<span class="text-sm font-bold">Post-Meal</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Add New Medication Button -->
+<button class="w-full border-2 border-dashed border-outline-variant rounded-3xl p-4 flex items-center justify-center gap-2 text-outline hover:bg-surface-container-highest transition-colors group">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">add_circle</span>
+<span class="font-bold text-sm">Add manual medication entry</span>
+</button>
+</div>
+<!-- Action Bar -->
+<div class="bg-surface-container rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="flex items-center gap-4">
+<div class="flex -space-x-2">
+<div class="h-10 w-10 rounded-full border-2 border-surface-container bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img class="h-full w-full object-cover" data-alt="professional female doctor with stethoscope" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2Be7CVWxbtd8EmzXkkWCkNrkJgyPhIGLJkcjb0jNMnI4P4qNxW2ZwQyIwuJiqqo2leygqagu-eVtFXLf3vcxQpvoSSv-6lHKNtEevHZdMYwNoU58mm0g3C3cD9sAU9mlgmx6gZGWGXz2OrABv4HheiTGWV_7HphqNR1DCLK2lWxwGClSaDcj_rst3zlhUyO6TpD0VRryVLAM5XQYiIRXzRzGzspiKl-WaeWV3uHt1pofyU3KpOXVBKQystRAxM2h-jZw33rBCgP4"/>
+</div>
+<div class="h-10 w-10 rounded-full border-2 border-surface-container bg-primary-fixed flex items-center justify-center">
+<span class="text-[10px] font-bold text-on-primary-fixed">AI</span>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant font-medium">Double-verified by Merlion AI &amp; Clinical Reviewer</p>
+</div>
+<div class="flex gap-4 w-full md:w-auto">
+<button class="flex-1 md:flex-none px-6 py-3 bg-surface-container-lowest text-on-surface-variant rounded-full font-bold text-sm active:scale-95 transition-all">
+                                    Save Draft
+                                </button>
+<button class="flex-1 md:flex-none px-8 py-3 bg-gradient-to-r from-primary to-primary-container text-on-primary rounded-full font-bold text-sm shadow-lg active:scale-95 transition-all">
+                                    Confirm &amp; Activate Patient Plan
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<div class="h-24"></div> <!-- Spacer for bottom nav -->
+</div>
+</main>
+</div>
+<!-- Bottom Navigation Bar (Mobile only) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-[#bdc9c8]/15 z-50">
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-semibold mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-teal-100 dark:bg-teal-900/50 text-[#006565] dark:text-teal-100 rounded-2xl px-5 py-2" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">medication</span>
+<span class="text-[10px] font-semibold mt-1">Meds</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2" href="#">
+<span class="material-symbols-outlined">forum</span>
+<span class="text-[10px] font-semibold mt-1">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-semibold mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

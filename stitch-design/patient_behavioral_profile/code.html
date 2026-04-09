@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Patient Behavioral Profile | Clinical Serenity</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary": "#ffffff",
+              "inverse-primary": "#76d6d5",
+              "surface-container-highest": "#e0e3e5",
+              "secondary-fixed": "#cee5ff",
+              "on-surface-variant": "#3e4949",
+              "on-secondary": "#ffffff",
+              "on-secondary-fixed": "#001d32",
+              "primary": "#006565",
+              "tertiary": "#156820",
+              "on-error-container": "#93000a",
+              "surface-dim": "#d7dadc",
+              "on-primary-fixed": "#002020",
+              "background": "#f7fafc",
+              "inverse-surface": "#2d3133",
+              "surface": "#f7fafc",
+              "primary-fixed-dim": "#76d6d5",
+              "surface-container-low": "#f1f4f6",
+              "secondary-container": "#90c9ff",
+              "on-tertiary-container": "#ebffe3",
+              "surface-container": "#ebeef0",
+              "surface-container-high": "#e5e9eb",
+              "on-surface": "#181c1e",
+              "secondary-fixed-dim": "#96ccff",
+              "tertiary-fixed-dim": "#88d982",
+              "primary-fixed": "#93f2f2",
+              "tertiary-fixed": "#a3f69c",
+              "on-secondary-fixed-variant": "#004a75",
+              "on-primary-container": "#e3fffe",
+              "inverse-on-surface": "#eef1f3",
+              "surface-container-lowest": "#ffffff",
+              "on-error": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-tertiary-fixed": "#002204",
+              "secondary": "#206393",
+              "on-background": "#181c1e",
+              "tertiary-container": "#338236",
+              "on-tertiary-fixed-variant": "#005312",
+              "surface-tint": "#006a6a",
+              "outline-variant": "#bdc9c8",
+              "primary-container": "#008080",
+              "surface-bright": "#f7fafc",
+              "surface-variant": "#e0e3e5",
+              "on-secondary-container": "#035584",
+              "error": "#ba1a1a",
+              "on-primary-fixed-variant": "#004f4f",
+              "outline": "#6e7979",
+              "on-tertiary": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface min-h-screen">
+<!-- SideNavBar (Authority: JSON) -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 dark:bg-slate-950 flex flex-col py-6 hidden md:flex">
+<div class="px-6 mb-10 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" data-icon="clinical_notes">clinical_notes</span>
+</div>
+<div>
+<h1 class="font-headline font-extrabold text-teal-800 tracking-tight leading-tight">Care Portal</h1>
+<p class="text-[10px] uppercase tracking-widest text-outline">Medication Adherence</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-teal-600 mx-2 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-['Inter'] text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-teal-700 bg-teal-50 rounded-lg mx-2 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-['Inter'] text-sm font-medium">Patients</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-teal-600 mx-2 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="font-['Inter'] text-sm font-medium">Tasks</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-teal-600 mx-2 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Inter'] text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-slate-200 pt-6 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-teal-600 mx-2 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span class="font-['Inter'] text-sm font-medium">Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-teal-600 mx-2 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-['Inter'] text-sm font-medium">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 min-h-screen">
+<!-- TopNavBar (Authority: JSON) -->
+<header class="w-full sticky top-0 z-50 bg-slate-50/80 backdrop-blur-md shadow-sm h-16 flex items-center justify-between px-8">
+<div class="flex items-center gap-4">
+<span class="font-['Manrope'] tracking-tight text-xl font-bold text-teal-800">Clinical Serenity</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative hidden sm:block">
+<input class="bg-slate-100 border-none rounded-full px-4 py-2 text-sm w-64 focus:ring-2 focus:ring-primary-fixed transition-all" placeholder="Search records..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-2 text-slate-400 text-sm" data-icon="search">search</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-600 hover:bg-teal-50/50 rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-600 hover:bg-teal-50/50 rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border-2 border-primary-fixed">
+<img alt="Clinician profile" class="w-full h-full object-cover" data-alt="professional headshot of a friendly female doctor in white clinical attire with a soft blurred medical background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbFAlzeji4zQlWAxFRCuiXkqNGf5TCwTSilPMp4czrgjEofMsAewih99naoyf_n5HH6Gc84LfeVMGnz41ydVreTWrs00PB2iyEjG0zNo2eX6r4QnFMlVDpMTlDsGGfqosOgF5a4Gzh0upx3Km-blZo2eBR-ZuDHhuxQ9y9ZOERlE2ILwAROwqEa7JL23O8GNYLPb7V9LWTV2bNSvWCHtoDGx6a-YQYUIpKrQKSoDCMYzPM47aH1V_C6l06viR93zfeiq4qG9TLbHU"/>
+</div>
+</div>
+</div>
+</header>
+<section class="p-8 max-w-7xl mx-auto space-y-8">
+<!-- Patient Profile Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-outline-variant/15">
+<div class="flex items-start gap-6">
+<div class="w-24 h-24 rounded-2xl overflow-hidden shadow-lg shadow-on-surface/5">
+<img alt="Patient portrait" class="w-full h-full object-cover" data-alt="close up portrait of an elderly man with gentle eyes and a kind smile in a warmly lit indoor environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFYWRD1B5rN8FSQAzrNvMzuzS18HRUkEJmSGS2-pNrHkMLIZ0fNgjXz8l-Fed8rllcwo2TQYbN_J2URAUvgKw26I_aCPi03tje1M5DCGUIEvnf91UKnn4Qh_wx5k08OvKFYMoVN07z_rdEI1ymlldmR5mUIh2xTMm5SkhlzTsfaRwjQg-kuIZ3S0MyxSBSWDfynuQYe9sqe1t-t8isv0FFe5bLYiufldAv_Gdd1pDX2Sun4OYyrTGojgHuK_lDRsvPHtccQdZgBUs"/>
+</div>
+<div>
+<div class="flex items-center gap-3 mb-1">
+<h2 class="font-headline text-2xl font-bold tracking-tight text-on-surface">Tan Boon Hock</h2>
+<span class="bg-tertiary-container/10 text-tertiary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Active</span>
+</div>
+<p class="text-sm text-outline font-medium mb-4">Patient ID: #CS-88102 • 68 Years Old</p>
+<div class="flex flex-wrap gap-4">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low rounded-lg text-xs font-medium text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-base" data-icon="medical_services">medical_services</span>
+                                Hypertension, Type 2 Diabetes
+                            </div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low rounded-lg text-xs font-medium text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-base" data-icon="medication">medication</span>
+                                Metformin, Lisinopril
+                            </div>
+</div>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="px-5 py-2.5 rounded-full border border-outline text-on-surface font-medium text-sm hover:bg-surface-container transition-colors active:scale-95">Message Patient</button>
+<button class="px-5 py-2.5 rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary font-medium text-sm shadow-md shadow-primary/20 active:scale-95 transition-all">Schedule Consultation</button>
+</div>
+</div>
+<!-- Bento Grid Dashboard -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Adherence Risk Score Card -->
+<div class="md:col-span-4 bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4">
+<span class="material-symbols-outlined text-outline/30 text-4xl" data-icon="analytics">analytics</span>
+</div>
+<h3 class="text-sm font-label text-outline mb-6">Calculated Adherence Risk</h3>
+<div class="relative mb-6">
+<!-- Simple SVG gauge visualization -->
+<svg class="w-40 h-40 transform -rotate-90">
+<circle class="text-surface-container-high" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-error" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-dasharray="440" stroke-dashoffset="110" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center transform rotate-0">
+<span class="font-headline text-5xl font-extrabold text-error">78</span>
+<span class="text-[10px] text-outline uppercase tracking-widest font-bold">High Risk</span>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed max-w-[200px]">The risk score has increased by 14% since the last review 30 days ago.</p>
+</div>
+<!-- Risk Analysis Logic (High-End Insight Card) -->
+<div class="md:col-span-8 bg-error-container/30 border-l-4 border-error rounded-xl p-8 flex flex-col justify-center">
+<div class="flex items-start gap-4 mb-6">
+<div class="bg-error text-on-error w-10 h-10 rounded-full flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div>
+<h3 class="font-headline text-xl font-bold text-on-error-container">Risk Analysis</h3>
+<p class="text-sm text-on-error-container/80 mt-1">Behavioral triggers identified through pharmacy integration</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-4 bg-white/40 p-4 rounded-xl border border-error/5">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<p class="text-sm font-medium text-on-surface">3 consecutive late refills for <span class="font-bold">Lisinopril</span> (Avg. 8 days late)</p>
+</div>
+<div class="flex items-center gap-4 bg-white/40 p-4 rounded-xl border border-error/5">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<p class="text-sm font-medium text-on-surface">No login activity on the <span class="font-bold">Care Companion App</span> for 14 days</p>
+</div>
+<div class="flex items-center gap-4 bg-white/40 p-4 rounded-xl border border-error/5">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<p class="text-sm font-medium text-on-surface">System predicts potential medication exhaustion within 72 hours</p>
+</div>
+</div>
+</div>
+<!-- Refill History Timeline -->
+<div class="md:col-span-12 lg:col-span-7 bg-surface-container-lowest rounded-xl p-8 shadow-sm">
+<div class="flex items-center justify-between mb-8">
+<h3 class="font-headline text-lg font-bold text-on-surface">Pharmacy Refill Timeline</h3>
+<div class="flex gap-2">
+<span class="flex items-center gap-1.5 text-[10px] font-bold text-outline uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span> On Time
+                            </span>
+<span class="flex items-center gap-1.5 text-[10px] font-bold text-outline uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-error"></span> Late
+                            </span>
+</div>
+</div>
+<div class="relative space-y-12 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-highest">
+<!-- Timeline Item 1 -->
+<div class="relative pl-10">
+<div class="absolute left-0 top-1 w-6 h-6 rounded-full bg-error ring-4 ring-white flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[14px]" data-icon="event_busy">event_busy</span>
+</div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<h4 class="text-sm font-bold text-on-surface">Refill: Metformin 500mg</h4>
+<p class="text-xs text-outline mt-0.5">Refilled at Unity Pharmacy (Toa Payoh)</p>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-error block">8 Days Late</span>
+<span class="text-[10px] text-outline">Oct 12, 2023</span>
+</div>
+</div>
+</div>
+<!-- Timeline Item 2 -->
+<div class="relative pl-10">
+<div class="absolute left-0 top-1 w-6 h-6 rounded-full bg-tertiary ring-4 ring-white flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[14px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<h4 class="text-sm font-bold text-on-surface">Refill: Lisinopril 10mg</h4>
+<p class="text-xs text-outline mt-0.5">Refilled at Guardian (Bishan)</p>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-tertiary block">On Time</span>
+<span class="text-[10px] text-outline">Sep 14, 2023</span>
+</div>
+</div>
+</div>
+<!-- Timeline Item 3 -->
+<div class="relative pl-10">
+<div class="absolute left-0 top-1 w-6 h-6 rounded-full bg-error ring-4 ring-white flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[14px]" data-icon="event_busy">event_busy</span>
+</div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<h4 class="text-sm font-bold text-on-surface">Refill: Metformin 500mg</h4>
+<p class="text-xs text-outline mt-0.5">Refilled at Unity Pharmacy (Toa Payoh)</p>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-error block">5 Days Late</span>
+<span class="text-[10px] text-outline">Aug 15, 2023</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Behavioral Signals -->
+<div class="md:col-span-12 lg:col-span-5 space-y-6">
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
+<h3 class="font-headline text-md font-bold text-on-surface mb-6">Patient Behavior Signals</h3>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="w-10 h-10 rounded-xl bg-secondary-container/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary" data-icon="smartphone">smartphone</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-on-surface">App Engagement Drop</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Engagement with daily dosage reminders has dropped from 90% to 20% in the last 14 days.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 rounded-xl bg-primary-fixed/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" data-icon="local_pharmacy">local_pharmacy</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-on-surface">Pharmacy Switching</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Patient has used 3 different pharmacies in 6 months, often a sign of fragmented supply tracking.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 rounded-xl bg-tertiary-container/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-tertiary" data-icon="psychology">psychology</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-on-surface">Forgetfulness Report</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Patient indicated "forgetting occasionally" during the last nurse-led phone screening.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Clinical Action Card (Glassmorphism) -->
+<div class="glass-card border border-white/20 rounded-2xl p-6 shadow-xl shadow-primary/5">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
+<h3 class="font-headline text-sm font-bold text-on-surface">Recommended Intervention</h3>
+</div>
+<p class="text-xs text-on-surface-variant mb-6">Based on behavioral patterns, we recommend transitioning this patient to a <span class="text-primary font-bold">medication blister pack</span> system.</p>
+<button class="w-full py-3 rounded-full bg-primary text-on-primary text-sm font-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-all active:scale-95">
+<span class="material-symbols-outlined text-base" data-icon="send">send</span>
+                            Send Recommendation to Patient
+                        </button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Mobile Navigation Shell (Authority: JSON/Rules) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-50 border-t border-slate-200 flex justify-around items-center h-16 px-4 z-50">
+<a class="flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-medium">Dashboard</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-teal-700" href="#">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="text-[10px] font-bold">Patients</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="text-[10px] font-medium">Tasks</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Voice Setup Selection | Merlion Health</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-lowest": "#ffffff",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed": "#002204",
+              "tertiary": "#156820",
+              "on-primary-fixed-variant": "#004f4f",
+              "on-error-container": "#93000a",
+              "tertiary-fixed-dim": "#88d982",
+              "secondary-container": "#90c9ff",
+              "inverse-surface": "#2d3133",
+              "on-primary-container": "#e3fffe",
+              "secondary": "#206393",
+              "on-secondary-container": "#035584",
+              "secondary-fixed-dim": "#96ccff",
+              "on-secondary-fixed": "#001d32",
+              "on-secondary": "#ffffff",
+              "on-error": "#ffffff",
+              "surface-bright": "#f7fafc",
+              "tertiary-fixed": "#a3f69c",
+              "primary-fixed-dim": "#76d6d5",
+              "outline-variant": "#bdc9c8",
+              "error-container": "#ffdad6",
+              "surface-container": "#ebeef0",
+              "on-surface": "#181c1e",
+              "inverse-on-surface": "#eef1f3",
+              "primary-container": "#008080",
+              "on-primary-fixed": "#002020",
+              "on-background": "#181c1e",
+              "surface-variant": "#e0e3e5",
+              "outline": "#6e7979",
+              "surface-container-high": "#e5e9eb",
+              "inverse-primary": "#76d6d5",
+              "background": "#f7fafc",
+              "on-tertiary": "#ffffff",
+              "primary": "#006565",
+              "surface": "#f7fafc",
+              "on-secondary-fixed-variant": "#004a75",
+              "error": "#ba1a1a",
+              "on-tertiary-container": "#ebffe3",
+              "surface-container-highest": "#e0e3e5",
+              "surface-container-low": "#f1f4f6",
+              "secondary-fixed": "#cee5ff",
+              "on-surface-variant": "#3e4949",
+              "on-tertiary-fixed-variant": "#005312",
+              "primary-fixed": "#93f2f2",
+              "tertiary-container": "#338236",
+              "surface-dim": "#d7dadc",
+              "surface-tint": "#006a6a"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body">
+<!-- Top Navigation Bar -->
+<nav class="w-full sticky top-0 z-50 bg-[#f7fafc] dark:bg-slate-900 shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+<div class="flex items-center space-x-8">
+<span class="text-xl font-bold text-[#006565] dark:text-[#93f2f2] font-['Manrope'] tracking-tight">Merlion Health</span>
+<div class="hidden md:flex space-x-6">
+<a class="text-slate-600 dark:text-slate-400 hover:text-[#008080] dark:hover:text-[#93f2f2] transition-colors font-['Manrope'] tracking-tight font-semibold" href="#">Dashboard</a>
+<a class="text-[#006565] dark:text-[#93f2f2] font-bold border-b-2 border-[#006565] font-['Manrope'] tracking-tight" href="#">Patients</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-[#008080] dark:hover:text-[#93f2f2] transition-colors font-['Manrope'] tracking-tight font-semibold" href="#">Analytics</a>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<span class="material-symbols-outlined text-[#006565]" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-[#006565]" data-icon="account_circle">account_circle</span>
+</div>
+</div>
+</nav>
+<div class="flex max-w-7xl mx-auto min-h-[calc(100vh-72px)]">
+<!-- Side Navigation Bar -->
+<aside class="hidden md:flex flex-col p-4 space-y-2 h-[calc(100vh-72px)] w-64 bg-[#f1f4f6] dark:bg-slate-900 font-['Inter'] text-sm font-medium">
+<div class="mb-6 px-2">
+<h3 class="text-lg font-bold text-[#006565]">Clinical Portal</h3>
+<p class="text-xs text-slate-500">AI Voice Setup</p>
+</div>
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-all active:translate-x-1 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="alarm">alarm</span>
+<span>Reminders</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 bg-[#006565] text-white rounded-lg shadow-md transition-all active:translate-x-1 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="mic_external_on">mic_external_on</span>
+<span>Voice Library</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-all active:translate-x-1 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="person_search">person_search</span>
+<span>Patient Hub</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-all active:translate-x-1 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span>Security</span>
+</a>
+<div class="mt-auto pt-4">
+<button class="w-full py-3 bg-gradient-to-br from-primary to-primary-container text-white rounded-full font-semibold shadow-lg hover:scale-[1.02] transition-transform active:scale-95">
+                    New Reminder
+                </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 p-6 md:p-10 bg-background overflow-y-auto">
+<!-- Breadcrumbs & Search Section -->
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
+<div>
+<nav class="flex text-label-sm text-outline mb-2">
+<span>Patient Hub</span>
+<span class="mx-2">/</span>
+<span class="text-primary font-semibold">Voice Setup Selection</span>
+</nav>
+<h1 class="font-headline text-3xl font-bold text-on-surface tracking-tight">Configure Therapeutic Voice</h1>
+</div>
+<div class="relative w-full md:w-96">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+</div>
+<input class="w-full pl-12 pr-4 py-3 bg-surface-container-highest border-none rounded-xl focus:ring-2 focus:ring-primary-fixed text-sm transition-all" placeholder="Search patient by name or ID..." type="text"/>
+</div>
+</div>
+<!-- Content Grid: Bento Style -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Patient Context Card -->
+<div class="lg:col-span-4 space-y-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm">
+<div class="flex items-center space-x-4 mb-6">
+<img alt="Patient Profile" class="w-16 h-16 rounded-full object-cover border-2 border-primary-fixed" data-alt="Close-up portrait of an elderly woman with silver hair smiling gently, soft indoor clinical lighting with neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQPzfXAK3KlmNf5e97-4mTnWSiRKrnH65KOuyIngN7z7ThtcBbRnQvkoK8YWP5-TwTZO5jqXpQHcGen5HQ3KXxah3g1kid1XfTTdVkIXT8V0od9YM4Ld1Lk8YjaC2aKm0A5YXWbzE8Ijz5FtfMQKH5ax7FpJ_gFi4dx227V2UMB2YjUcyllWTW0_8AzqXAq0-6DPDVCM_rPPf2Cmoxw4k42c43ChR-zehVVRgJgjzEjluzsHV4SpYQC9GvB1Y47VdmZvSpc4_1CQI"/>
+<div>
+<h2 class="font-headline text-xl font-bold text-on-surface">Tan Ah Lian</h2>
+<p class="text-label-sm text-outline">Patient ID: #MH-8821</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between text-sm">
+<span class="text-outline">Condition:</span>
+<span class="font-semibold">Early-stage Dementia</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-outline">Language:</span>
+<span class="font-semibold">English, Mandarin</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-outline">Next Reminder:</span>
+<span class="font-semibold text-secondary">14:00 (Medication)</span>
+</div>
+</div>
+</div>
+<div class="bg-primary-container/10 p-6 rounded-xl border border-primary-container/20">
+<h4 class="font-headline font-bold text-primary mb-2 flex items-center">
+<span class="material-symbols-outlined mr-2" data-icon="info">info</span>
+                            Clinical Insight
+                        </h4>
+<p class="text-body-md text-on-surface-variant leading-relaxed">
+                            Familiar voices have been shown to reduce agitation in dementia patients by up to 40% compared to synthetic or unknown voices.
+                        </p>
+</div>
+</div>
+<!-- Voice Selection Bento Grid -->
+<div class="lg:col-span-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Option 1: Family Member -->
+<div class="group relative bg-surface-container-lowest p-6 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer border-2 border-transparent hover:border-primary">
+<div class="absolute top-4 right-4">
+<span class="material-symbols-outlined text-tertiary opacity-0 group-hover:opacity-100 transition-opacity" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="w-12 h-12 bg-tertiary-fixed rounded-lg flex items-center justify-center mb-4 text-on-tertiary-fixed">
+<span class="material-symbols-outlined" data-icon="family_history">family_history</span>
+</div>
+<h3 class="font-headline text-xl font-bold mb-2">Family Member</h3>
+<p class="text-body-md text-on-surface-variant mb-4">A child, spouse, or grandchild's voice for personalized care.</p>
+<div class="flex items-center text-xs font-semibold text-tertiary bg-tertiary-container/20 px-3 py-1 rounded-full w-fit">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="sentiment_very_satisfied">sentiment_very_satisfied</span>
+                                Increases emotional comfort
+                            </div>
+</div>
+<!-- Option 2: Primary Caregiver -->
+<div class="group bg-surface-container-lowest p-6 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer border-2 border-transparent hover:border-primary">
+<div class="w-12 h-12 bg-secondary-fixed rounded-lg flex items-center justify-center mb-4 text-on-secondary-fixed">
+<span class="material-symbols-outlined" data-icon="volunteer_activism">volunteer_activism</span>
+</div>
+<h3 class="font-headline text-xl font-bold mb-2">Primary Caregiver</h3>
+<p class="text-body-md text-on-surface-variant mb-4">The daily assistant whose voice the patient recognizes as authority.</p>
+<div class="flex items-center text-xs font-semibold text-secondary bg-secondary-container/20 px-3 py-1 rounded-full w-fit">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="task_alt">task_alt</span>
+                                Higher adherence rates
+                            </div>
+</div>
+<!-- Option 3: Clinical Staff -->
+<div class="group bg-surface-container-lowest p-6 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer border-2 border-transparent hover:border-primary">
+<div class="w-12 h-12 bg-primary-fixed rounded-lg flex items-center justify-center mb-4 text-on-primary-fixed">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+</div>
+<h3 class="font-headline text-xl font-bold mb-2">Clinical Staff</h3>
+<p class="text-body-md text-on-surface-variant mb-4">Professional voice from a doctor or nurse for critical medical prompts.</p>
+<div class="flex items-center text-xs font-semibold text-primary bg-primary-container/20 px-3 py-1 rounded-full w-fit">
+<span class="material-symbols-outlined text-sm mr-1" data-icon="verified">verified</span>
+                                Medical professional tone
+                            </div>
+</div>
+<!-- Option 4: AI Assisted (Placeholder/Disabled Style) -->
+<div class="bg-surface-container-low p-6 rounded-xl border border-dashed border-outline-variant flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-outline mb-2" data-icon="add_circle">add_circle</span>
+<p class="text-sm font-semibold text-outline">Add Custom Provider</p>
+<p class="text-xs text-outline/60 px-4 mt-1">Upload pre-recorded media or invite via link</p>
+</div>
+</div>
+<!-- Call to Action -->
+<div class="mt-10 flex flex-col md:flex-row items-center justify-between p-8 bg-surface-container-lowest rounded-2xl shadow-lg border border-primary/5">
+<div class="mb-6 md:mb-0">
+<p class="text-label-sm uppercase tracking-widest text-outline font-bold mb-1">Ready to proceed?</p>
+<p class="text-body-md text-on-surface-variant">The patient's family will receive a recording link via SMS.</p>
+</div>
+<button class="w-full md:w-auto px-10 py-4 bg-gradient-to-br from-[#006565] to-[#008080] text-white rounded-full font-bold text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95 flex items-center justify-center space-x-3">
+<span>Proceed to Recording</span>
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Mobile Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-end px-4 pb-4 pt-2 md:hidden bg-[#f7fafc]/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-[#bdc9c8]/15 z-50">
+<a class="flex flex-col items-center justify-center text-[#181c1e] dark:text-slate-400 opacity-60 hover:opacity-100 transition-opacity active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-wider mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#006565] text-white rounded-full p-3 mb-2 scale-110 shadow-lg active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings_voice">settings_voice</span>
+<span class="sr-only">Voices</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#181c1e] dark:text-slate-400 opacity-60 hover:opacity-100 transition-opacity active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-wider mt-1">Schedule</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#181c1e] dark:text-slate-400 opacity-60 hover:opacity-100 transition-opacity active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+<span class="font-['Inter'] text-[10px] font-bold uppercase tracking-wider mt-1">Preview</span>
+</a>
+</nav>
+</body></html>

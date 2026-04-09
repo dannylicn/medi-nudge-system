@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed": "#a3f69c",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#ebeef0",
+              "on-error-container": "#93000a",
+              "secondary-fixed-dim": "#96ccff",
+              "outline-variant": "#bdc9c8",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed-variant": "#005312",
+              "tertiary-fixed-dim": "#88d982",
+              "secondary-fixed": "#cee5ff",
+              "on-secondary-fixed-variant": "#004a75",
+              "inverse-primary": "#76d6d5",
+              "surface-container-highest": "#e0e3e5",
+              "primary-fixed": "#93f2f2",
+              "tertiary": "#156820",
+              "on-primary-fixed-variant": "#004f4f",
+              "primary-container": "#008080",
+              "on-tertiary-fixed": "#002204",
+              "secondary-container": "#90c9ff",
+              "secondary": "#206393",
+              "surface-bright": "#f7fafc",
+              "inverse-surface": "#2d3133",
+              "surface": "#f7fafc",
+              "on-primary-container": "#e3fffe",
+              "on-error": "#ffffff",
+              "surface-variant": "#e0e3e5",
+              "on-tertiary-container": "#ebffe3",
+              "on-secondary-fixed": "#001d32",
+              "on-primary-fixed": "#002020",
+              "primary-fixed-dim": "#76d6d5",
+              "on-surface": "#181c1e",
+              "on-secondary": "#ffffff",
+              "surface-tint": "#006a6a",
+              "error": "#ba1a1a",
+              "background": "#f7fafc",
+              "inverse-on-surface": "#eef1f3",
+              "surface-dim": "#d7dadc",
+              "on-background": "#181c1e",
+              "primary": "#006565",
+              "surface-container-high": "#e5e9eb",
+              "surface-container-low": "#f1f4f6",
+              "outline": "#6e7979",
+              "on-surface-variant": "#3e4949",
+              "on-secondary-container": "#035584",
+              "error-container": "#ffdad6",
+              "tertiary-container": "#338236"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .chat-container {
+            height: calc(100vh - 380px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body text-on-surface">
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 bg-[#f7fafc] dark:bg-slate-900 shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center px-6 h-16 w-full">
+<h1 class="font-headline font-bold text-lg tracking-tight text-[#006565] dark:text-teal-300">Merlion Health</h1>
+<div class="flex gap-4">
+<button class="active:scale-95 duration-200 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="active:scale-95 duration-200 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-20 pb-28 px-4 max-w-md mx-auto space-y-6">
+<!-- Adherence Dashboard Section (Bento Style) -->
+<section class="space-y-4">
+<div class="flex justify-between items-end px-1">
+<h2 class="font-headline font-bold text-xl text-on-surface tracking-tight">Your Health Today</h2>
+<span class="font-label text-label-sm text-outline">Updated 5m ago</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Main Adherence Card -->
+<div class="col-span-2 bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/15 flex items-center justify-between">
+<div class="space-y-1">
+<p class="font-label text-sm text-on-surface-variant font-medium">Weekly Adherence</p>
+<div class="flex items-baseline gap-1">
+<span class="font-headline font-extrabold text-4xl text-primary">95%</span>
+<span class="text-tertiary font-bold text-sm">+2% vs last week</span>
+</div>
+</div>
+<div class="relative h-16 w-16">
+<svg class="h-full w-full transform -rotate-90">
+<circle class="text-surface-container-highest" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="6"></circle>
+<circle class="text-primary-container" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175.9" stroke-dashoffset="8.8" stroke-width="6"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+</div>
+<!-- Secondary Stats -->
+<div class="bg-surface-container-low p-4 rounded-xl space-y-2">
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-lg" data-icon="water_drop">water_drop</span>
+<span class="font-label font-bold text-xs uppercase tracking-wider">Hydration</span>
+</div>
+<p class="font-headline font-bold text-xl text-on-surface">1.2L <span class="text-sm font-normal text-outline">/ 2L</span></p>
+</div>
+<div class="bg-surface-container-low p-4 rounded-xl space-y-2">
+<div class="flex items-center gap-2 text-tertiary">
+<span class="material-symbols-outlined text-lg" data-icon="pill">pill</span>
+<span class="font-label font-bold text-xs uppercase tracking-wider">Meds Today</span>
+</div>
+<p class="font-headline font-bold text-xl text-on-surface">3 <span class="text-sm font-normal text-outline">/ 4 taken</span></p>
+</div>
+</div>
+</section>
+<!-- AI Assistant Chat Interface -->
+<section class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/15 overflow-hidden flex flex-col">
+<div class="bg-primary px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 bg-on-primary-container rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="smart_toy">smart_toy</span>
+</div>
+<div>
+<h3 class="font-headline font-bold text-on-primary text-sm leading-none">Merlion AI</h3>
+<span class="font-label text-[10px] text-on-primary-container/80">Active Support</span>
+</div>
+</div>
+<button class="text-on-primary/70 hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="chat-container overflow-y-auto p-4 space-y-4">
+<!-- AI Message 1 -->
+<div class="flex flex-col items-start max-w-[85%]">
+<div class="bg-surface-container-highest text-on-surface px-4 py-3 rounded-xl rounded-tl-sm text-sm">
+                        Hi Mrs. Tan, it's 8:00 AM. Time for your Amlodipine.
+                    </div>
+<span class="font-label text-[10px] text-outline mt-1 ml-1">8:00 AM</span>
+</div>
+<!-- Patient Reply -->
+<div class="flex flex-col items-end self-end max-w-[85%]">
+<div class="bg-secondary-container text-on-secondary-container px-4 py-3 rounded-xl rounded-tr-sm text-sm font-medium">
+                        Just took it, thanks!
+                    </div>
+<span class="font-label text-[10px] text-outline mt-1 mr-1">8:02 AM</span>
+</div>
+<!-- AI Message 2 -->
+<div class="flex flex-col items-start max-w-[85%]">
+<div class="bg-surface-container-highest text-on-surface px-4 py-3 rounded-xl rounded-tl-sm text-sm">
+                        Great! Remember to drink plenty of water. Anything else I can help with?
+                    </div>
+<span class="font-label text-[10px] text-outline mt-1 ml-1">8:02 AM</span>
+</div>
+</div>
+<!-- Quick Actions -->
+<div class="p-3 border-t border-outline-variant/10">
+<div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+<button class="whitespace-nowrap px-4 py-2 bg-tertiary-container/10 text-tertiary border border-tertiary/20 rounded-full text-xs font-semibold hover:bg-tertiary-container/20 transition-colors">
+                        Ask about side effects
+                    </button>
+<button class="whitespace-nowrap px-4 py-2 bg-secondary-container/10 text-secondary border border-secondary/20 rounded-full text-xs font-semibold hover:bg-secondary-container/20 transition-colors">
+                        Request refill
+                    </button>
+<button class="whitespace-nowrap px-4 py-2 bg-surface-container-high text-on-surface-variant rounded-full text-xs font-semibold">
+                        Symptom check
+                    </button>
+</div>
+<div class="mt-2 flex items-center gap-2">
+<div class="flex-grow relative">
+<input class="w-full bg-surface-container-high border-none rounded-full px-5 py-3 text-sm focus:ring-2 focus:ring-primary-fixed outline-none placeholder:text-outline" placeholder="Message Merlion AI..." type="text"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-on-primary h-8 w-8 rounded-full flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-lg" data-icon="send">send</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg z-50 rounded-t-3xl shadow-[0_-4px_24px_rgba(24,28,30,0.04)] border-t border-[#bdc9c8]/15">
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2 hover:text-[#006565] dark:hover:text-teal-300 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-inter text-[10px] font-semibold">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2 hover:text-[#006565] dark:hover:text-teal-300 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="medication">medication</span>
+<span class="font-inter text-[10px] font-semibold">Meds</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-teal-100 dark:bg-teal-900/50 text-[#006565] dark:text-teal-100 rounded-2xl px-5 py-2 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="forum" style="font-variation-settings: 'FILL' 1;">forum</span>
+<span class="font-inter text-[10px] font-semibold">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2 hover:text-[#006565] dark:hover:text-teal-300 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-inter text-[10px] font-semibold">Profile</span>
+</a>
+</nav>
+</body></html>

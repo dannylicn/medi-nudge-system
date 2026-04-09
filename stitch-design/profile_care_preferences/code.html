@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Merlion Health - Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed": "#a3f69c",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#ebeef0",
+              "on-error-container": "#93000a",
+              "secondary-fixed-dim": "#96ccff",
+              "outline-variant": "#bdc9c8",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed-variant": "#005312",
+              "tertiary-fixed-dim": "#88d982",
+              "secondary-fixed": "#cee5ff",
+              "on-secondary-fixed-variant": "#004a75",
+              "inverse-primary": "#76d6d5",
+              "surface-container-highest": "#e0e3e5",
+              "primary-fixed": "#93f2f2",
+              "tertiary": "#156820",
+              "on-primary-fixed-variant": "#004f4f",
+              "primary-container": "#008080",
+              "on-tertiary-fixed": "#002204",
+              "secondary-container": "#90c9ff",
+              "secondary": "#206393",
+              "surface-bright": "#f7fafc",
+              "inverse-surface": "#2d3133",
+              "surface": "#f7fafc",
+              "on-primary-container": "#e3fffe",
+              "on-error": "#ffffff",
+              "surface-variant": "#e0e3e5",
+              "on-tertiary-container": "#ebffe3",
+              "on-secondary-fixed": "#001d32",
+              "on-primary-fixed": "#002020",
+              "primary-fixed-dim": "#76d6d5",
+              "on-surface": "#181c1e",
+              "on-secondary": "#ffffff",
+              "surface-tint": "#006a6a",
+              "error": "#ba1a1a",
+              "background": "#f7fafc",
+              "inverse-on-surface": "#eef1f3",
+              "surface-dim": "#d7dadc",
+              "on-background": "#181c1e",
+              "primary": "#006565",
+              "surface-container-high": "#e5e9eb",
+              "surface-container-low": "#f1f4f6",
+              "outline": "#6e7979",
+              "on-surface-variant": "#3e4949",
+              "on-secondary-container": "#035584",
+              "error-container": "#ffdad6",
+              "tertiary-container": "#338236"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- Transactional Header: No Nav Shell as per instructions for Onboarding -->
+<header class="sticky top-0 z-40 px-6 pt-8 pb-4 bg-surface/80 backdrop-blur-md">
+<div class="flex items-center justify-between mb-2">
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-surface-container-low text-on-surface-variant active:scale-95 transition-transform">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<div class="flex gap-1.5">
+<div class="h-1.5 w-6 rounded-full bg-primary-container"></div>
+<div class="h-1.5 w-6 rounded-full bg-primary-container"></div>
+<div class="h-1.5 w-6 rounded-full bg-outline-variant/30"></div>
+</div>
+<button class="text-label-sm font-semibold text-primary uppercase tracking-wider">Skip</button>
+</div>
+</header>
+<main class="px-6 pb-32">
+<!-- Hero Section -->
+<section class="mb-10">
+<h1 class="font-headline font-extrabold text-3xl text-on-surface tracking-tight leading-tight mb-3">
+                Setup your care profile
+            </h1>
+<p class="text-on-surface-variant leading-relaxed">
+                Help us personalize Merlion Health to fit your daily needs and safety.
+            </p>
+</section>
+<!-- Identity Verification Section -->
+<section class="mb-10">
+<h2 class="font-headline font-bold text-lg mb-4 text-on-surface">Identity Verification</h2>
+<div class="relative overflow-hidden bg-surface-container-low rounded-3xl p-6 flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/50 group active:bg-surface-container-high transition-colors">
+<div class="w-16 h-16 rounded-full bg-primary-container/10 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary text-3xl">badge</span>
+</div>
+<p class="font-semibold text-on-surface mb-1">Scan NRIC or ID Card</p>
+<p class="text-xs text-on-surface-variant text-center px-4">Place your ID card within the frame. We use this to verify your medical records.</p>
+<div class="mt-6 w-full aspect-[1.586/1] rounded-xl overflow-hidden relative shadow-sm border border-outline-variant/20">
+<img alt="NRIC Placeholder" class="w-full h-full object-cover opacity-40 grayscale" data-alt="Blurred close up of a plastic identification card on a neutral surface with soft clinical studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDr6g7mrhJ1Ij_YMBwqRYBhsHSTM7IoQfDA_TdJ-iAn21lubecSE7MZtMTgIj9z5yctDXjJlsBZ5dEpk6iA1aAVb0Yl4Y-Funai81aivx-LrQlBE3v12-ZUZL579pGCi2Bt6820AdiUxTF17OORZdFhZMtgbMKnKXvuVKJyQIx5KtS4V5pVKdP0H9PS2FXAA6wY5-TWIXnXcZS1zdbajJUtYNlqBMOcvVZRBPc57v4XuC8XjwEQvphKLOfFnfWe9b74mOBPp0orDZo"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-48 h-32 border-2 border-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-4xl animate-pulse">qr_code_scanner</span>
+</div>
+</div>
+</div>
+<button class="mt-4 px-6 py-2 rounded-full bg-primary text-on-primary font-semibold text-sm">Open Camera</button>
+</div>
+</section>
+<!-- Language Preferences -->
+<section class="mb-10">
+<h2 class="font-headline font-bold text-lg mb-4 text-on-surface">Preferred Language</h2>
+<p class="text-sm text-on-surface-variant mb-4">What is your preferred language for reminders and AI support?</p>
+<div class="grid grid-cols-2 gap-3">
+<!-- English - Active State -->
+<label class="relative flex items-center p-4 rounded-2xl bg-teal-50 border-2 border-primary ring-2 ring-primary/10 transition-all cursor-pointer">
+<input checked="" class="hidden" name="language" type="radio" value="english"/>
+<div class="flex flex-col">
+<span class="font-bold text-primary">English</span>
+<span class="text-[10px] text-primary/70">DEFAULT</span>
+</div>
+<span class="material-symbols-outlined absolute top-3 right-3 text-primary text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</label>
+<!-- Mandarin -->
+<label class="relative flex items-center p-4 rounded-2xl bg-surface-container-lowest border-2 border-transparent hover:border-outline-variant transition-all cursor-pointer">
+<input class="hidden" name="language" type="radio" value="mandarin"/>
+<div class="flex flex-col">
+<span class="font-bold text-on-surface">Mandarin</span>
+<span class="text-[10px] text-on-surface-variant">华语</span>
+</div>
+</label>
+<!-- Malay -->
+<label class="relative flex items-center p-4 rounded-2xl bg-surface-container-lowest border-2 border-transparent hover:border-outline-variant transition-all cursor-pointer">
+<input class="hidden" name="language" type="radio" value="malay"/>
+<div class="flex flex-col">
+<span class="font-bold text-on-surface">Malay</span>
+<span class="text-[10px] text-on-surface-variant">Bahasa Melayu</span>
+</div>
+</label>
+<!-- Tamil -->
+<label class="relative flex items-center p-4 rounded-2xl bg-surface-container-lowest border-2 border-transparent hover:border-outline-variant transition-all cursor-pointer">
+<input class="hidden" name="language" type="radio" value="tamil"/>
+<div class="flex flex-col">
+<span class="font-bold text-on-surface">Tamil</span>
+<span class="text-[10px] text-on-surface-variant">தமிழ்</span>
+</div>
+</label>
+</div>
+</section>
+<!-- Caregiver Contact Section -->
+<section class="mb-6">
+<h2 class="font-headline font-bold text-lg mb-4 text-on-surface">Safety Net</h2>
+<div class="bg-surface-container-low rounded-3xl p-6">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container">group</span>
+</div>
+<div>
+<p class="font-semibold text-on-surface">Emergency Caregiver</p>
+<p class="text-xs text-on-surface-variant">Who should we contact if you miss a dose?</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="relative">
+<label class="absolute -top-2 left-3 px-1 bg-surface-container-low text-[10px] font-bold text-primary uppercase tracking-widest">Full Name</label>
+<input class="w-full h-14 bg-surface-container-highest border-none rounded-2xl px-4 pt-2 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 transition-all" placeholder="e.g. Sarah Tan" type="text"/>
+</div>
+<div class="relative">
+<label class="absolute -top-2 left-3 px-1 bg-surface-container-low text-[10px] font-bold text-primary uppercase tracking-widest">Mobile Number</label>
+<div class="flex gap-2">
+<div class="w-20 h-14 bg-surface-container-highest rounded-2xl flex items-center justify-center text-on-surface font-semibold">+65</div>
+<input class="flex-1 h-14 bg-surface-container-highest border-none rounded-2xl px-4 pt-2 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 transition-all" placeholder="8123 4567" type="tel"/>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-white/40 rounded-xl">
+<span class="material-symbols-outlined text-secondary text-sm">info</span>
+<p class="text-[10px] text-on-surface-variant leading-relaxed">By adding a caregiver, they will receive an SMS alert if you fail to confirm medication adherence after 3 reminders.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Bottom Action Bar -->
+<div class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-surface via-surface to-surface/0">
+<button class="w-full h-16 bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold text-lg rounded-full shadow-lg shadow-primary/20 flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
+            Continue to Dashboard
+            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<!-- Background Decorative Elements -->
+<div class="fixed -top-20 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="fixed top-1/2 -left-32 w-80 h-80 bg-secondary/5 rounded-full blur-3xl pointer-events-none"></div>
+</body></html>
