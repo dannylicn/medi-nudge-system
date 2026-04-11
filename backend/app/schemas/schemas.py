@@ -54,6 +54,10 @@ class PatientCreate(BaseModel):
     @field_validator("phone_number")
     @classmethod
     def normalise_phone(cls, v: str) -> str:
+        v = v.strip()
+        # Accept Telegram chat_id (numeric string)
+        if re.match(r"^\d{5,15}$", v):
+            return v
         return validate_e164(v)
 
     @field_validator("language_preference")

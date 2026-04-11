@@ -36,7 +36,7 @@ class TestOcrFlow:
             patient_id=test_patient.id,
             image_path="/tmp/test_scan_c.png",
             image_hash="abc123def456confirm01",
-            source="whatsapp",
+            source="telegram",
             ocr_engine="gpt4o",
             status="review",
         )
@@ -69,7 +69,7 @@ class TestOcrFlow:
             patient_id=test_patient.id,
             image_path="/tmp/test_scan_r.png",
             image_hash="rejecthash9990001xx",
-            source="whatsapp",
+            source="telegram",
             ocr_engine="gpt4o",
             status="review",
         )

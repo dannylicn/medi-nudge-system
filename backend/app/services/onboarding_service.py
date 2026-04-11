@@ -7,17 +7,13 @@ import logging
 from datetime import datetime
 from sqlalchemy.orm import Session
 from app.models.models import Patient, EscalationCase
-from app.services import whatsapp_service, escalation_service
+from app.services import telegram_service, escalation_service
 
 logger = logging.getLogger(__name__)
 
 ONBOARDING_STATES = [
     "invited",
     "consent_pending",
-    "language_confirmed",
-    "medication_capture",
-    "medication_confirm",
-    "preferences",
     "complete",
     "drop_off_recovery",
 ]
@@ -71,7 +67,7 @@ WELCOME_MESSAGES = {
 
 
 def send_invite(db: Session, patient: Patient) -> None:
-    """Send initial WhatsApp invite and set onboarding state."""
+    """Send initial Telegram invite and set onboarding state."""
     lang = patient.language_preference or "en"
     invite_messages = {
         "en": (
@@ -94,7 +90,7 @@ def send_invite(db: Session, patient: Patient) -> None:
         ),
     }
     message = invite_messages.get(lang, invite_messages["en"])
-    whatsapp_service.send_text(
+    telegram_service.send_text(
         db=db, patient_id=patient.id, to_phone=patient.phone_number, body=message
     )
     patient.onboarding_state = "invited"
@@ -110,21 +106,15 @@ def handle_onboarding_reply(db: Session, patient: Patient, text: str) -> None:
         _handle_invite_reply(db, patient, text_lower)
     elif state == "consent_pending":
         _handle_consent_reply(db, patient, text_lower)
-    elif state == "language_confirmed":
-        _handle_language_reply(db, patient, text_lower)
-    elif state in ("medication_capture", "medication_confirm", "preferences"):
-        # Advanced onboarding steps — handled by coordinator offline in v1
-        pass
-    # If state is "complete" — falls through to the main webhook handler
 
 
 def _handle_invite_reply(db: Session, patient: Patient, text: str) -> None:
     if any(k in text for k in ("yes", "ya", "好", "同意", "setuju")):
         patient.onboarding_state = "consent_pending"
         patient.consent_obtained_at = datetime.utcnow()
-        patient.consent_channel = "whatsapp"
+        patient.consent_channel = "telegram"
         db.commit()
-        whatsapp_service.send_text(
+        telegram_service.send_text(
             db=db,
             patient_id=patient.id,
             to_phone=patient.phone_number,
@@ -139,28 +129,10 @@ def _handle_consent_reply(db: Session, patient: Patient, text: str) -> None:
     lang = LANG_MAP.get(text.strip())
     if lang:
         patient.language_preference = lang
-        patient.onboarding_state = "language_confirmed"
-        db.commit()
-        # In v1, coordinator follows up for medication capture
-        welcome = WELCOME_MESSAGES.get(lang, WELCOME_MESSAGES["en"])
-        whatsapp_service.send_text(
-            db=db,
-            patient_id=patient.id,
-            to_phone=patient.phone_number,
-            body=welcome,
-        )
-        patient.onboarding_state = "complete"
-        db.commit()
-
-
-def _handle_language_reply(db: Session, patient: Patient, text: str) -> None:
-    lang = LANG_MAP.get(text.strip())
-    if lang:
-        patient.language_preference = lang
         patient.onboarding_state = "complete"
         db.commit()
         welcome = WELCOME_MESSAGES.get(lang, WELCOME_MESSAGES["en"])
-        whatsapp_service.send_text(
+        telegram_service.send_text(
             db=db,
             patient_id=patient.id,
             to_phone=patient.phone_number,

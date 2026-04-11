@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.models.models import (
     NudgeCampaign, Patient, Medication, CAMPAIGN_VALID_TRANSITIONS,
 )
-from app.services import nudge_generator, whatsapp_service, escalation_service
+from app.services import nudge_generator, telegram_service, escalation_service
 from app.core.config import settings
 
 
@@ -70,7 +70,7 @@ def create_and_send(
     db.refresh(campaign)
 
     # Send
-    out_msg = whatsapp_service.send_text(
+    out_msg = telegram_service.send_text(
         db=db,
         patient_id=patient.id,
         to_phone=patient.phone_number,
@@ -125,7 +125,7 @@ def handle_response(
         patient = db.query(Patient).filter(Patient.id == campaign.patient_id).first()
         if patient:
             ack = nudge_generator.get_safety_ack(patient.language_preference)
-            whatsapp_service.send_text(
+            telegram_service.send_text(
                 db=db, patient_id=patient.id, to_phone=patient.phone_number, body=ack
             )
 
@@ -140,7 +140,7 @@ def handle_response(
         patient = db.query(Patient).filter(Patient.id == campaign.patient_id).first()
         if patient:
             ack = nudge_generator.get_question_ack(patient.language_preference)
-            whatsapp_service.send_text(
+            telegram_service.send_text(
                 db=db, patient_id=patient.id, to_phone=patient.phone_number, body=ack
             )
 

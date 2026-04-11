@@ -182,7 +182,7 @@ class OutboundMessage(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     campaign_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("nudge_campaigns.id"), nullable=True)
     patient_id: Mapped[int] = mapped_column(Integer, ForeignKey("patients.id"), nullable=False)
-    whatsapp_message_id: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    telegram_message_id: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     delivery_mode: Mapped[str] = mapped_column(String(20), default="text", nullable=False)
     audio_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)

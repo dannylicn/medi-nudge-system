@@ -62,7 +62,7 @@ def generate_nudge_message(
     """
     Generate a nudge message. Uses GPT-4o when available; falls back to templates.
     """
-    if settings.OPENAI_API_KEY:
+    if settings.OPENAI_API_KEY or settings.LLM_BASE_URL:
         try:
             return _llm_generate(name, medication, days_overdue, language, attempt, condition)
         except Exception as exc:
@@ -92,14 +92,17 @@ def _llm_generate(
     lang_names = {"en": "English", "zh": "Simplified Chinese", "ms": "Malay", "ta": "Tamil"}
     lang_name = lang_names.get(language, "English")
 
-    client = OpenAI(api_key=settings.OPENAI_API_KEY)
+    client = OpenAI(
+        api_key=settings.OPENAI_API_KEY or "ollama",
+        base_url=settings.LLM_BASE_URL or None,
+    )
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model=settings.LLM_MODEL,
         messages=[
             {
                 "role": "system",
                 "content": (
-                    f"You are a warm, non-judgmental healthcare assistant sending a WhatsApp reminder "
+                    f"You are a warm, non-judgmental healthcare assistant sending a Telegram reminder "
                     f"to a patient in Singapore about their medication refill. "
                     f"Write a short (3-4 sentence) message in {lang_name}. "
                     f"Tone: {tone}. "
@@ -118,7 +121,7 @@ def _llm_generate(
                 ),
             },
         ],
-        max_tokens=200,
+        max_tokens=1024,
         temperature=0.7,
     )
     return response.choices[0].message.content.strip()

@@ -34,6 +34,15 @@ def start_scheduler():
         misfire_grace_time=600,
     )
 
+    # Every 6 hours — check for onboarding drop-offs (no reply for 24h)
+    scheduler.add_job(
+        _run_onboarding_drop_off_check,
+        IntervalTrigger(hours=6),
+        id="onboarding_drop_off_check",
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
+
     scheduler.start()
     logger.info("Scheduler started")
 
@@ -80,3 +89,49 @@ def _run_no_reply_check():
         db.close()
     except Exception as exc:
         logger.error("No-reply check failed: %s", exc)
+
+
+def _run_onboarding_drop_off_check():
+    """Re-invite patients stuck in onboarding (no reply for 24+ hours)."""
+    logger.info("Running onboarding drop-off check ...")
+    try:
+        from app.core.database import SessionLocal
+        from app.models.models import Patient, OutboundMessage
+        from app.services.onboarding_service import handle_drop_off
+
+        db = SessionLocal()
+        threshold = datetime.utcnow() - timedelta(hours=24)
+
+        stale_patients = (
+            db.query(Patient)
+            .filter(
+                Patient.is_active == True,  # noqa: E712
+                Patient.onboarding_state.in_(["invited", "consent_pending"]),
+            )
+            .all()
+        )
+
+        for patient in stale_patients:
+            # Check last outbound message time
+            last_msg = (
+                db.query(OutboundMessage)
+                .filter(OutboundMessage.patient_id == patient.id)
+                .order_by(OutboundMessage.sent_at.desc())
+                .first()
+            )
+            if last_msg and last_msg.sent_at <= threshold:
+                retry_count = (
+                    db.query(OutboundMessage)
+                    .filter(OutboundMessage.patient_id == patient.id)
+                    .count()
+                )
+                try:
+                    handle_drop_off(db, patient, retry_count)
+                except Exception as exc:
+                    logger.error(
+                        "Error handling drop-off for patient %s: %s",
+                        patient.id, exc,
+                    )
+        db.close()
+    except Exception as exc:
+        logger.error("Onboarding drop-off check failed: %s", exc)

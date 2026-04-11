@@ -47,16 +47,16 @@ class TestNudgeCampaignFlow:
         )
         assert resp.status_code == 201, resp.text
 
-    @patch("app.services.whatsapp_service.send_text")
+    @patch("app.services.telegram_service.send_text")
     def test_inbound_confirm_resolves_campaign(self, mock_send, client, auth_headers, db):
-        """Simulate a confirmed inbound WhatsApp reply closing a campaign."""
+        """Simulate a confirmed inbound Telegram reply closing a campaign."""
         from app.models.models import Patient, Medication, PatientMedication, NudgeCampaign
         from datetime import datetime, timezone
 
         # Seed data directly
         patient = Patient(
             full_name="Test Nudge Patient",
-            phone_number="+6591234001",
+            phone_number="91234001",
             language_preference="en",
             risk_level="medium",
             is_active=True,
@@ -96,16 +96,20 @@ class TestNudgeCampaignFlow:
         db.commit()
         db.refresh(campaign)
 
-        # Mock Twilio signature validation to always pass
-        with patch("app.routers.webhook.validate_twilio_signature", return_value=True):
+        # Mock Telegram webhook secret validation to always pass
+        with patch("app.routers.webhook.validate_telegram_token", return_value=True):
             resp = client.post(
-                "/api/webhook/whatsapp",
-                data={
-                    "From": "whatsapp:+6591234001",
-                    "Body": "Yes, taken",
-                    "MessageSid": "SM_test_001",
+                "/api/webhook/telegram",
+                json={
+                    "update_id": 100,
+                    "message": {
+                        "message_id": 1,
+                        "from": {"id": 91234001, "is_bot": False, "first_name": "Test"},
+                        "chat": {"id": 91234001, "type": "private"},
+                        "text": "Yes, taken",
+                    },
                 },
-                headers={"X-Twilio-Signature": "valid"},
+                headers={"X-Telegram-Bot-Api-Secret-Token": "valid"},
             )
         # Should process successfully
         assert resp.status_code in (200, 204)

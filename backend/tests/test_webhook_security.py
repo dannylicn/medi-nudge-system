@@ -1,67 +1,65 @@
 """
 T-50: Webhook security tests.
-- Invalid Twilio signature → 403
-- Valid signature → processes normally
-- Rate limiting headers present
+- Missing/invalid Telegram webhook secret → 403
+- Valid secret → processes normally
 """
 from unittest.mock import patch
 import pytest
-import hmac
-import hashlib
-import base64
+import json
 
 
-def _build_twilio_sig(auth_token: str, url: str, params: dict) -> str:
-    """Compute a valid Twilio HMAC-SHA1 signature."""
-    s = url + "".join(f"{k}{v}" for k, v in sorted(params.items()))
-    mac = hmac.new(auth_token.encode(), s.encode(), hashlib.sha1)
-    return base64.b64encode(mac.digest()).decode()
+WEBHOOK_URL = "/api/webhook/telegram"
+DUMMY_SECRET = "test_telegram_webhook_secret"
 
 
-WEBHOOK_URL = "http://testserver/api/webhook/whatsapp"
-DUMMY_TOKEN = "test_twilio_auth_token"
-FORM_PARAMS = {
-    "From": "whatsapp:+6591234567",
-    "Body": "Yes",
-    "MessageSid": "SM_sec_001",
-}
+def _telegram_update(chat_id: str = "123456789", text: str = "Yes"):
+    """Build a minimal Telegram Update object."""
+    return {
+        "update_id": 100,
+        "message": {
+            "message_id": 1,
+            "from": {"id": int(chat_id), "is_bot": False, "first_name": "Test"},
+            "chat": {"id": int(chat_id), "type": "private"},
+            "text": text,
+        },
+    }
 
 
 class TestWebhookSecurity:
-    def test_invalid_signature_returns_403(self, client):
-        """Requests with an invalid Twilio signature must be rejected with 403."""
+    def test_invalid_secret_returns_403(self, client):
+        """Requests with an invalid Telegram webhook secret must be rejected with 403."""
         resp = client.post(
-            "/api/webhook/whatsapp",
-            data=FORM_PARAMS,
-            headers={"X-Twilio-Signature": "INVALID_SIGNATURE"},
+            WEBHOOK_URL,
+            json=_telegram_update(),
+            headers={"X-Telegram-Bot-Api-Secret-Token": "INVALID"},
         )
         assert resp.status_code == 403, (
-            f"Expected 403 for invalid signature, got {resp.status_code}: {resp.text}"
+            f"Expected 403 for invalid secret, got {resp.status_code}: {resp.text}"
         )
 
-    def test_missing_signature_returns_403(self, client):
-        """Requests without X-Twilio-Signature header must be rejected."""
+    def test_missing_secret_returns_403(self, client):
+        """Requests without X-Telegram-Bot-Api-Secret-Token header must be rejected."""
         resp = client.post(
-            "/api/webhook/whatsapp",
-            data=FORM_PARAMS,
+            WEBHOOK_URL,
+            json=_telegram_update(),
         )
         assert resp.status_code in (403, 422), (
-            f"Expected 403/422 for missing signature, got {resp.status_code}"
+            f"Expected 403/422 for missing secret, got {resp.status_code}"
         )
 
-    @patch("app.services.whatsapp_service.send_text")
-    def test_valid_signature_processes(self, mock_send, client, db):
-        """A request with a passing signature (mocked validation) is processed."""
+    @patch("app.services.telegram_service.send_text")
+    def test_valid_secret_processes(self, mock_send, client, db):
+        """A request with a valid webhook secret (mocked validation) is processed."""
         from app.models.models import Patient
 
-        # Ensure patient exists for the FROM number
+        chat_id = "123456789"
         existing = db.query(Patient).filter(
-            Patient.phone_number == "+6591234567"
+            Patient.phone_number == chat_id
         ).first()
         if not existing:
             p = Patient(
                 full_name="Webhook Test Patient",
-                phone_number="+6591234567",
+                phone_number=chat_id,
                 language_preference="en",
                 risk_level="low",
                 is_active=True,
@@ -70,28 +68,16 @@ class TestWebhookSecurity:
             db.add(p)
             db.commit()
 
-        with patch("app.routers.webhook.validate_twilio_signature", return_value=True):
+        with patch("app.routers.webhook.validate_telegram_token", return_value=True):
             resp = client.post(
-                "/api/webhook/whatsapp",
-                data=FORM_PARAMS,
-                headers={"X-Twilio-Signature": "valid"},
+                WEBHOOK_URL,
+                json=_telegram_update(chat_id=chat_id),
+                headers={"X-Telegram-Bot-Api-Secret-Token": "valid"},
             )
 
         assert resp.status_code in (200, 204), (
-            f"Expected 200/204 for valid signature, got {resp.status_code}: {resp.text}"
+            f"Expected 200/204 for valid secret, got {resp.status_code}: {resp.text}"
         )
-
-    def test_status_callback_validates_signature(self, client):
-        """Status callback also validates Twilio signature (consistent security)."""
-        resp = client.post(
-            "/api/webhook/whatsapp/status",
-            data={
-                "MessageSid": "SM_status_001",
-                "MessageStatus": "delivered",
-            },
-        )
-        # Should be 403 (signature required) — consistent with main webhook security
-        assert resp.status_code == 403, "Status callback should also validate signature"
 
 
 class TestWebhookNricNotLeaked:

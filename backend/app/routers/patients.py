@@ -43,7 +43,7 @@ def create_patient(
     try:
         send_invite(db, patient)
     except Exception:
-        pass  # Don't fail patient creation if WhatsApp is unavailable
+        pass  # Don't fail patient creation if Telegram is unavailable
 
     return patient
 

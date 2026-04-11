@@ -10,7 +10,7 @@ import pytest
 
 
 class TestEscalationTriggers:
-    @patch("app.services.whatsapp_service.send_text")
+    @patch("app.services.telegram_service.send_text")
     def test_side_effect_reply_triggers_escalation(self, mock_send, client, auth_headers, db):
         """A 'side_effect' classified reply must open an EscalationCase."""
         from app.models.models import (
@@ -19,7 +19,7 @@ class TestEscalationTriggers:
 
         patient = Patient(
             full_name="Side Effect Patient",
-            phone_number="+6591230100",
+            phone_number="91230100",
             language_preference="en",
             risk_level="medium",
             is_active=True,
@@ -62,15 +62,19 @@ class TestEscalationTriggers:
             EscalationCase.patient_id == patient.id
         ).count()
 
-        with patch("app.routers.webhook.validate_twilio_signature", return_value=True):
+        with patch("app.routers.webhook.validate_telegram_token", return_value=True):
             resp = client.post(
-                "/api/webhook/whatsapp",
-                data={
-                    "From": f"whatsapp:{patient.phone_number}",
-                    "Body": "I feel very dizzy and vomiting",
-                    "MessageSid": "SM_side_eff_001",
+                "/api/webhook/telegram",
+                json={
+                    "update_id": 200,
+                    "message": {
+                        "message_id": 2,
+                        "from": {"id": int(patient.phone_number), "is_bot": False, "first_name": "Test"},
+                        "chat": {"id": int(patient.phone_number), "type": "private"},
+                        "text": "I feel very dizzy and vomiting",
+                    },
                 },
-                headers={"X-Twilio-Signature": "valid"},
+                headers={"X-Telegram-Bot-Api-Secret-Token": "valid"},
             )
 
         assert resp.status_code in (200, 204)
@@ -127,7 +131,7 @@ class TestEscalationTriggers:
         )
         assert case.priority in ("high", "urgent")
 
-    @patch("app.services.whatsapp_service.send_text")
+    @patch("app.services.telegram_service.send_text")
     def test_escalation_routes_list(self, mock_send, client, auth_headers, db):
         """GET /api/escalations returns sorted cases with correct schema."""
         resp = client.get("/api/escalations", headers=auth_headers)
@@ -167,7 +171,7 @@ class TestEscalationTriggers:
 
 
 class TestRefillGapEscalation:
-    @patch("app.services.whatsapp_service.send_text")
+    @patch("app.services.telegram_service.send_text")
     def test_escalation_days_threshold(self, mock_send, db):
         """detect_and_trigger should escalate when days_overdue >= ESCALATION_DAYS."""
         from app.models.models import Patient, Medication, PatientMedication

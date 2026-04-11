@@ -113,7 +113,7 @@ def ingest_image(
 
 def _run_ocr(image_bytes: bytes) -> tuple[dict, str]:
     """Try GPT-4o Vision; fall back to Tesseract."""
-    if settings.OPENAI_API_KEY:
+    if settings.OPENAI_API_KEY or settings.LLM_BASE_URL:
         try:
             return _gpt4o_ocr(image_bytes), "gpt4o_vision"
         except Exception as exc:
@@ -126,7 +126,10 @@ def _gpt4o_ocr(image_bytes: bytes) -> dict:
     from openai import OpenAI
 
     b64 = base64.b64encode(image_bytes).decode("utf-8")
-    client = OpenAI(api_key=settings.OPENAI_API_KEY)
+    client = OpenAI(
+        api_key=settings.OPENAI_API_KEY or "ollama",
+        base_url=settings.LLM_BASE_URL or None,
+    )
 
     system_prompt = (
         "You are a pharmacy data extraction assistant. Extract structured fields from the prescription "
@@ -138,7 +141,7 @@ def _gpt4o_ocr(image_bytes: bytes) -> dict:
     )
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model=settings.LLM_MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
             {
@@ -151,7 +154,7 @@ def _gpt4o_ocr(image_bytes: bytes) -> dict:
                 ],
             },
         ],
-        max_tokens=600,
+        max_tokens=4096,
         response_format={"type": "json_object"},
     )
     text = response.choices[0].message.content

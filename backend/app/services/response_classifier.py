@@ -1,5 +1,5 @@
 """
-Classifies inbound WhatsApp replies into response types.
+Classifies inbound Telegram replies into response types.
 Uses keyword/pattern matching; defaults to 'question' for unrecognised messages.
 """
 import re

@@ -4,7 +4,7 @@
 
 **Medi-Nudge** is a personalised, automated medication adherence system targeting chronic disease patients in Singapore. It addresses the ~50% non-adherence rate among patients with diabetes, hypertension, and hyperlipidemia — a key gap in MOH's Healthier SG strategy.
 
-The system uses refill dispensing data and patient behaviour signals to send timely, context-aware nudges via **WhatsApp** (the dominant channel in Singapore), with escalation to care coordinators when needed. Beyond nudges, the channel supports two-way interactions: vitals collection, symptom check-ins, side effect reporting, appointment reminders, refill coordination, lab result notifications, caregiver loops, and conversational Q&A.
+The system uses refill dispensing data and patient behaviour signals to send timely, context-aware nudges via **Telegram** (free Bot API, zero per-message cost), with escalation to care coordinators when needed. Beyond nudges, the channel supports two-way interactions: vitals collection, symptom check-ins, side effect reporting, appointment reminders, refill coordination, lab result notifications, caregiver loops, and conversational Q&A.
 
 **Primary users:**
 - Patients with chronic conditions (diabetes, hypertension, hyperlipidemia)
@@ -26,7 +26,7 @@ The system uses refill dispensing data and patient behaviour signals to send tim
 | LLM | OpenAI GPT-4o | Multilingual nudge generation; template fallback when no API key |
 | VLM / OCR | GPT-4o Vision (primary), Tesseract (fallback) | Prescription / medicine label extraction |
 | Voice TTS | ElevenLabs API | Voice cloning from ~60–90s donor sample; multilingual |
-| Messaging | Twilio WhatsApp Business API | Text + audio voice note attachments |
+| Messaging | Telegram Bot API | Free; text + photo + inline keyboards; via httpx |
 | Auth | JWT (care team login) | Minimal viable for v1 |
 
 ### Database
@@ -65,7 +65,7 @@ Connection is driven entirely by the `DATABASE_URL` environment variable — no 
 
 - **Service layer pattern**: Route handlers are thin — all business logic lives in `app/services/`. Routes only validate input, call a service function, and return the response.
 - **Repository pattern (optional for prod)**: Database queries are encapsulated; direct SQLAlchemy session usage is acceptable in v1 services.
-- **Event-driven for messaging**: The scheduler triggers `nudge_service.py` which calls `whatsapp_service.py`. Inbound webhook events are dispatched through a central `webhook_router.py` → `response_classifier.py` → appropriate handler.
+- **Event-driven for messaging**: The scheduler triggers `nudge_service.py` which calls `telegram_service.py`. Inbound webhook events are dispatched through a central `webhook_router.py` → `response_classifier.py` → appropriate handler.
 - **State machines for core entities**: `NudgeCampaign`, `EscalationCase`, `PrescriptionScan`, and `OutboundMessage` all follow explicit status state machines. Never update status by arbitrary string assignment — use defined transition helpers.
 - **LLM with template fallback**: Every LLM call has a non-LLM fallback path. The system must be partially functional with no OpenAI API key.
 - **Soft deletes**: Use `is_active = False` rather than `DELETE` for `Patient`, `PatientMedication`, and `VoiceProfile` records.
@@ -85,9 +85,8 @@ Connection is driven entirely by the `DATABASE_URL` environment variable — no 
 DATABASE_URL          # SQLite for dev; PostgreSQL URL for prod
 OPENAI_API_KEY        # Optional; system degrades gracefully to templates
 ELEVENLABS_API_KEY    # Required for voice nudge feature
-TWILIO_ACCOUNT_SID    # Twilio credentials
-TWILIO_AUTH_TOKEN
-TWILIO_WHATSAPP_FROM  # e.g. whatsapp:+14155238886
+TELEGRAM_BOT_TOKEN    # Telegram bot token from @BotFather
+TELEGRAM_WEBHOOK_SECRET  # Secret token for webhook validation
 JWT_SECRET_KEY        # For care team auth
 WARNING_DAYS          # Default 3 — days overdue before first nudge
 ESCALATION_DAYS       # Default 14 — days overdue before auto-escalation
@@ -98,7 +97,7 @@ MAX_NUDGE_ATTEMPTS    # Default 3
 
 - Unit tests for service-layer logic (nudge generation, response classification, OCR extraction parsing).
 - Integration tests for API routes using FastAPI `TestClient` with an in-memory SQLite database.
-- Mock all external APIs (Twilio, OpenAI, ElevenLabs) in tests — never call real APIs in CI.
+- Mock all external APIs (Telegram, OpenAI, ElevenLabs) in tests — never call real APIs in CI.
 - Test state machine transitions explicitly — each valid and invalid transition.
 
 ### Git Workflow
@@ -167,7 +166,7 @@ Fields extracted by VLM with `confidence < 0.75` must be flagged for human revie
 
 ### Technical
 - The system must degrade gracefully when `OPENAI_API_KEY` is unset — fall back to template-based nudge messages
-- Twilio webhook endpoint must validate the `X-Twilio-Signature` header on every inbound request (HMAC-SHA1)
+- Telegram webhook endpoint must validate the `X-Telegram-Bot-Api-Secret-Token` header on every inbound request
 - Audio files cached as `.ogg` and keyed by internal IDs only — never by patient name or NRIC
 - Maximum prescription image upload size: 10 MB; accepted formats: JPEG, PNG, WEBP, HEIC (converted to JPEG server-side)
 
@@ -177,7 +176,7 @@ Fields extracted by VLM with `confidence < 0.75` must be flagged for human revie
 
 | Service | Purpose | Fallback |
 |---|---|---|
-| **Twilio WhatsApp Business API** | Send/receive WhatsApp messages and audio notes | None — core channel |
+| **Telegram Bot API** | Send/receive Telegram messages and photos | None — core channel |
 | **OpenAI GPT-4o** | LLM nudge generation + Vision OCR for prescriptions | Template fallback for nudges; Tesseract for OCR |
 | **ElevenLabs API** | Voice cloning + TTS for loved-one voice nudges | Feature disabled; text nudge only |
 | **Tesseract OCR** | Fallback OCR for structured typed labels | Only used when GPT-4o Vision unavailable |
