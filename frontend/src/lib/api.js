@@ -36,16 +36,27 @@ export const createPatient = (data) => api.post("/api/patients", data);
 export const updatePatient = (id, data) => api.patch(`/api/patients/${id}`, data);
 export const deletePatient = (id) => api.delete(`/api/patients/${id}`);
 
-// Medications
+// Medication catalog
+export const getMedications = () => api.get("/api/medications");
+export const createMedication = (data) => api.post("/api/medications", data);
+
+// Patient medications
 export const getPatientMedications = (patientId) =>
   api.get(`/api/patients/${patientId}/medications`);
+export const assignMedication = (patientId, data) =>
+  api.post(`/api/patients/${patientId}/medications`, data);
 
 // Dispensing records
-export const getDispensingRecords = (patientMedId) =>
-  api.get(`/api/patient-medications/${patientMedId}/dispensing-records`);
+export const getDispensingRecords = (patientId) =>
+  api.get(`/api/patients/${patientId}/dispensing-records`);
+export const createDispensingRecord = (data) =>
+  api.post("/api/dispensing-records", data);
+
+// Conditions (with medication mappings)
+export const getConditions = () => api.get("/api/conditions");
 
 // Nudge campaigns
-export const getNudgeCampaigns = (params) => api.get("/api/analytics/campaigns", { params });
+export const getNudgeCampaigns = (params) => api.get("/api/nudge-campaigns", { params });
 
 // Escalations
 export const getEscalations = (params) => api.get("/api/escalations", { params });

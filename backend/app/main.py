@@ -9,7 +9,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from app.core.scheduler import start_scheduler, stop_scheduler
-from app.routers import auth, patients, medications, escalations, prescriptions, webhook, analytics
+from app.routers import auth, patients, medications, escalations, prescriptions, webhook, analytics, conditions
 from app.core.config import settings
 
 # Create media storage directory
@@ -51,6 +51,7 @@ app.include_router(escalations.router)
 app.include_router(prescriptions.router)
 app.include_router(webhook.router)
 app.include_router(analytics.router)
+app.include_router(conditions.router)
 
 
 @app.get("/health")

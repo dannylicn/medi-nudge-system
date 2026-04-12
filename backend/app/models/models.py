@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Optional
 from sqlalchemy import (
     Boolean, DateTime, Float, ForeignKey, Integer,
-    JSON, String, Text, func,
+    JSON, String, Text, UniqueConstraint, func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
@@ -45,6 +45,33 @@ class Patient(Base):
     nudge_campaigns: Mapped[list["NudgeCampaign"]] = relationship("NudgeCampaign", back_populates="patient")
     escalation_cases: Mapped[list["EscalationCase"]] = relationship("EscalationCase", back_populates="patient")
     prescription_scans: Mapped[list["PrescriptionScan"]] = relationship("PrescriptionScan", back_populates="patient")
+
+
+# ---------------------------------------------------------------------------
+# Condition catalog & condition → medication mapping
+# ---------------------------------------------------------------------------
+
+class Condition(Base):
+    __tablename__ = "conditions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+
+    medications: Mapped[list["ConditionMedication"]] = relationship("ConditionMedication", back_populates="condition")
+
+
+class ConditionMedication(Base):
+    __tablename__ = "condition_medications"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    condition_id: Mapped[int] = mapped_column(Integer, ForeignKey("conditions.id"), nullable=False)
+    medication_id: Mapped[int] = mapped_column(Integer, ForeignKey("medications.id"), nullable=False)
+
+    condition: Mapped["Condition"] = relationship("Condition", back_populates="medications")
+    medication: Mapped["Medication"] = relationship("Medication")
+
+    __table_args__ = (UniqueConstraint("condition_id", "medication_id"),)
 
 
 # ---------------------------------------------------------------------------

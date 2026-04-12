@@ -200,6 +200,27 @@ class DispensingRecordOut(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Condition & condition-medication mapping
+# ---------------------------------------------------------------------------
+
+class ConditionOut(BaseModel):
+    id: int
+    name: str
+    medications: list[MedicationOut] = []
+
+    class Config:
+        from_attributes = True
+
+
+class ConditionCreate(BaseModel):
+    name: str
+
+
+class ConditionMedicationAdd(BaseModel):
+    medication_id: int
+
+
+# ---------------------------------------------------------------------------
 # NudgeCampaign
 # ---------------------------------------------------------------------------
 

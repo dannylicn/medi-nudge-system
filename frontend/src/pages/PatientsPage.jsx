@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getPatients, createPatient } from "../lib/api";
+import { getPatients, createPatient, getConditions } from "../lib/api";
 
 const RISK_CHIP = {
   high: "bg-error-container text-on-error-container",
@@ -20,9 +20,15 @@ export default function PatientsPage() {
     full_name: "",
     phone_number: "",
     language_preference: "en",
+    conditions: [],
   });
   const [enrolling, setEnrolling] = useState(false);
+  const [conditionsList, setConditionsList] = useState([]);
   const PAGE_SIZE = 20;
+
+  useEffect(() => {
+    getConditions().then(({ data }) => setConditionsList(data)).catch(() => {});
+  }, []);
 
   const fetchPatients = async () => {
     setLoading(true);
@@ -57,7 +63,7 @@ export default function PatientsPage() {
     try {
       await createPatient(newPatient);
       setShowEnrol(false);
-      setNewPatient({ full_name: "", phone_number: "", language_preference: "en" });
+      setNewPatient({ full_name: "", phone_number: "", language_preference: "en", conditions: [] });
       fetchPatients();
     } catch {
       // leave form open
@@ -228,6 +234,27 @@ export default function PatientsPage() {
                   <option value="ms">Malay</option>
                   <option value="ta">Tamil</option>
                 </select>
+              </div>
+              <div>
+                <label className="block font-body text-xs font-medium text-on-surface/70 mb-1.5">Conditions</label>
+                <div className="grid grid-cols-2 gap-1 max-h-40 overflow-y-auto rounded-xl bg-surface-container-highest p-2.5">
+                  {conditionsList.map((c) => (
+                    <label key={c.id} className="flex items-center gap-2 cursor-pointer py-0.5 px-1 rounded-lg hover:bg-surface-container-low">
+                      <input
+                        type="checkbox"
+                        checked={newPatient.conditions.includes(c.name)}
+                        onChange={() => setNewPatient((prev) => ({
+                          ...prev,
+                          conditions: prev.conditions.includes(c.name)
+                            ? prev.conditions.filter((x) => x !== c.name)
+                            : [...prev.conditions, c.name],
+                        }))}
+                        className="accent-primary w-3.5 h-3.5"
+                      />
+                      <span className="font-body text-xs text-on-surface">{c.name}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
               <div className="flex gap-3 pt-2">
                 <button

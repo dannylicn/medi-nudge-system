@@ -3,6 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 
 const NAV = [
   { label: "Patients", to: "/patients", icon: "👥" },
+  { label: "Medications", to: "/medications", icon: "💊" },
   { label: "Escalations", to: "/escalations", icon: "🚨" },
   { label: "OCR Review", to: "/ocr-review", icon: "📷" },
   { label: "Analytics", to: "/analytics", icon: "📊" },

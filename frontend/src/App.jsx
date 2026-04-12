@@ -7,6 +7,7 @@ import PatientDetailPage from "./pages/PatientDetailPage";
 import EscalationsPage from "./pages/EscalationsPage";
 import OcrReviewPage from "./pages/OcrReviewPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import MedicationsPage from "./pages/MedicationsPage";
 
 function RequireAuth({ children }) {
   const { user } = useAuth();
@@ -26,6 +27,7 @@ function AppRoutes() {
                 <Route path="/" element={<Navigate to="/patients" replace />} />
                 <Route path="/patients" element={<PatientsPage />} />
                 <Route path="/patients/:id" element={<PatientDetailPage />} />
+                <Route path="/medications" element={<MedicationsPage />} />
                 <Route path="/escalations" element={<EscalationsPage />} />
                 <Route path="/ocr-review" element={<OcrReviewPage />} />
                 <Route path="/analytics" element={<AnalyticsPage />} />
