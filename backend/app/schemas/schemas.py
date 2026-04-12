@@ -157,6 +157,8 @@ class PatientMedicationCreate(BaseModel):
     medication_id: int
     dosage: Optional[str] = None
     refill_interval_days: Optional[int] = None
+    frequency: str = "once_daily"
+    reminder_times: Optional[list[str]] = None  # ["08:00"] or ["08:00", "20:00"] SGT
 
 
 class PatientMedicationOut(BaseModel):
@@ -165,6 +167,8 @@ class PatientMedicationOut(BaseModel):
     medication_id: int
     dosage: Optional[str]
     refill_interval_days: Optional[int]
+    frequency: str
+    reminder_times: Optional[list[str]]
     is_active: bool
     medication: Optional[MedicationOut] = None
 

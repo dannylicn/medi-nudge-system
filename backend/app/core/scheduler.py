@@ -43,6 +43,15 @@ def start_scheduler():
         misfire_grace_time=3600,
     )
 
+    # Every 30 minutes — send medication reminders based on each patient's schedule (SGT)
+    scheduler.add_job(
+        _run_daily_medication_reminder,
+        IntervalTrigger(minutes=30),
+        id="daily_medication_reminder",
+        replace_existing=True,
+        misfire_grace_time=300,
+    )
+
     scheduler.start()
     logger.info("Scheduler started")
 
@@ -135,3 +144,14 @@ def _run_onboarding_drop_off_check():
         db.close()
     except Exception as exc:
         logger.error("Onboarding drop-off check failed: %s", exc)
+
+
+def _run_daily_medication_reminder():
+    """Send scheduled medication-taking reminders based on each patient's frequency & times."""
+    logger.info("Running scheduled medication reminder ...")
+    try:
+        from app.services.daily_reminder_service import send_scheduled_reminders
+        results = send_scheduled_reminders()
+        logger.info("Medication reminder results: %s", results)
+    except Exception as exc:
+        logger.error("Medication reminder failed: %s", exc)

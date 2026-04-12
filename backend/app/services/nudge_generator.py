@@ -133,3 +133,76 @@ def get_safety_ack(language: str) -> str:
 
 def get_question_ack(language: str) -> str:
     return QUESTION_ACK.get(language, QUESTION_ACK["en"])
+
+
+# ---------------------------------------------------------------------------
+# Daily medication-taking reminders
+# ---------------------------------------------------------------------------
+
+REMINDER_TEMPLATES: dict[str, str] = {
+    "en": "Good morning {name} 👋 Friendly reminder to take your {medications} today. Staying consistent helps manage your health! Reply TAKEN when done.",
+    "zh": "早上好 {name} 👋 温馨提醒：请记得今天服用 {medications}。坚持服药有助于控制您的健康！服用后请回复「已服」。",
+    "ms": "Selamat pagi {name} 👋 Peringatan mesra untuk mengambil {medications} anda hari ini. Konsisten membantu menjaga kesihatan! Balas SUDAH selepas mengambil.",
+    "ta": "காலை வணக்கம் {name} 👋 இன்று உங்கள் {medications} மருந்தை எடுக்க நினைவூட்டல். தொடர்ச்சியாக எடுப்பது ஆரோக்கியத்திற்கு உதவும்! எடுத்த பிறகு TAKEN என பதிலளிக்கவும்.",
+}
+
+
+def generate_daily_reminder(
+    name: str,
+    medications: list[str],
+    language: str,
+    conditions: list[str] | None = None,
+) -> str:
+    """Generate a daily medication-taking reminder message."""
+    med_list = ", ".join(medications)
+
+    if settings.OPENAI_API_KEY or settings.LLM_BASE_URL:
+        try:
+            return _llm_daily_reminder(name, med_list, language, conditions)
+        except Exception as exc:
+            logger.warning("LLM daily reminder failed, falling back to template: %s", exc)
+
+    lang = language if language in REMINDER_TEMPLATES else "en"
+    return REMINDER_TEMPLATES[lang].format(name=name, medications=med_list)
+
+
+def _llm_daily_reminder(
+    name: str, medications: str, language: str, conditions: list[str] | None
+) -> str:
+    from openai import OpenAI
+
+    lang_names = {"en": "English", "zh": "Simplified Chinese", "ms": "Malay", "ta": "Tamil"}
+    lang_name = lang_names.get(language, "English")
+    cond_str = ", ".join(conditions) if conditions else "chronic conditions"
+
+    client = OpenAI(
+        api_key=settings.OPENAI_API_KEY or "ollama",
+        base_url=settings.LLM_BASE_URL or None,
+    )
+    response = client.chat.completions.create(
+        model=settings.LLM_MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    f"You are a warm, caring healthcare assistant sending a daily Telegram reminder "
+                    f"to a patient in Singapore to take their prescribed medications. "
+                    f"Write a short (2-3 sentences) in {lang_name}. "
+                    f"Be encouraging but not preachy. Vary your greeting style. "
+                    f"End with a prompt to reply TAKEN when done. "
+                    f"Do not use medical jargon. Be culturally sensitive."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Patient name: {name}\n"
+                    f"Medications: {medications}\n"
+                    f"Conditions: {cond_str}"
+                ),
+            },
+        ],
+        max_tokens=512,
+        temperature=0.8,
+    )
+    return response.choices[0].message.content.strip()

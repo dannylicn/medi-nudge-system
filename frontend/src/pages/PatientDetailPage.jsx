@@ -37,7 +37,7 @@ export default function PatientDetailPage() {
   // Assign medication
   const [showAssignMed, setShowAssignMed] = useState(false);
   const [catalogMeds, setCatalogMeds] = useState([]);
-  const [assignForm, setAssignForm] = useState({ medication_id: "", dosage: "", refill_interval_days: "" });
+  const [assignForm, setAssignForm] = useState({ medication_id: "", dosage: "", refill_interval_days: "", frequency: "once_daily", reminder_times: "" });
   const [assigningSaving, setAssigningSaving] = useState(false);
 
   // Dispensing
@@ -128,7 +128,7 @@ export default function PatientDetailPage() {
       });
       setCatalogMeds(sorted);
     } catch { /* */ }
-    setAssignForm({ medication_id: "", dosage: "", refill_interval_days: "" });
+    setAssignForm({ medication_id: "", dosage: "", refill_interval_days: "", frequency: "once_daily", reminder_times: "" });
     setShowAssignMed(true);
   };
   const handleAssignMed = async (e) => {
@@ -139,6 +139,10 @@ export default function PatientDetailPage() {
         medication_id: Number(assignForm.medication_id),
         dosage: assignForm.dosage || null,
         refill_interval_days: assignForm.refill_interval_days ? Number(assignForm.refill_interval_days) : null,
+        frequency: assignForm.frequency,
+        reminder_times: assignForm.reminder_times
+          ? assignForm.reminder_times.split(",").map((t) => t.trim()).filter(Boolean)
+          : null,
       });
       setShowAssignMed(false);
       await reload();
@@ -304,7 +308,7 @@ export default function PatientDetailPage() {
                     {m.medication?.brand_name || m.medication?.generic_name}
                   </p>
                   <p className="font-body text-xs text-on-surface/50 mt-0.5">
-                    {m.dosage_instructions} · {m.supply_days_per_dispense}d supply
+                    {m.dosage || "—"} · {m.frequency?.replace(/_/g, " ")} · refill {m.refill_interval_days ?? "—"}d
                   </p>
                 </div>
                 <div className="text-right font-body text-xs text-on-surface/50">
@@ -416,6 +420,34 @@ export default function PatientDetailPage() {
                   onChange={(e) => setAssignForm((p) => ({ ...p, refill_interval_days: e.target.value }))}
                   className="w-full bg-surface-container-highest rounded-xl px-3.5 py-2.5 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed"
                 />
+              </div>
+              <div>
+                <label className="block font-body text-xs font-medium text-on-surface/70 mb-1.5">Frequency</label>
+                <select
+                  value={assignForm.frequency}
+                  onChange={(e) => setAssignForm((p) => ({ ...p, frequency: e.target.value }))}
+                  className="w-full bg-surface-container-highest rounded-xl px-3.5 py-2.5 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed"
+                >
+                  <option value="once_daily">Once daily</option>
+                  <option value="twice_daily">Twice daily</option>
+                  <option value="three_times_daily">Three times daily</option>
+                  <option value="every_other_day">Every other day</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="as_needed">As needed</option>
+                </select>
+              </div>
+              <div>
+                <label className="block font-body text-xs font-medium text-on-surface/70 mb-1.5">
+                  Reminder Times (SGT) — comma-separated
+                </label>
+                <input
+                  type="text"
+                  placeholder={assignForm.frequency === "twice_daily" ? "08:00, 20:00" : "08:00"}
+                  value={assignForm.reminder_times}
+                  onChange={(e) => setAssignForm((p) => ({ ...p, reminder_times: e.target.value }))}
+                  className="w-full bg-surface-container-highest rounded-xl px-3.5 py-2.5 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed"
+                />
+                <p className="font-body text-xs text-on-surface/40 mt-1">Leave blank to use frequency defaults</p>
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={assigningSaving} className="flex-1 bg-gradient-to-br from-primary to-primary-container text-white rounded-pill py-2.5 font-body text-sm font-semibold disabled:opacity-60">

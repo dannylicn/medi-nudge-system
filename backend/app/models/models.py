@@ -104,6 +104,9 @@ class PatientMedication(Base):
     medication_id: Mapped[int] = mapped_column(Integer, ForeignKey("medications.id"), nullable=False)
     dosage: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     refill_interval_days: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    frequency: Mapped[str] = mapped_column(String(50), default="once_daily", nullable=False)
+    # JSON list of HH:MM strings in SGT, e.g. ["08:00"] or ["08:00", "20:00"]
+    reminder_times: Mapped[Optional[list]] = mapped_column(JSON, default=list, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
 
