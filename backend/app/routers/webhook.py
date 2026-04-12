@@ -7,10 +7,10 @@ from fastapi import APIRouter, Request, Response, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.config import settings
-from app.models.models import Patient, NudgeCampaign, OutboundMessage
+from app.models.models import Patient, NudgeCampaign, OutboundMessage, PatientMedication
 from app.services.response_classifier import classify_response
 from app.services import nudge_campaign_service, onboarding_service, ocr_service
-from app.services.telegram_service import validate_telegram_token
+from app.services.telegram_service import validate_telegram_token, send_text
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +92,11 @@ async def inbound_telegram(
     else:
         from app.services import escalation_service
         from app.services.nudge_generator import get_safety_ack, get_question_ack
-        from app.services.telegram_service import send_text
 
-        if response_type == "side_effect":
+        if response_type == "confirmed" or text.strip().upper() in ("TAKEN", "已服", "SUDAH"):
+            # Patient acknowledging a daily reminder — reset missed-dose streak
+            _handle_taken(db, patient)
+        elif response_type == "side_effect":
             escalation_service.create_escalation(
                 db=db, patient_id=patient.id, reason="side_effect", priority="urgent"
             )
@@ -159,3 +161,31 @@ def _send_reply(chat_id: str, text: str) -> None:
         )
     except Exception:
         pass
+
+
+TAKEN_ACK: dict[str, str] = {
+    "en": "Great job! 👍 Your medication has been recorded as taken. Keep it up!",
+    "zh": "做得好！👍 您的服药记录已更新。继续保持！",
+    "ms": "Bagus sekali! 👍 Ubat anda telah direkodkan sebagai sudah diambil. Teruskan!",
+    "ta": "சரிதான்! 👍 உங்கள் மருந்து எடுத்தது பதிவு செய்யப்பட்டது. தொடர்ந்து வாருங்கள்!",
+}
+
+
+def _handle_taken(db: Session, patient: Patient) -> None:
+    """Reset missed-dose streak for patient and send ack."""
+    from datetime import datetime as _dt
+    active_meds = (
+        db.query(PatientMedication)
+        .filter(
+            PatientMedication.patient_id == patient.id,
+            PatientMedication.is_active == True,  # noqa: E712
+        )
+        .all()
+    )
+    for pm in active_meds:
+        pm.last_taken_at = _dt.utcnow()
+        pm.consecutive_missed_doses = 0
+    db.commit()
+
+    lang = patient.language_preference if patient.language_preference in TAKEN_ACK else "en"
+    send_text(db, patient.id, patient.phone_number, TAKEN_ACK[lang])

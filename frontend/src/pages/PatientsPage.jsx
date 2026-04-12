@@ -21,6 +21,8 @@ export default function PatientsPage() {
     phone_number: "",
     language_preference: "en",
     conditions: [],
+    caregiver_name: "",
+    caregiver_telegram_id: "",
   });
   const [enrolling, setEnrolling] = useState(false);
   const [conditionsList, setConditionsList] = useState([]);
@@ -63,7 +65,7 @@ export default function PatientsPage() {
     try {
       await createPatient(newPatient);
       setShowEnrol(false);
-      setNewPatient({ full_name: "", phone_number: "", language_preference: "en", conditions: [] });
+      setNewPatient({ full_name: "", phone_number: "", language_preference: "en", conditions: [], caregiver_name: "", caregiver_telegram_id: "" });
       fetchPatients();
     } catch {
       // leave form open
@@ -234,6 +236,26 @@ export default function PatientsPage() {
                   <option value="ms">Malay</option>
                   <option value="ta">Tamil</option>
                 </select>
+              </div>
+              <div>
+                <label className="block font-body text-xs font-medium text-on-surface/70 mb-1.5">Caregiver Name <span className="text-on-surface/40 font-normal">(optional)</span></label>
+                <input
+                  type="text"
+                  placeholder="e.g. Jane Doe"
+                  value={newPatient.caregiver_name}
+                  onChange={(e) => setNewPatient((prev) => ({ ...prev, caregiver_name: e.target.value }))}
+                  className="w-full bg-surface-container-highest rounded-xl px-3.5 py-2.5 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed"
+                />
+              </div>
+              <div>
+                <label className="block font-body text-xs font-medium text-on-surface/70 mb-1.5">Caregiver Telegram ID <span className="text-on-surface/40 font-normal">(optional)</span></label>
+                <input
+                  type="text"
+                  placeholder="e.g. 123456789"
+                  value={newPatient.caregiver_telegram_id}
+                  onChange={(e) => setNewPatient((prev) => ({ ...prev, caregiver_telegram_id: e.target.value }))}
+                  className="w-full bg-surface-container-highest rounded-xl px-3.5 py-2.5 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed"
+                />
               </div>
               <div>
                 <label className="block font-body text-xs font-medium text-on-surface/70 mb-1.5">Conditions</label>

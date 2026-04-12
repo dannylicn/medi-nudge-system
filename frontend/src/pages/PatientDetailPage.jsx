@@ -47,6 +47,11 @@ export default function PatientDetailPage() {
   });
   const [dispensingSaving, setDispensingSaving] = useState(false);
 
+  // Caregiver editing
+  const [editingCaregiver, setEditingCaregiver] = useState(false);
+  const [caregiverForm, setCaregiverForm] = useState({ caregiver_name: "", caregiver_telegram_id: "" });
+  const [savingCaregiver, setSavingCaregiver] = useState(false);
+
   const reload = async () => {
     try {
       const [patientRes, medsRes, campRes, dispRes, condsRes] = await Promise.allSettled([
@@ -105,6 +110,27 @@ export default function PatientDetailPage() {
       // keep form open
     } finally {
       setSavingConditions(false);
+    }
+  };
+
+  // --- Caregiver handlers ---
+  const startEditCaregiver = () => {
+    setCaregiverForm({
+      caregiver_name: patient?.caregiver_name || "",
+      caregiver_telegram_id: patient?.caregiver_telegram_id || "",
+    });
+    setEditingCaregiver(true);
+  };
+  const saveCaregiver = async () => {
+    setSavingCaregiver(true);
+    try {
+      await updatePatient(id, caregiverForm);
+      setEditingCaregiver(false);
+      await reload();
+    } catch {
+      // keep form open
+    } finally {
+      setSavingCaregiver(false);
     }
   };
 
@@ -274,6 +300,63 @@ export default function PatientDetailPage() {
             </div>
           ) : (
             <p className="font-body text-sm text-on-surface/30">No conditions recorded</p>
+          )}
+        </div>
+
+        {/* Caregiver */}
+        <div className="mt-5">
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-xs text-primary-fixed-dim font-medium uppercase tracking-wide">Caregiver</p>
+            {!editingCaregiver && (
+              <button
+                onClick={startEditCaregiver}
+                className="font-body text-xs text-primary hover:underline"
+              >
+                {patient.caregiver_name ? "Edit" : "Add"}
+              </button>
+            )}
+          </div>
+          {editingCaregiver ? (
+            <div className="space-y-2">
+              <input
+                type="text"
+                placeholder="Caregiver name"
+                value={caregiverForm.caregiver_name}
+                onChange={(e) => setCaregiverForm((f) => ({ ...f, caregiver_name: e.target.value }))}
+                className="w-full bg-surface-container-highest rounded-xl px-3 py-2 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed"
+              />
+              <input
+                type="text"
+                placeholder="Caregiver Telegram ID (numeric)"
+                value={caregiverForm.caregiver_telegram_id}
+                onChange={(e) => setCaregiverForm((f) => ({ ...f, caregiver_telegram_id: e.target.value }))}
+                className="w-full bg-surface-container-highest rounded-xl px-3 py-2 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed"
+              />
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={saveCaregiver}
+                  disabled={savingCaregiver}
+                  className="bg-primary text-white rounded-xl px-4 py-2 font-body text-sm font-semibold disabled:opacity-60"
+                >
+                  {savingCaregiver ? "…" : "Save"}
+                </button>
+                <button
+                  onClick={() => setEditingCaregiver(false)}
+                  className="bg-surface-container-highest rounded-xl px-4 py-2 font-body text-sm text-on-surface/70"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : patient.caregiver_name ? (
+            <div className="flex items-center gap-3">
+              <span className="font-body text-sm text-on-surface font-medium">{patient.caregiver_name}</span>
+              {patient.caregiver_telegram_id && (
+                <span className="font-body text-xs text-on-surface/50">TG: {patient.caregiver_telegram_id}</span>
+              )}
+            </div>
+          ) : (
+            <p className="font-body text-sm text-on-surface/30">No caregiver assigned</p>
           )}
         </div>
       </div>

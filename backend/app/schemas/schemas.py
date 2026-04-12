@@ -84,6 +84,8 @@ class PatientUpdate(BaseModel):
     is_active: Optional[bool] = None
     contact_window_start: Optional[str] = None
     contact_window_end: Optional[str] = None
+    caregiver_name: Optional[str] = None
+    caregiver_telegram_id: Optional[str] = None
 
     @field_validator("language_preference")
     @classmethod
@@ -113,6 +115,8 @@ class PatientOut(BaseModel):
     consent_obtained_at: Optional[datetime]
     contact_window_start: Optional[str]
     contact_window_end: Optional[str]
+    caregiver_name: Optional[str]
+    caregiver_telegram_id: Optional[str]
     created_at: datetime
     # nric_hash is intentionally excluded from API responses
 
@@ -169,6 +173,9 @@ class PatientMedicationOut(BaseModel):
     refill_interval_days: Optional[int]
     frequency: str
     reminder_times: Optional[list[str]]
+    consecutive_missed_doses: int
+    last_reminded_at: Optional[datetime]
+    last_taken_at: Optional[datetime]
     is_active: bool
     medication: Optional[MedicationOut] = None
 

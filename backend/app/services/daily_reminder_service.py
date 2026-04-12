@@ -2,15 +2,18 @@
 Daily medication-taking reminder service.
 Sends Telegram reminders to patients based on their per-medication schedule.
 Runs every 30 minutes; fires reminders whose scheduled time falls within the current window.
+Tracks consecutive missed doses and escalates to caregiver when threshold is reached.
 """
 import logging
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from sqlalchemy.orm import Session, joinedload
+from app.core.config import settings
 from app.core.database import SessionLocal
 from app.models.models import Patient, PatientMedication
 from app.services import telegram_service
 from app.services.nudge_generator import generate_daily_reminder
+from app.services import caregiver_service
 
 logger = logging.getLogger(__name__)
 SGT = ZoneInfo("Asia/Singapore")
@@ -94,21 +97,68 @@ def _send_due_reminders(
         return
 
     # Collect medications that are due right now
-    due_meds: list[str] = []
+    due_meds_pms: list[PatientMedication] = []
     for pm in active_meds:
         times = pm.reminder_times or FREQUENCY_DEFAULTS.get(pm.frequency, [])
         if any(_in_window(t, now_sgt) for t in times):
-            med_name = pm.medication.name if pm.medication else f"Medication #{pm.medication_id}"
-            dosage_suffix = f" ({pm.dosage})" if pm.dosage else ""
-            due_meds.append(f"{med_name}{dosage_suffix}")
+            due_meds_pms.append(pm)
 
-    if not due_meds:
+    if not due_meds_pms:
         results["skipped"] += 1
         return
 
+    # --- Missed dose tracking ---
+    # For each due medication, check if the LAST reminder was acknowledged (patient said TAKEN).
+    # If not, it counts as a miss. Accumulate meds that hit the threshold for caregiver alert.
+    caregiver_alert_meds: list[str] = []
+    threshold = settings.MISSED_DOSE_ESCALATION_THRESHOLD
+    grace = timedelta(hours=4)  # Allow up to 4h after reminder_time for a TAKEN response
+
+    for pm in due_meds_pms:
+        was_missed = False
+        if pm.last_reminded_at:
+            # If last_taken_at is absent or predates the last reminder (plus grace window)
+            ack_deadline = pm.last_reminded_at + grace
+            if now_sgt.replace(tzinfo=None) > ack_deadline.replace(tzinfo=None) if ack_deadline.tzinfo is None else now_sgt > ack_deadline:
+                took_it = pm.last_taken_at and pm.last_taken_at >= pm.last_reminded_at
+                if not took_it:
+                    was_missed = True
+
+        if was_missed:
+            pm.consecutive_missed_doses = (pm.consecutive_missed_doses or 0) + 1
+            logger.debug(
+                "Patient %s missed %s (streak: %d)",
+                patient.id, pm.medication.name if pm.medication else pm.medication_id,
+                pm.consecutive_missed_doses,
+            )
+            if pm.consecutive_missed_doses >= threshold:
+                med_name = pm.medication.name if pm.medication else f"Medication #{pm.medication_id}"
+                caregiver_alert_meds.append(med_name)
+        # Always update last_reminded_at AFTER the window check
+        pm.last_reminded_at = datetime.utcnow()
+
+    db.commit()
+
+    # Notify caregiver if any medication hit threshold
+    if caregiver_alert_meds and patient.caregiver_telegram_id:
+        max_streak = max(pm.consecutive_missed_doses for pm in due_meds_pms)
+        caregiver_service.notify_caregiver(
+            db=db,
+            patient=patient,
+            missed_medications=caregiver_alert_meds,
+            consecutive_count=max_streak,
+        )
+
+    # Send the actual reminder to the patient
+    due_med_names = []
+    for pm in due_meds_pms:
+        med_name = pm.medication.name if pm.medication else f"Medication #{pm.medication_id}"
+        dosage_suffix = f" ({pm.dosage})" if pm.dosage else ""
+        due_med_names.append(f"{med_name}{dosage_suffix}")
+
     message = generate_daily_reminder(
         name=patient.full_name.split()[0],
-        medications=due_meds,
+        medications=due_med_names,
         language=patient.language_preference,
         conditions=patient.conditions,
     )
@@ -122,5 +172,5 @@ def _send_due_reminders(
     results["reminders_sent"] += 1
     logger.debug(
         "Sent reminder to patient %s for: %s (time: %s SGT)",
-        patient.id, due_meds, now_sgt.strftime("%H:%M"),
+        patient.id, due_med_names, now_sgt.strftime("%H:%M"),
     )

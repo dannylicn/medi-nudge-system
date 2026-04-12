@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     WARNING_DAYS: int = 3
     ESCALATION_DAYS: int = 14
     MAX_NUDGE_ATTEMPTS: int = 3
+    MISSED_DOSE_ESCALATION_THRESHOLD: int = 3  # consecutive misses before caregiver notified
     MEDIA_STORAGE_PATH: str = "./media"
 
     class Config:

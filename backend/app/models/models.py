@@ -37,6 +37,9 @@ class Patient(Base):
     consent_channel: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     contact_window_start: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)  # e.g. "15:00"
     contact_window_end: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    # Caregiver contact (notified when patient misses doses repeatedly)
+    caregiver_name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    caregiver_telegram_id: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -107,6 +110,10 @@ class PatientMedication(Base):
     frequency: Mapped[str] = mapped_column(String(50), default="once_daily", nullable=False)
     # JSON list of HH:MM strings in SGT, e.g. ["08:00"] or ["08:00", "20:00"]
     reminder_times: Mapped[Optional[list]] = mapped_column(JSON, default=list, nullable=True)
+    # Missed-dose tracking
+    consecutive_missed_doses: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    last_reminded_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    last_taken_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
 
