@@ -20,6 +20,16 @@ class Settings(BaseSettings):
     MISSED_DOSE_ESCALATION_THRESHOLD: int = 3  # consecutive misses before caregiver notified
     MEDIA_STORAGE_PATH: str = "./media"
 
+    # AWS — optional; when set, enables S3 image storage and ECS-compatible config
+    AWS_S3_BUCKET_NAME: str = ""
+    AWS_REGION: str = "ap-southeast-1"
+
+    # CORS — comma-separated list of allowed origins
+    ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
+
+    # Scheduler — set to False on API tasks; scheduler runs in a dedicated ECS task
+    SCHEDULER_ENABLED: bool = True
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

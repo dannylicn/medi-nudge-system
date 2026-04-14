@@ -62,6 +62,14 @@ uvicorn app.main:app --reload --port 8000
 The API will be available at **http://localhost:8000**  
 Interactive docs: **http://localhost:8000/docs**
 
+### 6. (Optional) Run the Telegram long-poll bridge
+
+For local development, use this script to poll Telegram updates and forward them to the local webhook endpoint. Requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_WEBHOOK_SECRET` in your `.env` file.
+
+```bash
+python poll_telegram.py
+```
+
 ---
 
 ## Frontend (React + Vite)
@@ -131,3 +139,61 @@ medi-nudge-system/
 - **Escalation engine** — flags non-adherent patients for care coordinator follow-up
 - **Analytics dashboard** — adherence trends and patient insights
 - **Caregiver loop** — loop in caregivers when patient is unresponsive
+
+---
+
+## AWS Deployment
+
+Infrastructure is defined with Terraform under `infra/`. Target region: `ap-southeast-1`.
+
+### Prerequisites
+
+- Terraform >= 1.7
+- AWS CLI configured with permissions to create IAM, ECS, RDS, S3, CloudFront resources
+- ACM certificates created manually in `ap-southeast-1` (ALB) and `us-east-1` (CloudFront)
+- S3 state bucket and DynamoDB lock table bootstrapped (see comments in `infra/backend.tf`)
+
+### Deploy (staging)
+
+```bash
+cd infra
+terraform init \
+  -backend-config="bucket=medi-nudge-tfstate-staging" \
+  -backend-config="key=staging/terraform.tfstate" \
+  -backend-config="region=ap-southeast-1" \
+  -backend-config="dynamodb_table=medi-nudge-tfstate-lock"
+
+terraform plan -var-file="environments/staging/terraform.tfvars"
+terraform apply -var-file="environments/staging/terraform.tfvars"
+```
+
+Replace `staging` with `production` and use `environments/production/terraform.tfvars` for production.
+
+### Required GitHub repository variables
+
+Set these under **Settings → Secrets and variables → Actions → Variables**:
+
+| Variable | Description |
+|---|---|
+| `GH_DEPLOY_ROLE_ARN` | IAM role ARN output from `terraform output github_actions_role_arn` |
+| `FRONTEND_BUCKET_NAME` | S3 frontend bucket name from `terraform output frontend_bucket_name` |
+| `CLOUDFRONT_DISTRIBUTION_ID` | CloudFront distribution ID from `terraform output cloudfront_domain_name` |
+| `ECS_PRIVATE_SUBNET_IDS` | Comma-separated private subnet IDs (from VPC module outputs) |
+| `ECS_SG_ID` | ECS security group ID (from ECS module outputs) |
+| `VITE_API_BASE_URL` | API base URL for the SPA build (e.g. `https://api.medi-nudge.example.com`) |
+
+### Scheduler vs API
+
+The app uses two ECS services sharing the same Docker image:
+
+| Service | `SCHEDULER_ENABLED` | Entry point |
+|---|---|---|
+| `api-service` | `false` | `uvicorn app.main:app` |
+| `scheduler-service` | `true` | `python -m app.worker` |
+
+This prevents APScheduler from firing duplicate jobs when the API scales horizontally.
+
+### Pre-signed prescription images
+
+Set `AWS_S3_BUCKET_NAME` in the ECS task environment to switch prescription image storage from local filesystem to S3. Images are served as 15-minute pre-signed URLs — no public S3 access is required or granted.
+

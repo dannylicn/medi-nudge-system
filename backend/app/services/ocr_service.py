@@ -8,6 +8,7 @@ import json
 import logging
 import os
 from datetime import datetime
+import boto3
 from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.models.models import (
@@ -62,13 +63,12 @@ def ingest_image(
     if existing:
         return existing
 
-    # Store encrypted at rest — for v1 we write to local path; swap to S3 in prod
-    storage_dir = os.path.join(settings.MEDIA_STORAGE_PATH, "prescriptions", str(patient_id))
-    os.makedirs(storage_dir, exist_ok=True)
+    # Store image — S3 in production (when AWS_S3_BUCKET_NAME is set), local filesystem otherwise
     filename = f"{image_hash[:16]}_{int(datetime.utcnow().timestamp())}.jpg"
-    image_path = os.path.join(storage_dir, filename)
-    with open(image_path, "wb") as f:
-        f.write(image_bytes)
+    if settings.AWS_S3_BUCKET_NAME:
+        image_path = _store_image_s3(image_bytes, patient_id, filename)
+    else:
+        image_path = _store_image_local(image_bytes, patient_id, filename)
 
     scan = PrescriptionScan(
         patient_id=patient_id,
@@ -109,6 +109,44 @@ def ingest_image(
     db.commit()
     db.refresh(scan)
     return scan
+
+
+def _store_image_s3(image_bytes: bytes, patient_id: int, filename: str) -> str:
+    """Upload image bytes to S3 and return the object key."""
+    key = f"prescriptions/{patient_id}/{filename}"
+    client = boto3.client("s3", region_name=settings.AWS_REGION)
+    client.put_object(
+        Bucket=settings.AWS_S3_BUCKET_NAME,
+        Key=key,
+        Body=image_bytes,
+        ContentType="image/jpeg",
+        ServerSideEncryption="aws:kms",
+    )
+    logger.info("Stored prescription image in S3: %s", key)
+    return key
+
+
+def _store_image_local(image_bytes: bytes, patient_id: int, filename: str) -> str:
+    """Write image bytes to the local media directory and return the absolute path."""
+    storage_dir = os.path.join(settings.MEDIA_STORAGE_PATH, "prescriptions", str(patient_id))
+    os.makedirs(storage_dir, exist_ok=True)
+    image_path = os.path.join(storage_dir, filename)
+    with open(image_path, "wb") as f:
+        f.write(image_bytes)
+    return image_path
+
+
+def generate_image_url(scan: "PrescriptionScan", base_url: str) -> str:
+    """Return a pre-signed S3 URL (production) or an auth-gated local URL (dev)."""
+    if settings.AWS_S3_BUCKET_NAME and scan.image_path and not os.path.isabs(scan.image_path):
+        client = boto3.client("s3", region_name=settings.AWS_REGION)
+        url = client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": settings.AWS_S3_BUCKET_NAME, "Key": scan.image_path},
+            ExpiresIn=900,  # 15 minutes
+        )
+        return url
+    return f"{base_url}/api/prescriptions/{scan.id}/image"
 
 
 def _run_ocr(image_bytes: bytes) -> tuple[dict, str]:

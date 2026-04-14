@@ -16,6 +16,10 @@ scheduler = BackgroundScheduler()
 
 def start_scheduler():
     """Register all jobs and start the scheduler."""
+    from app.core.config import settings
+    if not settings.SCHEDULER_ENABLED:
+        logger.info("Scheduler disabled via SCHEDULER_ENABLED=false — skipping startup")
+        return
     # Daily at 08:00 UTC
     scheduler.add_job(
         _run_refill_detection,
@@ -57,6 +61,9 @@ def start_scheduler():
 
 
 def stop_scheduler():
+    from app.core.config import settings
+    if not settings.SCHEDULER_ENABLED:
+        return
     scheduler.shutdown(wait=False)
     logger.info("Scheduler stopped")
 

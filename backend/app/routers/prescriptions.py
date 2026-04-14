@@ -4,22 +4,18 @@ Images are NEVER returned as raw bytes or raw file paths.
 All image access goes through signed URLs (local path in dev; S3 signed URL in prod).
 """
 import os
+import boto3
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.models import PrescriptionScan, ExtractedMedicationField, User
 from app.schemas.schemas import PrescriptionScanOut, ExtractedFieldUpdate
-from app.services.ocr_service import ingest_image, confirm_scan, reject_scan
+from app.services.ocr_service import ingest_image, confirm_scan, reject_scan, generate_image_url
 
 MAX_IMAGE_BYTES = 10 * 1024 * 1024  # 10 MB
 
 router = APIRouter(prefix="/api/prescriptions", tags=["prescriptions"])
-
-
-def _make_image_url(scan: PrescriptionScan, base_url: str) -> str:
-    """Generate a simple auth-gated URL reference (no raw path exposed)."""
-    return f"{base_url}/api/prescriptions/{scan.id}/image"
 
 
 @router.post("", response_model=PrescriptionScanOut, status_code=201)
@@ -38,7 +34,7 @@ async def upload_prescription(
     scan = ingest_image(db=db, patient_id=patient_id, image_bytes=content, source="web_upload", uploaded_by_ip=client_ip)
     base_url = str(request.base_url).rstrip("/")
     out = PrescriptionScanOut.model_validate(scan)
-    out.image_url = _make_image_url(scan, base_url)
+    out.image_url = generate_image_url(scan, base_url)
     return out
 
 
@@ -60,7 +56,7 @@ def list_scans(
     result = []
     for scan in scans:
         out = PrescriptionScanOut.model_validate(scan)
-        out.image_url = _make_image_url(scan, base_url)
+        out.image_url = generate_image_url(scan, base_url)
         result.append(out)
     return result
 
@@ -77,7 +73,7 @@ def get_scan(
         raise HTTPException(status_code=404, detail="Scan not found")
     base_url = str(request.base_url).rstrip("/")
     out = PrescriptionScanOut.model_validate(scan)
-    out.image_url = _make_image_url(scan, base_url)
+    out.image_url = generate_image_url(scan, base_url)
     return out
 
 
@@ -87,12 +83,21 @@ def serve_scan_image(
     db: Session = Depends(get_db),
     _user: User = Depends(get_current_user),  # Auth required — no public access
 ):
-    """Serve the raw image bytes, gated by JWT auth."""
-    from fastapi.responses import Response
+    """Serve the raw image bytes (local dev only). In production S3 pre-signed URLs are used."""
+    from fastapi.responses import Response, RedirectResponse
+    from app.core.config import settings
     scan = db.query(PrescriptionScan).filter(PrescriptionScan.id == scan_id).first()
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
-    if not os.path.exists(scan.image_path):
+    if settings.AWS_S3_BUCKET_NAME and scan.image_path and not os.path.isabs(scan.image_path):
+        client = boto3.client("s3", region_name=settings.AWS_REGION)
+        url = client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": settings.AWS_S3_BUCKET_NAME, "Key": scan.image_path},
+            ExpiresIn=900,
+        )
+        return RedirectResponse(url=url, status_code=302)
+    if not scan.image_path or not os.path.exists(scan.image_path):
         raise HTTPException(status_code=404, detail="Image file not found")
     with open(scan.image_path, "rb") as f:
         content = f.read()
@@ -135,7 +140,7 @@ def confirm_prescription_scan(
         raise HTTPException(status_code=400, detail=str(exc))
     base_url = str(request.base_url).rstrip("/")
     out = PrescriptionScanOut.model_validate(scan)
-    out.image_url = _make_image_url(scan, base_url)
+    out.image_url = generate_image_url(scan, base_url)
     return out
 
 
@@ -155,5 +160,5 @@ def reject_prescription_scan(
         raise HTTPException(status_code=400, detail=str(exc))
     base_url = str(request.base_url).rstrip("/")
     out = PrescriptionScanOut.model_validate(scan)
-    out.image_url = _make_image_url(scan, base_url)
+    out.image_url = generate_image_url(scan, base_url)
     return out

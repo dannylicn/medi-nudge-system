@@ -24,8 +24,9 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
 
-# Override sqlalchemy.url from settings so env var controls the database
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Override sqlalchemy.url from settings so env var controls the database.
+# Escape % signs for configparser's interpolation engine (passwords may contain %).
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
