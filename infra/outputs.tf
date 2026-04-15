@@ -1,11 +1,21 @@
 output "alb_dns_name" {
-  description = "ALB DNS name — create a CNAME record for api_domain pointing here"
+  description = "ALB DNS name — API is served over HTTP on port 80 (auto-generated AWS URL, no custom domain required)"
   value       = module.alb.alb_dns_name
+}
+
+output "api_url" {
+  description = "API base URL (uses api_domain when set, otherwise the auto-generated ALB DNS name)"
+  value       = var.api_domain != "" ? "https://${var.api_domain}" : "http://${module.alb.alb_dns_name}"
 }
 
 output "cloudfront_domain_name" {
   description = "CloudFront domain — create a CNAME record for frontend_domain pointing here"
   value       = module.cloudfront.cloudfront_domain_name
+}
+
+output "cloudfront_distribution_id" {
+  description = "CloudFront distribution ID — used for cache invalidations"
+  value       = module.cloudfront.cloudfront_distribution_id
 }
 
 output "ecr_repository_url" {

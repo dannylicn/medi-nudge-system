@@ -107,6 +107,35 @@ module "cloudfront" {
 
 data "aws_caller_identity" "current" {}
 
+# Route 53 — API domain alias → ALB (created only when both api_domain and route53_zone_id are set)
+resource "aws_route53_record" "api" {
+  count   = var.api_domain != "" && var.route53_zone_id != "" ? 1 : 0
+  zone_id = var.route53_zone_id
+  name    = var.api_domain
+  type    = "A"
+
+  alias {
+    name                   = module.alb.alb_dns_name
+    zone_id                = module.alb.alb_zone_id
+    evaluate_target_health = true
+  }
+}
+
+# Route 53 — frontend domain alias → CloudFront (created only when both frontend_domain and route53_zone_id are set)
+resource "aws_route53_record" "frontend" {
+  count    = var.frontend_domain != "" && var.route53_zone_id != "" ? 1 : 0
+  zone_id  = var.route53_zone_id
+  name     = var.frontend_domain
+  type     = "A"
+
+  alias {
+    name                   = module.cloudfront.cloudfront_domain_name
+    zone_id                = "Z2FDTNDATAQYW2" # CloudFront's fixed hosted zone ID
+    evaluate_target_health = false
+  }
+}
+
+
 # S3 bucket policy for CloudFront OAC access — defined at root level so Terraform
 # can establish an explicit dependency on both the S3 bucket and the CloudFront
 # distribution, preventing the 307 TemporaryRedirect race condition on non-us-east-1 buckets.

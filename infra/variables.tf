@@ -70,3 +70,9 @@ variable "acm_certificate_arn_cloudfront" {
   type        = string
   default     = ""
 }
+
+variable "route53_zone_id" {
+  description = "Route 53 hosted zone ID for the app domain (optional — when set, DNS records for api_domain and frontend_domain are created automatically)"
+  type        = string
+  default     = ""
+}
