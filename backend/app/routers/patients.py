@@ -34,6 +34,8 @@ def create_patient(
         language_preference=payload.language_preference,
         conditions=payload.conditions,
         risk_level=payload.risk_level,
+        caregiver_name=payload.caregiver_name or None,
+        caregiver_telegram_id=payload.caregiver_telegram_id or None,
     )
     db.add(patient)
     db.commit()

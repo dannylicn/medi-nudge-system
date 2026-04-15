@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.core.config import settings
 from app.models.models import Patient, NudgeCampaign, OutboundMessage, PatientMedication
 from app.services.response_classifier import classify_response
-from app.services import nudge_campaign_service, onboarding_service, ocr_service
+from app.services import nudge_campaign_service, onboarding_service, ocr_service, agent_service
 from app.services.telegram_service import validate_telegram_token, send_text
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ async def inbound_telegram(
         onboarding_service.handle_start_command(db, chat_id, None)
         return {"ok": True}
 
-    # Photo → OCR pipeline
+    # Photo → OCR pipeline (always takes priority over text routing)
     if message.get("photo"):
         _handle_photo(db, patient, message)
         return {"ok": True}
@@ -71,49 +71,18 @@ async def inbound_telegram(
     if not text:
         return {"ok": True}
 
+    # Medication confirmation pending (from onboarding manual-entry verification)
+    if patient.onboarding_state == "medication_confirm_pending":
+        agent_service.handle_medication_confirm_reply(patient, text, db)
+        return {"ok": True}
+
     # Onboarding flow
     if patient.onboarding_state in ONBOARDING_STATES:
         onboarding_service.handle_onboarding_reply(db, patient, text)
         return {"ok": True}
 
-    # Active nudge campaign response
-    open_campaign: NudgeCampaign | None = (
-        db.query(NudgeCampaign)
-        .filter(
-            NudgeCampaign.patient_id == patient.id,
-            NudgeCampaign.status == "sent",
-        )
-        .order_by(NudgeCampaign.created_at.desc())
-        .first()
-    )
-
-    response_type = classify_response(text)
-
-    if open_campaign:
-        nudge_campaign_service.handle_response(
-            db=db,
-            campaign=open_campaign,
-            response_text=text,
-            response_type=response_type,
-        )
-    else:
-        from app.services import escalation_service
-        from app.services.nudge_generator import get_safety_ack, get_question_ack
-
-        if response_type == "confirmed" or text.strip().upper() in ("TAKEN", "已服", "SUDAH"):
-            # Patient acknowledging a daily reminder — reset missed-dose streak
-            _handle_taken(db, patient)
-        elif response_type == "side_effect":
-            escalation_service.create_escalation(
-                db=db, patient_id=patient.id, reason="side_effect", priority="urgent"
-            )
-            send_text(db, patient.id, patient.phone_number, get_safety_ack(patient.language_preference))
-        elif response_type in ("question", "opt_out"):
-            escalation_service.create_escalation(
-                db=db, patient_id=patient.id, reason="patient_question"
-            )
-            send_text(db, patient.id, patient.phone_number, get_question_ack(patient.language_preference))
-
+    # Active patient — route through agentic handler (LLM or rule-based fallback)
+    agent_service.run(patient, text, db)
     return {"ok": True}
 
 
@@ -195,4 +164,4 @@ def _handle_taken(db: Session, patient: Patient) -> None:
     db.commit()
 
     lang = patient.language_preference if patient.language_preference in TAKEN_ACK else "en"
-    send_text(db, patient.id, patient.phone_number, TAKEN_ACK[lang])
+    send_text(db, patient.id, patient.telegram_chat_id or patient.phone_number, TAKEN_ACK[lang])

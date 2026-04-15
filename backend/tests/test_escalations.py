@@ -24,6 +24,7 @@ class TestEscalationTriggers:
             risk_level="medium",
             is_active=True,
             onboarding_state="complete",
+            telegram_chat_id="91230100",
         )
         db.add(patient)
         db.commit()

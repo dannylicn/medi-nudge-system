@@ -11,7 +11,8 @@ import re
 
 def validate_e164(phone: str) -> str:
     """Normalise and validate E.164 phone numbers."""
-    phone = phone.strip()
+    # Strip all whitespace and common separators
+    phone = re.sub(r"[\s\-\.\(\)]", "", phone.strip())
     # Allow bare 8-digit Singapore numbers and auto-prefix
     if re.match(r"^[89]\d{7}$", phone):
         phone = "+65" + phone
@@ -50,6 +51,8 @@ class PatientCreate(BaseModel):
     language_preference: str = "en"
     conditions: list[str] = []
     risk_level: str = "normal"
+    caregiver_name: Optional[str] = None
+    caregiver_telegram_id: Optional[str] = None
 
     @field_validator("phone_number")
     @classmethod

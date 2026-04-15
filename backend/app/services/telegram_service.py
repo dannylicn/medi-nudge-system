@@ -79,7 +79,9 @@ def send_text(
 
 
 def validate_telegram_token(token: str) -> bool:
-    """Validate the X-Telegram-Bot-Api-Secret-Token header."""
+    """Validate the X-Telegram-Bot-Api-Secret-Token header.
+    When TELEGRAM_WEBHOOK_SECRET is not configured, skip validation (local dev).
+    """
     if not settings.TELEGRAM_WEBHOOK_SECRET:
-        return False
+        return True  # no secret configured — allow (local dev / polling mode)
     return token == settings.TELEGRAM_WEBHOOK_SECRET

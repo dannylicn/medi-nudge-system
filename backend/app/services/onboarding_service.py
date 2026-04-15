@@ -32,6 +32,7 @@ ONBOARDING_STATES = {
     "preferences",
     "self_registering",
     "drop_off_recovery",
+    "medication_confirm_pending",
 }
 
 LANG_QUICK_REPLIES = (
@@ -367,18 +368,9 @@ def _handle_confirm_reply(db: Session, patient: Patient, text: str) -> None:
         db.commit()
         _send_patient(db, patient, MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]))
     else:
-        # Treat as manual entry
-        from app.models.models import Medication as MedModel
-        med_name = text.strip().title()
-        med = db.query(MedModel).filter(MedModel.name.ilike(f"%{med_name}%")).first()
-        if not med:
-            med = MedModel(name=med_name, generic_name=med_name.lower())
-            db.add(med)
-            db.flush()
-        pm = PatientMedication(patient_id=patient.id, medication_id=med.id, is_active=False)
-        db.add(pm)
-        db.commit()
-        _send_patient(db, patient, f"Added: {med_name}. Enter another or reply *DONE* when finished.")
+        # Treat as manual entry — run through medicine verification gate
+        from app.services import agent_service
+        agent_service.verify_and_confirm_medication(patient, text, db)
 
 
 def _handle_preferences_reply(db: Session, patient: Patient, text: str) -> None:
