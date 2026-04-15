@@ -117,7 +117,11 @@ class PatientOut(BaseModel):
     contact_window_end: Optional[str]
     caregiver_name: Optional[str]
     caregiver_telegram_id: Optional[str]
+    telegram_chat_id: Optional[str]
     created_at: datetime
+    # Populated only on creation / token regeneration, not stored on the model
+    invite_link: Optional[str] = None
+    onboarding_qr_code: Optional[str] = None  # base64 PNG
     # nric_hash is intentionally excluded from API responses
 
     class Config:

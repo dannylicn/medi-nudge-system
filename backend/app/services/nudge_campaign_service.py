@@ -73,7 +73,7 @@ def create_and_send(
     out_msg = telegram_service.send_text(
         db=db,
         patient_id=patient.id,
-        to_phone=patient.phone_number,
+        to_phone=patient.telegram_chat_id or patient.phone_number,
         body=message,
         campaign_id=campaign.id,
     )
@@ -126,7 +126,7 @@ def handle_response(
         if patient:
             ack = nudge_generator.get_safety_ack(patient.language_preference)
             telegram_service.send_text(
-                db=db, patient_id=patient.id, to_phone=patient.phone_number, body=ack
+                db=db, patient_id=patient.id, to_phone=patient.telegram_chat_id or patient.phone_number, body=ack
             )
 
     elif response_type == "question":
@@ -141,7 +141,7 @@ def handle_response(
         if patient:
             ack = nudge_generator.get_question_ack(patient.language_preference)
             telegram_service.send_text(
-                db=db, patient_id=patient.id, to_phone=patient.phone_number, body=ack
+                db=db, patient_id=patient.id, to_phone=patient.telegram_chat_id or patient.phone_number, body=ack
             )
 
     elif response_type in ("negative", "opt_out"):

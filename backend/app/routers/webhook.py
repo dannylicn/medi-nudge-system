@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/webhook", tags=["webhook"])
 
-ONBOARDING_STATES = {"invited", "consent_pending"}
+ONBOARDING_STATES = onboarding_service.ONBOARDING_STATES
 
 
 def _validate_secret(request: Request) -> None:
@@ -48,12 +48,19 @@ async def inbound_telegram(
     if not chat_id:
         return {"ok": True}
 
-    # Look up patient by chat_id (stored in phone_number field for Telegram)
-    patient = db.query(Patient).filter(Patient.phone_number == chat_id).first()
+    # Handle /start [TOKEN] before patient lookup
+    if text.startswith("/start"):
+        parts = text.split(maxsplit=1)
+        token_arg = parts[1].strip() if len(parts) > 1 else None
+        onboarding_service.handle_start_command(db, chat_id, token_arg)
+        return {"ok": True}
+
+    # Look up patient by telegram_chat_id
+    patient = db.query(Patient).filter(Patient.telegram_chat_id == chat_id).first()
 
     if not patient:
-        logger.info("Inbound message from unknown chat_id: %s", chat_id)
-        _send_reply(chat_id, "We don't recognise this account. Please contact your clinic.")
+        # Route to self-onboarding
+        onboarding_service.handle_start_command(db, chat_id, None)
         return {"ok": True}
 
     # Photo → OCR pipeline

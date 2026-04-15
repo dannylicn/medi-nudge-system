@@ -166,7 +166,7 @@ def _send_due_reminders(
     telegram_service.send_text(
         db=db,
         patient_id=patient.id,
-        to_phone=patient.phone_number,
+        to_phone=patient.telegram_chat_id or patient.phone_number,
         body=message,
     )
     results["reminders_sent"] += 1

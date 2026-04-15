@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     LLM_MODEL: str = "gpt-4o"
     ELEVENLABS_API_KEY: str = ""
     TELEGRAM_BOT_TOKEN: str = ""
+    TELEGRAM_BOT_USERNAME: str = ""  # e.g. MediNudgeBot (without @)
     TELEGRAM_WEBHOOK_SECRET: str = ""
     WARNING_DAYS: int = 3
     ESCALATION_DAYS: int = 14

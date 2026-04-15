@@ -37,6 +37,8 @@ class Patient(Base):
     consent_channel: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     contact_window_start: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)  # e.g. "15:00"
     contact_window_end: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    # Telegram linkage (set when patient scans QR or /start token is validated)
+    telegram_chat_id: Mapped[Optional[str]] = mapped_column(String(30), unique=True, nullable=True)
     # Caregiver contact (notified when patient misses doses repeatedly)
     caregiver_name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     caregiver_telegram_id: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
@@ -48,6 +50,7 @@ class Patient(Base):
     nudge_campaigns: Mapped[list["NudgeCampaign"]] = relationship("NudgeCampaign", back_populates="patient")
     escalation_cases: Mapped[list["EscalationCase"]] = relationship("EscalationCase", back_populates="patient")
     prescription_scans: Mapped[list["PrescriptionScan"]] = relationship("PrescriptionScan", back_populates="patient")
+    onboarding_tokens: Mapped[list["OnboardingToken"]] = relationship("OnboardingToken", back_populates="patient")
 
 
 # ---------------------------------------------------------------------------
@@ -289,3 +292,20 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(200), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+
+
+# ---------------------------------------------------------------------------
+# OnboardingToken (one-time QR deep-link tokens)
+# ---------------------------------------------------------------------------
+
+class OnboardingToken(Base):
+    __tablename__ = "onboarding_tokens"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    patient_id: Mapped[int] = mapped_column(Integer, ForeignKey("patients.id"), nullable=False)
+    token: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    used_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+
+    patient: Mapped["Patient"] = relationship("Patient", back_populates="onboarding_tokens")

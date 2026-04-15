@@ -35,6 +35,7 @@ export const getPatient = (id) => api.get(`/api/patients/${id}`);
 export const createPatient = (data) => api.post("/api/patients", data);
 export const updatePatient = (id, data) => api.patch(`/api/patients/${id}`, data);
 export const deletePatient = (id) => api.delete(`/api/patients/${id}`);
+export const regenerateInviteLink = (id) => api.post(`/api/patients/${id}/invite-link`);
 
 // Medication catalog
 export const getMedications = () => api.get("/api/medications");

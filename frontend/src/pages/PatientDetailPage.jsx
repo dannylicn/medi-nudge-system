@@ -4,6 +4,7 @@ import {
   getPatient, getPatientMedications, getNudgeCampaigns,
   updatePatient, getMedications, assignMedication,
   createDispensingRecord, getDispensingRecords, getConditions,
+  regenerateInviteLink,
 } from "../lib/api";
 
 const CAMPAIGN_STATUS_CHIP = {
@@ -51,6 +52,11 @@ export default function PatientDetailPage() {
   const [editingCaregiver, setEditingCaregiver] = useState(false);
   const [caregiverForm, setCaregiverForm] = useState({ caregiver_name: "", caregiver_telegram_id: "" });
   const [savingCaregiver, setSavingCaregiver] = useState(false);
+
+  // QR code invite
+  const [qrCode, setQrCode] = useState(null);
+  const [inviteLink, setInviteLink] = useState(null);
+  const [qrLoading, setQrLoading] = useState(false);
 
   const reload = async () => {
     try {
@@ -131,6 +137,19 @@ export default function PatientDetailPage() {
       // keep form open
     } finally {
       setSavingCaregiver(false);
+    }
+  };
+
+  const handleRegenerateQR = async () => {
+    setQrLoading(true);
+    try {
+      const res = await regenerateInviteLink(id);
+      setQrCode(res.data.onboarding_qr_code);
+      setInviteLink(res.data.invite_link);
+    } catch {
+      // ignore
+    } finally {
+      setQrLoading(false);
     }
   };
 
@@ -246,6 +265,56 @@ export default function PatientDetailPage() {
             <p className="font-display font-semibold text-on-surface">{patient.consent_obtained_at ? "✓" : "Pending"}</p>
           </div>
         </div>
+
+        {/* Telegram invite QR code — shown when patient is not yet linked */}
+        {!patient.telegram_chat_id && (
+          <div className="mt-5 p-4 rounded-2xl bg-surface-container-highest border border-outline-variant">
+            <p className="text-xs text-primary-fixed-dim font-medium uppercase tracking-wide mb-3">Telegram Onboarding QR</p>
+            {qrCode ? (
+              <div className="flex flex-col items-start gap-3">
+                <img
+                  src={`data:image/png;base64,${qrCode}`}
+                  alt="Telegram invite QR code"
+                  className="w-40 h-40 rounded-xl border border-outline-variant"
+                />
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => {
+                      const a = document.createElement("a");
+                      a.href = `data:image/png;base64,${qrCode}`;
+                      a.download = `invite-qr-patient-${id}.png`;
+                      a.click();
+                    }}
+                    className="font-body text-xs bg-primary text-on-primary px-3 py-1.5 rounded-lg hover:opacity-90"
+                  >
+                    Download QR
+                  </button>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(inviteLink)}
+                    className="font-body text-xs bg-surface-container text-on-surface border border-outline-variant px-3 py-1.5 rounded-lg hover:bg-surface-container-high"
+                  >
+                    Copy Link
+                  </button>
+                  <button
+                    onClick={handleRegenerateQR}
+                    disabled={qrLoading}
+                    className="font-body text-xs text-primary hover:underline px-2 py-1.5"
+                  >
+                    {qrLoading ? "Generating…" : "Regenerate"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={handleRegenerateQR}
+                disabled={qrLoading}
+                className="font-body text-sm bg-primary text-on-primary px-4 py-2 rounded-xl hover:opacity-90 disabled:opacity-50"
+              >
+                {qrLoading ? "Generating…" : "Generate Invite QR"}
+              </button>
+            )}
+          </div>
+        )}
         {/* Conditions */}
         <div className="mt-5">
           <div className="flex items-center gap-2 mb-2">
