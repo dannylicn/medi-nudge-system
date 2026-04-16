@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.models.models import Patient, PatientMedication
-from app.services import telegram_service
+from app.services import telegram_service, tts_service
 from app.services.nudge_generator import generate_daily_reminder
 from app.services import caregiver_service
 
@@ -40,11 +40,14 @@ def _in_window(time_str: str, now_sgt: datetime, window_minutes: int = 14) -> bo
     return delta <= window_minutes * 60
 
 
-def send_scheduled_reminders(db: Session | None = None) -> dict:
+def send_scheduled_reminders(db: Session | None = None, *, skip_window: bool = False) -> dict:
     """
     Called every 30 minutes. For each patient medication, check if any
     reminder_time falls within the current 30-minute window and send the nudge.
     Groups all due medications for a patient into a single message.
+
+    When skip_window=True, sends reminders for ALL active medications regardless
+    of scheduled time (useful for manual triggers).
     """
     owns_session = db is None
     if owns_session:
@@ -66,7 +69,7 @@ def send_scheduled_reminders(db: Session | None = None) -> dict:
         for patient in patients:
             results["patients_checked"] += 1
             try:
-                _send_due_reminders(db, patient, now_sgt, results)
+                _send_due_reminders(db, patient, now_sgt, results, skip_window=skip_window)
             except Exception as exc:
                 logger.error("Reminder error for patient %s: %s", patient.id, exc)
                 results["errors"] += 1
@@ -80,7 +83,8 @@ def send_scheduled_reminders(db: Session | None = None) -> dict:
 
 
 def _send_due_reminders(
-    db: Session, patient: Patient, now_sgt: datetime, results: dict
+    db: Session, patient: Patient, now_sgt: datetime, results: dict,
+    *, skip_window: bool = False,
 ) -> None:
     active_meds = (
         db.query(PatientMedication)
@@ -99,9 +103,12 @@ def _send_due_reminders(
     # Collect medications that are due right now
     due_meds_pms: list[PatientMedication] = []
     for pm in active_meds:
-        times = pm.reminder_times or FREQUENCY_DEFAULTS.get(pm.frequency, [])
-        if any(_in_window(t, now_sgt) for t in times):
+        if skip_window:
             due_meds_pms.append(pm)
+        else:
+            times = pm.reminder_times or FREQUENCY_DEFAULTS.get(pm.frequency, [])
+            if any(_in_window(t, now_sgt) for t in times):
+                due_meds_pms.append(pm)
 
     if not due_meds_pms:
         results["skipped"] += 1
@@ -163,12 +170,40 @@ def _send_due_reminders(
         conditions=patient.conditions,
     )
 
-    telegram_service.send_text(
-        db=db,
-        patient_id=patient.id,
-        to_phone=patient.telegram_chat_id or patient.phone_number,
-        body=message,
-    )
+    chat_target = patient.telegram_chat_id or patient.phone_number
+    send_text = patient.nudge_delivery_mode in ("text", "both")
+    send_voice = patient.nudge_delivery_mode in ("voice", "both")
+
+    if send_text or not send_voice:
+        telegram_service.send_text(
+            db=db,
+            patient_id=patient.id,
+            to_phone=chat_target,
+            body=message,
+        )
+
+    if send_voice:
+        ogg_path = tts_service.generate_voice_message(
+            text=message,
+            voice_id=patient.selected_voice_id,
+            patient_id=patient.id,
+        )
+        if ogg_path:
+            telegram_service.send_voice(
+                db=db,
+                patient_id=patient.id,
+                to_phone=chat_target,
+                ogg_path=ogg_path,
+            )
+        elif not send_text:
+            # Voice failed, no text sent yet — fall back
+            telegram_service.send_text(
+                db=db,
+                patient_id=patient.id,
+                to_phone=chat_target,
+                body=message,
+            )
+
     results["reminders_sent"] += 1
     logger.debug(
         "Sent reminder to patient %s for: %s (time: %s SGT)",

@@ -4,7 +4,7 @@ import {
   getPatient, getPatientMedications, getNudgeCampaigns,
   updatePatient, getMedications, assignMedication,
   createDispensingRecord, getDispensingRecords, getConditions,
-  regenerateInviteLink,
+  regenerateInviteLink, generateCaregiverInviteLink,
 } from "../lib/api";
 
 const CAMPAIGN_STATUS_CHIP = {
@@ -50,8 +50,11 @@ export default function PatientDetailPage() {
 
   // Caregiver editing
   const [editingCaregiver, setEditingCaregiver] = useState(false);
-  const [caregiverForm, setCaregiverForm] = useState({ caregiver_name: "", caregiver_telegram_id: "" });
+  const [caregiverForm, setCaregiverForm] = useState({ caregiver_name: "", caregiver_phone_number: "" });
   const [savingCaregiver, setSavingCaregiver] = useState(false);
+  const [caregiverInviteLink, setCaregiverInviteLink] = useState(null);
+  const [caregiverLinkLoading, setCaregiverLinkLoading] = useState(false);
+  const [caregiverLinkCopied, setCaregiverLinkCopied] = useState(false);
 
   // QR code invite
   const [qrCode, setQrCode] = useState(null);
@@ -123,7 +126,7 @@ export default function PatientDetailPage() {
   const startEditCaregiver = () => {
     setCaregiverForm({
       caregiver_name: patient?.caregiver_name || "",
-      caregiver_telegram_id: patient?.caregiver_telegram_id || "",
+      caregiver_phone_number: patient?.caregiver_phone_number || "",
     });
     setEditingCaregiver(true);
   };
@@ -138,6 +141,25 @@ export default function PatientDetailPage() {
     } finally {
       setSavingCaregiver(false);
     }
+  };
+
+  const handleGenerateCaregiverLink = async () => {
+    setCaregiverLinkLoading(true);
+    try {
+      const res = await generateCaregiverInviteLink(id);
+      setCaregiverInviteLink(res.data.invite_link);
+    } catch {
+      // ignore
+    } finally {
+      setCaregiverLinkLoading(false);
+    }
+  };
+
+  const handleCopyCaregiverLink = () => {
+    if (!caregiverInviteLink) return;
+    navigator.clipboard.writeText(caregiverInviteLink);
+    setCaregiverLinkCopied(true);
+    setTimeout(() => setCaregiverLinkCopied(false), 2000);
   };
 
   const handleRegenerateQR = async () => {
@@ -396,9 +418,9 @@ export default function PatientDetailPage() {
               />
               <input
                 type="text"
-                placeholder="Caregiver Telegram ID (numeric)"
-                value={caregiverForm.caregiver_telegram_id}
-                onChange={(e) => setCaregiverForm((f) => ({ ...f, caregiver_telegram_id: e.target.value }))}
+                placeholder="Caregiver phone (E.164, e.g. +6591234567)"
+                value={caregiverForm.caregiver_phone_number}
+                onChange={(e) => setCaregiverForm((f) => ({ ...f, caregiver_phone_number: e.target.value }))}
                 className="w-full bg-surface-container-highest rounded-xl px-3 py-2 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed"
               />
               <div className="flex gap-2 pt-1">
@@ -418,10 +440,39 @@ export default function PatientDetailPage() {
               </div>
             </div>
           ) : patient.caregiver_name ? (
-            <div className="flex items-center gap-3">
-              <span className="font-body text-sm text-on-surface font-medium">{patient.caregiver_name}</span>
-              {patient.caregiver_telegram_id && (
-                <span className="font-body text-xs text-on-surface/50">TG: {patient.caregiver_telegram_id}</span>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <span className="font-body text-sm text-on-surface font-medium">{patient.caregiver_name}</span>
+                {patient.caregiver_phone_number && (
+                  <span className="font-body text-xs text-on-surface/50">{patient.caregiver_phone_number}</span>
+                )}
+                {patient.caregiver_telegram_id ? (
+                  <span className="font-body text-xs text-tertiary-container bg-tertiary-container/20 px-2 py-0.5 rounded-full">Telegram linked ✓</span>
+                ) : (
+                  <span className="font-body text-xs text-on-surface/40">Telegram not linked</span>
+                )}
+              </div>
+              {!patient.caregiver_telegram_id && (
+                <div className="space-y-1.5">
+                  <button
+                    onClick={handleGenerateCaregiverLink}
+                    disabled={caregiverLinkLoading}
+                    className="font-body text-xs text-primary border border-primary/30 rounded-pill px-3 py-1.5 hover:bg-primary/5 disabled:opacity-60"
+                  >
+                    {caregiverLinkLoading ? "Generating…" : "Generate Invite Link"}
+                  </button>
+                  {caregiverInviteLink && (
+                    <div className="flex items-center gap-2 bg-surface-container-highest rounded-xl px-3 py-2">
+                      <span className="font-body text-xs text-on-surface/70 truncate flex-1">{caregiverInviteLink}</span>
+                      <button
+                        onClick={handleCopyCaregiverLink}
+                        className="font-body text-xs text-primary font-semibold shrink-0"
+                      >
+                        {caregiverLinkCopied ? "Copied!" : "Copy"}
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           ) : (
@@ -429,6 +480,29 @@ export default function PatientDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Voice nudge preferences */}
+      {patient && (
+        <div className="bg-surface-container-lowest rounded-2xl shadow-ambient p-6 mb-4">
+          <h2 className="font-display text-base font-bold text-on-surface mb-3">Voice Nudge</h2>
+          <div className="flex gap-6 font-body text-sm">
+            <div>
+              <span className="text-on-surface/50">Delivery mode: </span>
+              <span className={`px-2 py-0.5 rounded-pill text-xs font-semibold ${
+                patient.nudge_delivery_mode === "voice" ? "bg-secondary-container text-secondary" :
+                patient.nudge_delivery_mode === "both" ? "bg-tertiary-container text-on-tertiary-container" :
+                "bg-surface-container-highest text-on-surface/60"
+              }`}>
+                {patient.nudge_delivery_mode || "text"}
+              </span>
+            </div>
+            <div>
+              <span className="text-on-surface/50">Voice ID: </span>
+              <span className="text-on-surface/70">{patient.selected_voice_id || "default"}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Medications card */}
       <div className="bg-surface-container-lowest rounded-2xl shadow-ambient p-6 mb-4">

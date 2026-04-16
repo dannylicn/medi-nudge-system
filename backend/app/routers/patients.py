@@ -1,12 +1,13 @@
 """Patient management routes."""
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.core.config import hash_sha256
 from app.models.models import Patient, User
 from app.schemas.schemas import PatientCreate, PatientOut, PatientUpdate, PatientListResponse
-from app.services.onboarding_service import generate_invite_token
+from app.services.onboarding_service import generate_invite_token, generate_caregiver_invite_token
 
 router = APIRouter(prefix="/api/patients", tags=["patients"])
 
@@ -35,7 +36,7 @@ def create_patient(
         conditions=payload.conditions,
         risk_level=payload.risk_level,
         caregiver_name=payload.caregiver_name or None,
-        caregiver_telegram_id=payload.caregiver_telegram_id or None,
+        caregiver_phone_number=payload.caregiver_phone_number or None,
     )
     db.add(patient)
     db.commit()
@@ -101,6 +102,25 @@ def regenerate_invite_link(
     out.invite_link = invite_data["invite_link"]
     out.onboarding_qr_code = invite_data["qr_code_png_b64"]
     return out
+
+
+class CaregiverInviteLinkResponse(BaseModel):
+    invite_link: str
+    patient_id: int
+
+
+@router.post("/{patient_id}/caregiver-invite-link", response_model=CaregiverInviteLinkResponse)
+def generate_caregiver_link(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    """Generate a fresh caregiver invite link. Returns the link for manual delivery."""
+    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    invite_link = generate_caregiver_invite_token(db, patient)
+    return {"invite_link": invite_link, "patient_id": patient_id}
 
 
 @router.patch("/{patient_id}", response_model=PatientOut)

@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from app.core.config import settings, hash_sha256
 from app.models.models import EscalationCase, OnboardingToken, Patient, PatientMedication
-from app.services import telegram_service, escalation_service
+from app.services import telegram_service, escalation_service, sms_service
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,8 @@ ONBOARDING_STATES = {
     "medication_capture",
     "confirm",
     "preferences",
+    "voice_preference",
+    "voice_selection",
     "self_registering",
     "drop_off_recovery",
     "medication_confirm_pending",
@@ -89,6 +91,32 @@ PREFERENCES_PROMPT = {
     "ms": "Hampir selesai! Bilakah anda ingin menerima peringatan?\n1. Pagi\n2. Tengahari\n3. Petang\n4. Tiada pilihan\n\nBalas 1–4.",
     "ta": "கிட்டத்தட்ட முடிந்தது! எப்போது நினைவூட்டல்கள் வேண்டும்?\n1. காலை\n2. மதியம்\n3. மாலை\n4. விருப்பமில்லை\n\n1–4 என பதிலளிக்கவும்.",
 }
+
+VOICE_PREFERENCE_PROMPT = {
+    "en": (
+        "How would you like to receive medication reminders?\n\n"
+        "1. Text only\n2. Voice only\n3. Both text and voice\n\nReply 1-3."
+    ),
+    "zh": "您希望如何收到用药提醒？\n1. 仅文字\n2. 仅语音\n3. 文字和语音\n\n回复 1-3。",
+    "ms": "Bagaimana anda mahu menerima peringatan ubat?\n1. Teks sahaja\n2. Suara sahaja\n3. Kedua-dua\n\nBalas 1-3.",
+    "ta": "மருந்து நினைவூட்டல்களை எவ்வாறு பெற விரும்புகிறீர்கள்?\n1. உரை மட்டும்\n2. குரல் மட்டும்\n3. இரண்டும்\n\n1-3 என பதிலளிக்கவும்.",
+}
+
+VOICE_SELECTION_PROMPT = {
+    "en": "Choose a voice for your reminders:\n\n1. Female voice\n2. Male voice\n3. Record my own voice\n\nReply 1, 2 or 3.",
+    "zh": "选择提醒语音：\n1. 女声\n2. 男声\n3. 录制自己的声音\n\n回复 1、2 或 3。",
+    "ms": "Pilih suara untuk peringatan anda:\n1. Suara wanita\n2. Suara lelaki\n3. Rakam suara sendiri\n\nBalas 1, 2 atau 3.",
+    "ta": "நினைவூட்டலுக்கு குரல் தேர்ந்தெடுக்கவும்:\n1. பெண் குரல்\n2. ஆண் குரல்\n3. சொந்த குரல் பதிவு\n\n1, 2 அல்லது 3 என பதிலளிக்கவும்.",
+}
+
+VOICE_RECORD_PROMPT = {
+    "en": "Please send a voice message (60-90 seconds) reading the following:\n\n\"Hello, this is a reminder to take your medication. Staying consistent helps manage your health. Remember to collect your refill when it's due.\"\n\nYour voice will be used for your reminders. You can also do this later — a default voice will be used in the meantime.",
+    "zh": "请发送一条语音消息（60-90秒），朗读以下内容：\n\n「您好，提醒您按时服药。坚持服药有助于控制您的健康。」\n\n您也可以稍后再录制——目前将使用默认语音。",
+    "ms": "Sila hantar mesej suara (60-90 saat) membaca teks berikut:\n\n\"Hai, ini peringatan untuk mengambil ubat anda. Konsisten membantu menjaga kesihatan.\"\n\nAnda juga boleh lakukan nanti — suara lalai akan digunakan buat sementara.",
+    "ta": "தயவுசெய்து குரல் செய்தி அனுப்பவும் (60-90 விநாடிகள்):\n\n\"வணக்கம், மருந்து எடுக்க நினைவூட்டல். தொடர்ச்சியாக எடுப்பது ஆரோக்கியத்திற்கு உதவும்.\"\n\nநீங்கள் பின்னர் செய்யலாம் — இப்போதைக்கு இயல்பு குரல் பயன்படுத்தப்படும்.",
+}
+
+DELIVERY_MODE_MAP = {"1": "text", "2": "voice", "3": "both"}
 
 CONTACT_WINDOWS = {
     "1": ("08:00", "12:00"),
@@ -169,6 +197,63 @@ def _generate_qr_b64(data: str) -> str:
         return ""
 
 
+def generate_caregiver_invite_token(db: Session, patient: Patient) -> str:
+    """
+    Create a one-time caregiver OnboardingToken and return the deep-link URL.
+    Old unused caregiver tokens for this patient are invalidated first.
+    """
+    now = datetime.utcnow()
+    existing = (
+        db.query(OnboardingToken)
+        .filter(
+            OnboardingToken.patient_id == patient.id,
+            OnboardingToken.is_caregiver == True,  # noqa: E712
+            OnboardingToken.used_at.is_(None),
+        )
+        .all()
+    )
+    for t in existing:
+        t.used_at = now
+
+    raw = secrets.token_hex(32)
+    token_row = OnboardingToken(
+        patient_id=patient.id,
+        token=raw,
+        expires_at=now + timedelta(hours=TOKEN_TTL_HOURS),
+        is_caregiver=True,
+    )
+    db.add(token_row)
+    db.commit()
+
+    bot_username = settings.TELEGRAM_BOT_USERNAME or "MediNudgeBot"
+    return f"https://t.me/{bot_username}?start={raw}"
+
+
+def send_caregiver_invite(db: Session, patient: Patient) -> bool:
+    """
+    Send the caregiver a WhatsApp/SMS invite link if they haven't linked yet.
+    Returns True if sent (or stubbed in dev), False if no phone or already linked.
+    """
+    if not patient.caregiver_phone_number:
+        return False
+    if patient.caregiver_telegram_id:
+        return False  # already linked
+
+    invite_link = generate_caregiver_invite_token(db, patient)
+    caregiver_name = patient.caregiver_name or "Caregiver"
+    patient_first = patient.full_name.split()[0]
+
+    body = (
+        f"Hi {caregiver_name}, you have been listed as a caregiver for {patient_first} "
+        f"on Medi-Nudge.\n\n"
+        f"Please tap the link below to connect your Telegram account so we can reach you "
+        f"if {patient_first} needs help:\n\n"
+        f"{invite_link}\n\n"
+        f"The link expires in {TOKEN_TTL_HOURS} hours."
+    )
+    return sms_service.send_whatsapp(patient.caregiver_phone_number, body)
+
+
 def validate_and_consume_token(db: Session, raw_token: str) -> "Patient | None":
     row = db.query(OnboardingToken).filter(OnboardingToken.token == raw_token).first()
     if not row or row.used_at is not None or datetime.utcnow() > row.expires_at:
@@ -193,12 +278,30 @@ def handle_start_command(db: Session, chat_id: str, token_arg: "str | None") -> 
             else:
                 _send_raw(chat_id, "This invite link has expired. Please ask your clinic for a new one.")
             return
+
+        # ── Caregiver invite token ──────────────────────────────────────────
+        row = db.query(OnboardingToken).filter(OnboardingToken.token == token_arg).first()
+        if row and row.is_caregiver:
+            if patient.caregiver_telegram_id and patient.caregiver_telegram_id != chat_id:
+                _send_raw(chat_id, "This caregiver slot is already linked. Please contact the clinic if this is an error.")
+                return
+            patient.caregiver_telegram_id = chat_id
+            db.commit()
+            _send_raw(
+                chat_id,
+                f"✅ You are now registered as a caregiver for {patient.full_name.split()[0]} on Medi-Nudge.\n\n"
+                "You will be notified here if they miss medications or need assistance.",
+            )
+            return
+
+        # ── Patient invite token ────────────────────────────────────────────
         if patient.telegram_chat_id and patient.telegram_chat_id != chat_id:
             _send_raw(chat_id, "This patient record is already linked to another account. Please contact your clinic.")
             return
         patient.telegram_chat_id = chat_id
         patient.onboarding_state = "invited"
         db.commit()
+        db.refresh(patient)
         _send_consent(db, patient)
         return
 
@@ -242,6 +345,8 @@ def handle_onboarding_reply(db: Session, patient: Patient, text: str) -> None:
         "medication_capture": _handle_medication_capture,
         "confirm": _handle_confirm_reply,
         "preferences": _handle_preferences_reply,
+        "voice_preference": _handle_voice_preference_reply,
+        "voice_selection": _handle_voice_selection_reply,
     }
 
     handler = dispatch.get(state)
@@ -383,11 +488,64 @@ def _handle_preferences_reply(db: Session, patient: Patient, text: str) -> None:
     start, end = window
     patient.contact_window_start = start
     patient.contact_window_end = end
+    patient.onboarding_state = "voice_preference"
+    db.commit()
+    lang = patient.language_preference or "en"
+    _send_patient(db, patient, VOICE_PREFERENCE_PROMPT.get(lang, VOICE_PREFERENCE_PROMPT["en"]))
+
+
+def _handle_voice_preference_reply(db: Session, patient: Patient, text: str) -> None:
+    choice = text.strip()
+    mode = DELIVERY_MODE_MAP.get(choice)
+    if mode is None:
+        lang = patient.language_preference or "en"
+        _send_patient(db, patient, VOICE_PREFERENCE_PROMPT.get(lang, VOICE_PREFERENCE_PROMPT["en"]))
+        return
+
+    patient.nudge_delivery_mode = mode
+    if mode == "text":
+        _complete_onboarding(db, patient)
+    else:
+        patient.onboarding_state = "voice_selection"
+        db.commit()
+        lang = patient.language_preference or "en"
+        _send_patient(db, patient, VOICE_SELECTION_PROMPT.get(lang, VOICE_SELECTION_PROMPT["en"]))
+
+
+def _handle_voice_selection_reply(db: Session, patient: Patient, text: str) -> None:
+    choice = text.strip()
+    if choice == "1":
+        patient.selected_voice_id = settings.ELEVENLABS_DEFAULT_VOICE_FEMALE or None
+    elif choice == "2":
+        patient.selected_voice_id = settings.ELEVENLABS_DEFAULT_VOICE_MALE or None
+    elif choice == "3":
+        # Use default voice now; patient will send a voice message post-onboarding to clone
+        patient.selected_voice_id = settings.ELEVENLABS_DEFAULT_VOICE_FEMALE or None
+        db.commit()
+        lang = patient.language_preference or "en"
+        _send_patient(db, patient, VOICE_RECORD_PROMPT.get(lang, VOICE_RECORD_PROMPT["en"]))
+        _complete_onboarding(db, patient)
+        return
+    else:
+        lang = patient.language_preference or "en"
+        _send_patient(db, patient, VOICE_SELECTION_PROMPT.get(lang, VOICE_SELECTION_PROMPT["en"]))
+        return
+    _complete_onboarding(db, patient)
+
+
+def _complete_onboarding(db: Session, patient: Patient) -> None:
+    """Finalize onboarding: set state to complete, send welcome, invite caregiver."""
     patient.onboarding_state = "complete"
     patient.is_active = True
     db.commit()
     lang = patient.language_preference or "en"
     _send_patient(db, patient, WELCOME_MESSAGES.get(lang, WELCOME_MESSAGES["en"]))
+
+    # Send caregiver invite via WhatsApp/SMS if phone is set and not yet linked
+    try:
+        send_caregiver_invite(db, patient)
+    except Exception as exc:
+        logger.warning("Caregiver invite send failed for patient %s: %s", patient.id, exc)
 
 
 # ---------------------------------------------------------------------------
@@ -395,14 +553,16 @@ def _handle_preferences_reply(db: Session, patient: Patient, text: str) -> None:
 # ---------------------------------------------------------------------------
 
 def handle_drop_off(db: Session, patient: Patient, retry_count: int) -> None:
+    # Voice preference or voice selection timeout — default to text, complete onboarding
+    if patient.onboarding_state in ("voice_preference", "voice_selection") and retry_count >= 1:
+        patient.nudge_delivery_mode = "text"
+        _complete_onboarding(db, patient)
+        return
+
     if patient.onboarding_state == "preferences" and retry_count >= 1:
         patient.contact_window_start = None
         patient.contact_window_end = None
-        patient.onboarding_state = "complete"
-        patient.is_active = True
-        db.commit()
-        lang = patient.language_preference or "en"
-        _send_patient(db, patient, WELCOME_MESSAGES.get(lang, WELCOME_MESSAGES["en"]))
+        _complete_onboarding(db, patient)
         return
 
     if retry_count < 2:

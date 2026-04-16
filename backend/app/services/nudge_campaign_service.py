@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.models.models import (
     NudgeCampaign, Patient, Medication, CAMPAIGN_VALID_TRANSITIONS,
 )
-from app.services import nudge_generator, telegram_service, escalation_service
+from app.services import nudge_generator, telegram_service, escalation_service, tts_service
 from app.core.config import settings
 
 
@@ -69,16 +69,54 @@ def create_and_send(
     db.commit()
     db.refresh(campaign)
 
-    # Send
-    out_msg = telegram_service.send_text(
-        db=db,
-        patient_id=patient.id,
-        to_phone=patient.telegram_chat_id or patient.phone_number,
-        body=message,
-        campaign_id=campaign.id,
-    )
+    # Send text (always for "text" and "both"; also the fallback for voice failures)
+    chat_target = patient.telegram_chat_id or patient.phone_number
+    send_text = patient.nudge_delivery_mode in ("text", "both")
+    send_voice = patient.nudge_delivery_mode in ("voice", "both")
 
-    if out_msg.status == "failed":
+    out_msg = None
+    if send_text or not send_voice:
+        out_msg = telegram_service.send_text(
+            db=db,
+            patient_id=patient.id,
+            to_phone=chat_target,
+            body=message,
+            campaign_id=campaign.id,
+        )
+
+    # Send voice if applicable
+    if send_voice:
+        ogg_path = tts_service.generate_voice_message(
+            text=message,
+            voice_id=patient.selected_voice_id,
+            patient_id=patient.id,
+            medication_id=medication.id,
+            attempt=attempt,
+        )
+        if ogg_path:
+            telegram_service.send_voice(
+                db=db,
+                patient_id=patient.id,
+                to_phone=chat_target,
+                ogg_path=ogg_path,
+                campaign_id=campaign.id,
+            )
+        elif not out_msg:
+            # Voice failed and no text was sent — fall back to text
+            out_msg = telegram_service.send_text(
+                db=db,
+                patient_id=patient.id,
+                to_phone=chat_target,
+                body=message,
+                campaign_id=campaign.id,
+            )
+
+    if out_msg is None:
+        # Voice-only path succeeded; use a sentinel for status check
+        _transition(db, campaign, "sent")
+        campaign.last_sent_at = datetime.utcnow()
+        db.commit()
+    elif out_msg.status == "failed":
         _transition(db, campaign, "failed")
     else:
         _transition(db, campaign, "sent")

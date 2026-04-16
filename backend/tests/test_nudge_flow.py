@@ -16,6 +16,7 @@ class TestNudgeCampaignFlow:
             json={
                 "full_name": "Lim Beng Hock",
                 "phone_number": "+6591111001",
+                "nric": "S1234501A",
                 "language_preference": "en",
             },
             headers=auth_headers,

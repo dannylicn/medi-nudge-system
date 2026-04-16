@@ -464,7 +464,9 @@ def run(patient: Patient, text: str, db: Session) -> None:
     for iteration in range(MAX_ITERATIONS):
         tool_call = _run_llm(messages, TOOL_SCHEMAS)
         if not tool_call:
-            break
+            # LLM unavailable or returned no tool call — use rule-based fallback
+            _fallback_agent(patient, text, db)
+            return
 
         tool_name = tool_call["name"]
         tool_args = tool_call.get("args", {})

@@ -78,6 +78,62 @@ def send_text(
     return msg
 
 
+def send_voice(
+    db: Session,
+    patient_id: int,
+    to_phone: str,
+    ogg_path: str,
+    campaign_id: int | None = None,
+    chat_id: str | None = None,
+) -> OutboundMessage:
+    """Send a Telegram voice note (.ogg) and record an OutboundMessage."""
+    msg = OutboundMessage(
+        campaign_id=campaign_id,
+        patient_id=patient_id,
+        content=f"[voice:{ogg_path}]",
+        delivery_mode="audio",
+        status="sent",
+        sent_at=datetime.utcnow(),
+    )
+    db.add(msg)
+    db.flush()
+
+    target_chat_id = chat_id or to_phone
+
+    try:
+        if not settings.TELEGRAM_BOT_TOKEN:
+            logger.warning("TELEGRAM_BOT_TOKEN not set — voice message logged but not sent")
+            msg.status = "simulated"
+            db.commit()
+            db.refresh(msg)
+            return msg
+
+        with open(ogg_path, "rb") as f:
+            response = httpx.post(
+                _api_url("sendVoice"),
+                data={"chat_id": target_chat_id},
+                files={"voice": (f"nudge.ogg", f, "audio/ogg")},
+                timeout=30,
+            )
+        response.raise_for_status()
+        data = response.json()
+        if data.get("ok"):
+            msg.telegram_message_id = str(data["result"]["message_id"])
+        else:
+            logger.error("Telegram sendVoice API error: %s", data.get("description"))
+            msg.status = "failed"
+    except Exception as exc:
+        logger.error(
+            "Telegram sendVoice failed for patient_id=%s campaign_id=%s: %s",
+            patient_id, campaign_id, exc,
+        )
+        msg.status = "failed"
+
+    db.commit()
+    db.refresh(msg)
+    return msg
+
+
 def validate_telegram_token(token: str) -> bool:
     """Validate the X-Telegram-Bot-Api-Secret-Token header.
     When TELEGRAM_WEBHOOK_SECRET is not configured, skip validation (local dev).

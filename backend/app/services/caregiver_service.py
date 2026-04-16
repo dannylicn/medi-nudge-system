@@ -2,13 +2,14 @@
 Caregiver notification service.
 Sends Telegram messages to registered caregivers when a patient misses
 medication doses beyond the configured threshold.
+Falls back to WhatsApp/SMS if Telegram is not yet linked.
 """
 import logging
 import httpx
 from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.models.models import Patient, PatientMedication, Medication
-from app.services import escalation_service
+from app.services import escalation_service, sms_service
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +47,11 @@ def notify_caregiver(
     consecutive_count: int,
 ) -> bool:
     """
-    Send a Telegram message to the patient's caregiver.
-    Returns True if sent, False if no caregiver configured or send failed.
+    Send a notification to the patient's caregiver.
+    Tries Telegram first; falls back to WhatsApp/SMS if phone is set but Telegram not linked.
+    Returns True if any channel succeeded.
     """
-    if not patient.caregiver_telegram_id:
+    if not patient.caregiver_telegram_id and not patient.caregiver_phone_number:
         return False
 
     lang = patient.language_preference if patient.language_preference in CAREGIVER_MESSAGES else "en"
@@ -63,7 +65,15 @@ def notify_caregiver(
         count=consecutive_count,
     )
 
-    sent = _send_telegram(patient.caregiver_telegram_id, message)
+    sent = False
+
+    # Try Telegram first (zero cost, instant)
+    if patient.caregiver_telegram_id:
+        sent = _send_telegram(patient.caregiver_telegram_id, message)
+
+    # Fall back to WhatsApp/SMS if Telegram not linked or failed
+    if not sent and patient.caregiver_phone_number:
+        sent = sms_service.send_whatsapp(patient.caregiver_phone_number, message)
 
     if sent:
         # Also create an escalation so the coordinator is aware
@@ -78,7 +88,7 @@ def notify_caregiver(
             patient.id, consecutive_count, med_list,
         )
     else:
-        logger.warning("Failed to notify caregiver for patient %s", patient.id)
+        logger.warning("Failed to notify caregiver for patient %s via any channel", patient.id)
 
     return sent
 

@@ -7,6 +7,8 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.models import NudgeCampaign, EscalationCase, User
 from app.schemas.schemas import NudgeCampaignOut
+from app.services import refill_gap_service
+from app.services.daily_reminder_service import send_scheduled_reminders
 
 router = APIRouter(tags=["campaigns & analytics"])
 
@@ -74,3 +76,21 @@ def escalation_analytics(
         priority = c.priority if c.priority in ("urgent", "high", "normal", "low") else "normal"
         weekly[week][priority] += 1
     return [weekly[w] for w in sorted(weekly.keys())]
+
+
+@router.post("/api/nudge-campaigns/trigger")
+def trigger_nudge_campaigns(
+    db: Session = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    """Manually trigger refill gap detection and nudge campaign creation."""
+    return refill_gap_service.detect_and_trigger(db)
+
+
+@router.post("/api/reminders/trigger")
+def trigger_daily_reminders(
+    db: Session = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    """Manually trigger daily medication reminders for all active patients."""
+    return send_scheduled_reminders(db, skip_window=True)

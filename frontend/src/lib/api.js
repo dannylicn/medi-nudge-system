@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (r) => r,
   (err) => {
-    if (err.response?.status === 401) {
+    if (err.response?.status === 401 && !window.location.pathname.includes("/login")) {
       clearToken();
       window.location.href = "/login";
     }
@@ -36,6 +36,7 @@ export const createPatient = (data) => api.post("/api/patients", data);
 export const updatePatient = (id, data) => api.patch(`/api/patients/${id}`, data);
 export const deletePatient = (id) => api.delete(`/api/patients/${id}`);
 export const regenerateInviteLink = (id) => api.post(`/api/patients/${id}/invite-link`);
+export const generateCaregiverInviteLink = (id) => api.post(`/api/patients/${id}/caregiver-invite-link`);
 
 // Medication catalog
 export const getMedications = () => api.get("/api/medications");
@@ -58,6 +59,8 @@ export const getConditions = () => api.get("/api/conditions");
 
 // Nudge campaigns
 export const getNudgeCampaigns = (params) => api.get("/api/nudge-campaigns", { params });
+export const triggerNudgeCampaigns = () => api.post("/api/nudge-campaigns/trigger");
+export const triggerDailyReminders = () => api.post("/api/reminders/trigger");
 
 // Escalations
 export const getEscalations = (params) => api.get("/api/escalations", { params });

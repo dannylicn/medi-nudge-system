@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getPatients, createPatient, getConditions } from "../lib/api";
+import { getPatients, createPatient, getConditions, triggerNudgeCampaigns, triggerDailyReminders } from "../lib/api";
 
 const RISK_CHIP = {
   high: "bg-error-container text-on-error-container",
@@ -19,13 +19,17 @@ export default function PatientsPage() {
   const [newPatient, setNewPatient] = useState({
     full_name: "",
     phone_number: "",
+    nric: "",
     language_preference: "en",
     conditions: [],
     caregiver_name: "",
-    caregiver_telegram_id: "",
+    caregiver_phone_number: "",
   });
   const [enrolling, setEnrolling] = useState(false);
   const [conditionsList, setConditionsList] = useState([]);
+  const [triggeringNudge, setTriggeringNudge] = useState(false);
+  const [triggeringReminder, setTriggeringReminder] = useState(false);
+  const [triggerResult, setTriggerResult] = useState(null);
   const PAGE_SIZE = 20;
 
   useEffect(() => {
@@ -65,12 +69,40 @@ export default function PatientsPage() {
     try {
       await createPatient(newPatient);
       setShowEnrol(false);
-      setNewPatient({ full_name: "", phone_number: "", language_preference: "en", conditions: [], caregiver_name: "", caregiver_telegram_id: "" });
+      setNewPatient({ full_name: "", phone_number: "", nric: "", language_preference: "en", conditions: [], caregiver_name: "", caregiver_phone_number: "" });
       fetchPatients();
     } catch {
       // leave form open
     } finally {
       setEnrolling(false);
+    }
+  };
+
+  const handleTriggerNudge = async () => {
+    setTriggeringNudge(true);
+    setTriggerResult(null);
+    try {
+      const { data } = await triggerNudgeCampaigns();
+      setTriggerResult(`Nudge: ${data.campaigns_created} campaigns created, ${data.checked} checked`);
+    } catch {
+      setTriggerResult("Failed to trigger nudge campaigns");
+    } finally {
+      setTriggeringNudge(false);
+      setTimeout(() => setTriggerResult(null), 5000);
+    }
+  };
+
+  const handleTriggerReminder = async () => {
+    setTriggeringReminder(true);
+    setTriggerResult(null);
+    try {
+      const { data } = await triggerDailyReminders();
+      setTriggerResult(`Reminders: ${data.reminders_sent} sent, ${data.patients_checked} patients checked`);
+    } catch {
+      setTriggerResult("Failed to trigger daily reminders");
+    } finally {
+      setTriggeringReminder(false);
+      setTimeout(() => setTriggerResult(null), 5000);
     }
   };
 
@@ -83,13 +115,35 @@ export default function PatientsPage() {
           <h1 className="font-display text-2xl font-bold text-on-surface tracking-tight">Patients</h1>
           <p className="font-body text-sm text-on-surface/50">{total} total</p>
         </div>
-        <button
-          onClick={() => setShowEnrol(true)}
-          className="bg-gradient-to-br from-primary to-primary-container text-white font-body text-sm font-semibold px-5 py-2.5 rounded-pill transition-opacity hover:opacity-90"
-        >
-          + Enrol Patient
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleTriggerNudge}
+            disabled={triggeringNudge}
+            className="font-body text-xs text-primary border border-primary/30 rounded-pill px-3 py-1.5 hover:bg-primary/5 disabled:opacity-60 transition-colors"
+          >
+            {triggeringNudge ? "Triggering…" : "Trigger Nudge"}
+          </button>
+          <button
+            onClick={handleTriggerReminder}
+            disabled={triggeringReminder}
+            className="font-body text-xs text-primary border border-primary/30 rounded-pill px-3 py-1.5 hover:bg-primary/5 disabled:opacity-60 transition-colors"
+          >
+            {triggeringReminder ? "Triggering…" : "Trigger Reminder"}
+          </button>
+          <button
+            onClick={() => setShowEnrol(true)}
+            className="bg-gradient-to-br from-primary to-primary-container text-white font-body text-sm font-semibold px-5 py-2.5 rounded-pill transition-opacity hover:opacity-90"
+          >
+            + Enrol Patient
+          </button>
+        </div>
       </div>
+
+      {triggerResult && (
+        <div className="mb-4 px-4 py-2.5 bg-tertiary-container/20 border border-tertiary-container/30 rounded-xl font-body text-sm text-on-surface/70">
+          {triggerResult}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex gap-3 mb-5">
@@ -214,6 +268,17 @@ export default function PatientsPage() {
                 />
               </div>
               <div>
+                <label className="block font-body text-xs font-medium text-on-surface/70 mb-1.5">NRIC / FIN</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="S1234567A"
+                  value={newPatient.nric}
+                  onChange={(e) => setNewPatient((prev) => ({ ...prev, nric: e.target.value.toUpperCase() }))}
+                  className="w-full bg-surface-container-highest rounded-xl px-3.5 py-2.5 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed"
+                />
+              </div>
+              <div>
                 <label className="block font-body text-xs font-medium text-on-surface/70 mb-1.5">Phone (E.164)</label>
                 <input
                   type="text"
@@ -248,12 +313,12 @@ export default function PatientsPage() {
                 />
               </div>
               <div>
-                <label className="block font-body text-xs font-medium text-on-surface/70 mb-1.5">Caregiver Telegram ID <span className="text-on-surface/40 font-normal">(optional)</span></label>
+                <label className="block font-body text-xs font-medium text-on-surface/70 mb-1.5">Caregiver Phone <span className="text-on-surface/40 font-normal">(optional — WhatsApp invite will be sent)</span></label>
                 <input
                   type="text"
-                  placeholder="e.g. 123456789"
-                  value={newPatient.caregiver_telegram_id}
-                  onChange={(e) => setNewPatient((prev) => ({ ...prev, caregiver_telegram_id: e.target.value }))}
+                  placeholder="+6591234567"
+                  value={newPatient.caregiver_phone_number}
+                  onChange={(e) => setNewPatient((prev) => ({ ...prev, caregiver_phone_number: e.target.value }))}
                   className="w-full bg-surface-container-highest rounded-xl px-3.5 py-2.5 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed"
                 />
               </div>

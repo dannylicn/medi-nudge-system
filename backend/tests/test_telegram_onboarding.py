@@ -194,7 +194,7 @@ class TestFullStateMachine:
         return m
 
     def test_coordinator_initiated_invited_to_complete(self, db):
-        """invited → consent_pending → language_confirmed → medication_capture → confirm → preferences → complete"""
+        """invited → consent_pending → language_confirmed → medication_capture → confirm → preferences → voice_preference → complete"""
         from app.services.onboarding_service import handle_onboarding_reply
 
         patient = _make_patient(db, "+6591000030", chat_id="777001")
@@ -220,9 +220,14 @@ class TestFullStateMachine:
 
             handle_onboarding_reply(db, patient, "1")  # morning window
             db.refresh(patient)
+            assert patient.onboarding_state == "voice_preference"
+            assert patient.contact_window_start == "08:00"
+
+            handle_onboarding_reply(db, patient, "1")  # text only
+            db.refresh(patient)
             assert patient.onboarding_state == "complete"
             assert patient.is_active is True
-            assert patient.contact_window_start == "08:00"
+            assert patient.nudge_delivery_mode == "text"
 
     def test_drop_off_recovery_creates_escalation(self, db):
         from app.services.onboarding_service import handle_drop_off
