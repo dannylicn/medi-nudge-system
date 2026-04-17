@@ -12,6 +12,13 @@ WEBHOOK_URL = "/api/webhook/telegram"
 DUMMY_SECRET = "test_telegram_webhook_secret"
 
 
+@pytest.fixture(autouse=True)
+def _enforce_webhook_secret(monkeypatch):
+    """Ensure TELEGRAM_WEBHOOK_SECRET is always set so validation is enforced."""
+    import app.services.telegram_service as _ts
+    monkeypatch.setattr(_ts.settings, "TELEGRAM_WEBHOOK_SECRET", DUMMY_SECRET)
+
+
 def _telegram_update(chat_id: str = "123456789", text: str = "Yes"):
     """Build a minimal Telegram Update object."""
     return {
@@ -49,7 +56,7 @@ class TestWebhookSecurity:
 
     @patch("app.services.telegram_service.send_text")
     def test_valid_secret_processes(self, mock_send, client, db):
-        """A request with a valid webhook secret (mocked validation) is processed."""
+        """A request with the correct webhook secret is processed."""
         from app.models.models import Patient
 
         chat_id = "123456789"
@@ -68,11 +75,11 @@ class TestWebhookSecurity:
             db.add(p)
             db.commit()
 
-        with patch("app.routers.webhook.validate_telegram_token", return_value=True):
+        with patch("app.services.telegram_service.send_text"):
             resp = client.post(
                 WEBHOOK_URL,
                 json=_telegram_update(chat_id=chat_id),
-                headers={"X-Telegram-Bot-Api-Secret-Token": "valid"},
+                headers={"X-Telegram-Bot-Api-Secret-Token": DUMMY_SECRET},
             )
 
         assert resp.status_code in (200, 204), (
