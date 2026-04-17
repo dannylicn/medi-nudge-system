@@ -38,6 +38,7 @@ export default function EscalationsPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCases();
   }, [statusFilter, priorityFilter]);
 
