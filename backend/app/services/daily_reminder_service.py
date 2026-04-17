@@ -133,6 +133,8 @@ def _send_due_reminders(
 
         if was_missed:
             pm.consecutive_missed_doses = (pm.consecutive_missed_doses or 0) + 1
+            from app.services.dose_log_service import log_dose
+            log_dose(db, patient.id, pm.medication_id, "missed", "system_detected", patient_medication_id=pm.id)
             logger.debug(
                 "Patient %s missed %s (streak: %d)",
                 patient.id, pm.medication.name if pm.medication else pm.medication_id,

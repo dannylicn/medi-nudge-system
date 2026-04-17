@@ -4,7 +4,7 @@ import {
   getPatient, getPatientMedications, getNudgeCampaigns,
   updatePatient, getMedications, assignMedication,
   createDispensingRecord, getDispensingRecords, getConditions,
-  regenerateInviteLink, generateCaregiverInviteLink,
+  regenerateInviteLink, generateCaregiverInviteLink, getDoseHistory,
 } from "../lib/api";
 
 const CAMPAIGN_STATUS_CHIP = {
@@ -27,6 +27,7 @@ export default function PatientDetailPage() {
   const [medications, setMedications] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [dispensingRecords, setDispensingRecords] = useState([]);
+  const [doseHistory, setDoseHistory] = useState([]);
   const [conditionsList, setConditionsList] = useState([]); // from API
   const [loading, setLoading] = useState(true);
 
@@ -63,12 +64,13 @@ export default function PatientDetailPage() {
 
   const reload = async () => {
     try {
-      const [patientRes, medsRes, campRes, dispRes, condsRes] = await Promise.allSettled([
+      const [patientRes, medsRes, campRes, dispRes, condsRes, doseRes] = await Promise.allSettled([
         getPatient(id),
         getPatientMedications(id),
         getNudgeCampaigns({ patient_id: id, page: 1, page_size: 20 }),
         getDispensingRecords(id),
         getConditions(),
+        getDoseHistory(id, { days: 30 }),
       ]);
       if (patientRes.status === "fulfilled") setPatient(patientRes.value.data);
       if (medsRes.status === "fulfilled") {
@@ -85,6 +87,9 @@ export default function PatientDetailPage() {
       }
       if (condsRes.status === "fulfilled") {
         setConditionsList(condsRes.value.data);
+      }
+      if (doseRes.status === "fulfilled") {
+        setDoseHistory(doseRes.value.data);
       }
     } catch {
       // handled by interceptor
@@ -503,6 +508,34 @@ export default function PatientDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Dose history */}
+      <div className="bg-surface-container-lowest rounded-2xl shadow-ambient p-6 mb-4">
+        <h2 className="font-display text-base font-bold text-on-surface mb-3">Dose History (Last 30 Days)</h2>
+        {doseHistory.length === 0 ? (
+          <p className="font-body text-sm text-on-surface/30">No dose records yet</p>
+        ) : (
+          <div className="space-y-1.5 max-h-64 overflow-y-auto">
+            {doseHistory.map((d) => (
+              <div key={d.id} className="flex items-center gap-3 font-body text-sm py-1.5 px-2 rounded-lg hover:bg-surface-container-highest/40">
+                <span className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${
+                  d.status === "taken" ? "bg-tertiary-container" : "bg-error"
+                }`} />
+                <span className="text-on-surface/70 w-36 flex-shrink-0">
+                  {new Date(d.logged_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                </span>
+                <span className="text-on-surface font-medium">{d.medication_name}</span>
+                <span className={`ml-auto px-2 py-0.5 rounded-pill text-xs font-semibold ${
+                  d.status === "taken" ? "bg-tertiary-container text-on-tertiary-container" : "bg-error-container text-on-error-container"
+                }`}>
+                  {d.status}
+                </span>
+                <span className="text-on-surface/40 text-xs">{d.source.replace("_", " ")}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Medications card */}
       <div className="bg-surface-container-lowest rounded-2xl shadow-ambient p-6 mb-4">

@@ -428,8 +428,9 @@ TAKEN_ACK: dict[str, str] = {
 
 
 def _handle_taken(db: Session, patient: Patient) -> None:
-    """Reset missed-dose streak for patient and send ack."""
+    """Reset missed-dose streak for patient, log dose events, and send ack."""
     from datetime import datetime as _dt
+    from app.services.dose_log_service import log_dose
     active_meds = (
         db.query(PatientMedication)
         .filter(
@@ -441,6 +442,7 @@ def _handle_taken(db: Session, patient: Patient) -> None:
     for pm in active_meds:
         pm.last_taken_at = _dt.utcnow()
         pm.consecutive_missed_doses = 0
+        log_dose(db, patient.id, pm.medication_id, "taken", "patient_reply", patient_medication_id=pm.id)
     db.commit()
 
     lang = patient.language_preference if patient.language_preference in TAKEN_ACK else "en"

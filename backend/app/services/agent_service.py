@@ -339,6 +339,9 @@ def _tool_confirm_adherence(args: dict, patient: Patient, db: Session, **_) -> d
 
     _nudge_svc._transition(db, campaign, "resolved")
 
+    from app.services.dose_log_service import log_dose
+    log_dose(db, patient.id, campaign.medication_id, "taken", "campaign_confirmed")
+
     lang = patient.language_preference or "en"
     TAKEN_ACK = {
         "en": "Great job! 👍 Your medication has been recorded as taken. Keep it up!",

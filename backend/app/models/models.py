@@ -240,6 +240,26 @@ class OutboundMessage(Base):
 
 
 # ---------------------------------------------------------------------------
+# DoseLog (tracks every dose event: taken, missed, skipped)
+# ---------------------------------------------------------------------------
+
+class DoseLog(Base):
+    __tablename__ = "dose_logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    patient_id: Mapped[int] = mapped_column(Integer, ForeignKey("patients.id"), nullable=False)
+    medication_id: Mapped[int] = mapped_column(Integer, ForeignKey("medications.id"), nullable=False)
+    patient_medication_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("patient_medications.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False)  # taken | missed | skipped
+    source: Mapped[str] = mapped_column(String(30), nullable=False)  # patient_reply | campaign_confirmed | caregiver | system_detected
+    logged_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+
+    patient: Mapped["Patient"] = relationship("Patient")
+    medication: Mapped["Medication"] = relationship("Medication")
+
+
+# ---------------------------------------------------------------------------
 # PrescriptionScan
 # ---------------------------------------------------------------------------
 

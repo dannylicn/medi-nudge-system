@@ -346,6 +346,24 @@ class PrescriptionScanOut(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# DoseLog
+# ---------------------------------------------------------------------------
+
+class DoseLogOut(BaseModel):
+    id: int
+    patient_id: int
+    medication_id: int
+    status: str
+    source: str
+    logged_at: datetime
+    created_at: datetime
+    medication_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+# ---------------------------------------------------------------------------
 # OutboundMessage
 # ---------------------------------------------------------------------------
 

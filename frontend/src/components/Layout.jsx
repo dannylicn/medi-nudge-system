@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 const NAV = [
+  { label: "Dashboard", to: "/dashboard", icon: "📋" },
   { label: "Patients", to: "/patients", icon: "👥" },
   { label: "Medications", to: "/medications", icon: "💊" },
   { label: "Escalations", to: "/escalations", icon: "🚨" },
