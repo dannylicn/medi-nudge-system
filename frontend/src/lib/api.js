@@ -61,6 +61,8 @@ export const getConditions = () => api.get("/api/conditions");
 export const getNudgeCampaigns = (params) => api.get("/api/nudge-campaigns", { params });
 export const triggerNudgeCampaigns = () => api.post("/api/nudge-campaigns/trigger");
 export const triggerDailyReminders = () => api.post("/api/reminders/trigger");
+export const triggerPatientNudge = (patientId) => api.post(`/api/patients/${patientId}/nudge/trigger`);
+export const triggerPatientReminder = (patientId) => api.post(`/api/patients/${patientId}/reminder/trigger`);
 
 // Escalations
 export const getEscalations = (params) => api.get("/api/escalations", { params });

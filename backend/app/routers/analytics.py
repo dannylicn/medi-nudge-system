@@ -86,7 +86,7 @@ def trigger_nudge_campaigns(
     db: Session = Depends(get_db),
     _user: User = Depends(get_current_user),
 ):
-    """Manually trigger refill gap detection and nudge campaign creation."""
+    """Manually trigger refill gap detection and nudge campaign creation for all patients."""
     return refill_gap_service.detect_and_trigger(db)
 
 
@@ -97,6 +97,62 @@ def trigger_daily_reminders(
 ):
     """Manually trigger daily medication reminders for all active patients."""
     return send_scheduled_reminders(db, skip_window=True)
+
+
+@router.post("/api/patients/{patient_id}/nudge/trigger")
+def trigger_patient_nudge(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    """Manually trigger refill gap detection for a single patient."""
+    from app.services import nudge_campaign_service
+
+    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    if not patient:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    pms = db.query(PatientMedication).filter(
+        PatientMedication.patient_id == patient_id,
+        PatientMedication.is_active == True,
+    ).all()
+
+    results = {"checked": 0, "campaigns_created": 0, "errors": 0}
+    today = datetime.utcnow().date()
+    for pm in pms:
+        results["checked"] += 1
+        try:
+            refill_gap_service._process_patient_medication(db, pm, today, results)
+        except Exception:
+            results["errors"] += 1
+    return results
+
+
+@router.post("/api/patients/{patient_id}/reminder/trigger")
+def trigger_patient_reminder(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    """Manually trigger daily medication reminder for a single patient."""
+    from app.services.daily_reminder_service import _send_due_reminders, FREQUENCY_DEFAULTS
+    from datetime import datetime as _dt
+    from zoneinfo import ZoneInfo
+    from sqlalchemy.orm import joinedload
+
+    patient = db.query(Patient).filter(Patient.id == patient_id, Patient.is_active == True).first()
+    if not patient:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    now_sgt = _dt.now(ZoneInfo("Asia/Singapore"))
+    results = {"patients_checked": 1, "reminders_sent": 0, "skipped": 0, "errors": 0}
+    try:
+        _send_due_reminders(db, patient, now_sgt, results, skip_window=True)
+    except Exception:
+        results["errors"] += 1
+    return results
 
 
 @router.get("/api/dashboard/summary")
