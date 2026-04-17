@@ -184,11 +184,13 @@ jobs:
             --no-cli-pager
 
       - name: Wait for services to stabilise
-        timeout-minutes: 10
+        timeout-minutes: 20
         run: |
           aws ecs wait services-stable \
             --cluster "${{ env.ECS_CLUSTER }}" \
-            --services api-service scheduler-service
+            --services api-service scheduler-service \
+            --cli-read-timeout 1200 \
+            --cli-connect-timeout 30
 
   # ────────────────────────────────────────────────────────────────────────────
   deploy-frontend:
