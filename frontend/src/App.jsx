@@ -2,12 +2,13 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
-import PatientsPage from "./pages/PatientsPage";
+// PatientsPage merged into DashboardPage
 import PatientDetailPage from "./pages/PatientDetailPage";
 import EscalationsPage from "./pages/EscalationsPage";
 import OcrReviewPage from "./pages/OcrReviewPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import MedicationsPage from "./pages/MedicationsPage";
+import DashboardPage from "./pages/DashboardPage";
 
 function RequireAuth({ children }) {
   const { user } = useAuth();
@@ -24,8 +25,9 @@ function AppRoutes() {
           <RequireAuth>
             <Layout>
               <Routes>
-                <Route path="/" element={<Navigate to="/patients" replace />} />
-                <Route path="/patients" element={<PatientsPage />} />
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/patients" element={<DashboardPage />} />
                 <Route path="/patients/:id" element={<PatientDetailPage />} />
                 <Route path="/medications" element={<MedicationsPage />} />
                 <Route path="/escalations" element={<EscalationsPage />} />

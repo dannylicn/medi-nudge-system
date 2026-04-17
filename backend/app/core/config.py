@@ -12,7 +12,10 @@ class Settings(BaseSettings):
     LLM_BASE_URL: str = ""
     LLM_MODEL: str = "gpt-4o"
     ELEVENLABS_API_KEY: str = ""
+    ELEVENLABS_DEFAULT_VOICE_FEMALE: str = ""  # e.g. Rachel voice ID
+    ELEVENLABS_DEFAULT_VOICE_MALE: str = ""    # e.g. Antoni voice ID
     TELEGRAM_BOT_TOKEN: str = ""
+    TELEGRAM_BOT_USERNAME: str = ""  # e.g. MediNudgeBot (without @)
     TELEGRAM_WEBHOOK_SECRET: str = ""
     WARNING_DAYS: int = 3
     ESCALATION_DAYS: int = 14
@@ -29,6 +32,11 @@ class Settings(BaseSettings):
 
     # Scheduler — set to False on API tasks; scheduler runs in a dedicated ECS task
     SCHEDULER_ENABLED: bool = True
+
+    # Twilio — optional; enables SMS/WhatsApp caregiver invite delivery
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_FROM_NUMBER: str = ""  # E.164, e.g. +6512345678 or whatsapp:+14155238886
 
     class Config:
         env_file = ".env"

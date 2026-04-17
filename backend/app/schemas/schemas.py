@@ -11,7 +11,8 @@ import re
 
 def validate_e164(phone: str) -> str:
     """Normalise and validate E.164 phone numbers."""
-    phone = phone.strip()
+    # Strip all whitespace and common separators
+    phone = re.sub(r"[\s\-\.\(\)]", "", phone.strip())
     # Allow bare 8-digit Singapore numbers and auto-prefix
     if re.match(r"^[89]\d{7}$", phone):
         phone = "+65" + phone
@@ -45,11 +46,28 @@ class TokenResponse(BaseModel):
 class PatientCreate(BaseModel):
     full_name: str
     phone_number: str
+    nric: str  # Plaintext NRIC/FIN — hashed before storage, never persisted
     age: Optional[int] = None
-    nric: Optional[str] = None  # Plaintext NRIC — hashed before storage, never persisted
     language_preference: str = "en"
     conditions: list[str] = []
     risk_level: str = "normal"
+    caregiver_name: Optional[str] = None
+    caregiver_phone_number: Optional[str] = None  # E.164 — Twilio sends invite link here
+
+    @field_validator("caregiver_phone_number")
+    @classmethod
+    def normalise_caregiver_phone(cls, v: Optional[str]) -> Optional[str]:
+        if v is None or v.strip() == "":
+            return None
+        return validate_e164(v.strip())
+
+    @field_validator("nric")
+    @classmethod
+    def validate_nric(cls, v: str) -> str:
+        v = v.strip().upper()
+        if not re.match(r"^[STFGM]\d{7}[A-Z]$", v):
+            raise ValueError("NRIC/FIN must be in format S1234567A (S/T/F/G/M + 7 digits + letter)")
+        return v
 
     @field_validator("phone_number")
     @classmethod
@@ -85,7 +103,10 @@ class PatientUpdate(BaseModel):
     contact_window_start: Optional[str] = None
     contact_window_end: Optional[str] = None
     caregiver_name: Optional[str] = None
-    caregiver_telegram_id: Optional[str] = None
+    caregiver_phone_number: Optional[str] = None  # E.164 — triggers invite SMS when set
+    caregiver_telegram_id: Optional[str] = None   # auto-populated once caregiver links bot
+    nudge_delivery_mode: Optional[str] = None
+    selected_voice_id: Optional[str] = None
 
     @field_validator("language_preference")
     @classmethod
@@ -116,8 +137,15 @@ class PatientOut(BaseModel):
     contact_window_start: Optional[str]
     contact_window_end: Optional[str]
     caregiver_name: Optional[str]
+    caregiver_phone_number: Optional[str]
     caregiver_telegram_id: Optional[str]
+    telegram_chat_id: Optional[str]
+    nudge_delivery_mode: str = "text"
+    selected_voice_id: Optional[str] = None
     created_at: datetime
+    # Populated only on creation / token regeneration, not stored on the model
+    invite_link: Optional[str] = None
+    onboarding_qr_code: Optional[str] = None  # base64 PNG
     # nric_hash is intentionally excluded from API responses
 
     class Config:
@@ -312,6 +340,46 @@ class PrescriptionScanOut(BaseModel):
     uploaded_at: datetime
     fields: list[ExtractedFieldOut] = []
     # image_path intentionally excluded
+
+    class Config:
+        from_attributes = True
+
+
+# ---------------------------------------------------------------------------
+# DoseLog
+# ---------------------------------------------------------------------------
+
+class DoseLogOut(BaseModel):
+    id: int
+    patient_id: int
+    medication_id: int
+    status: str
+    source: str
+    logged_at: datetime
+    created_at: datetime
+    medication_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+# ---------------------------------------------------------------------------
+# OutboundMessage
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# VoiceProfile
+# ---------------------------------------------------------------------------
+
+class VoiceProfileOut(BaseModel):
+    id: int
+    patient_id: int
+    donor_name: Optional[str]
+    elevenlabs_voice_id: Optional[str]
+    patient_consent_at: Optional[datetime]
+    donor_consent_at: Optional[datetime]
+    is_active: bool
+    created_at: datetime
 
     class Config:
         from_attributes = True

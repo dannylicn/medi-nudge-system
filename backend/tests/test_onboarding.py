@@ -14,8 +14,8 @@ import pytest
 
 class TestOnboardingService:
     def test_send_invite_sets_state(self, db):
-        """send_invite should set onboarding_state to 'invited' and send message."""
-        from app.models.models import Patient
+        """send_invite (legacy shim) should generate an OnboardingToken and return invite data."""
+        from app.models.models import Patient, OnboardingToken
         from app.services.onboarding_service import send_invite
 
         patient = Patient(
@@ -24,23 +24,18 @@ class TestOnboardingService:
             language_preference="en",
             risk_level="low",
             is_active=True,
-            onboarding_state="complete",
+            onboarding_state="invited",
         )
         db.add(patient)
         db.commit()
         db.refresh(patient)
 
-        with patch("app.services.telegram_service.send_text") as mock_send:
-            mock_msg = MagicMock()
-            mock_msg.status = "sent"
-            mock_send.return_value = mock_msg
-            send_invite(db, patient)
+        send_invite(db, patient)
 
-        db.refresh(patient)
-        assert patient.onboarding_state == "invited"
-        mock_send.assert_called_once()
-        call_kwargs = mock_send.call_args
-        assert "Medi-Nudge" in call_kwargs.kwargs.get("body", call_kwargs[1].get("body", ""))
+        token_row = db.query(OnboardingToken).filter(OnboardingToken.patient_id == patient.id).first()
+        assert token_row is not None, "Expected an OnboardingToken to be created"
+        assert token_row.token is not None
+        assert token_row.used_at is None  # not yet consumed
 
     def test_invite_reply_yes_transitions_to_consent_pending(self, db):
         """Replying YES to invite should set consent and move to consent_pending."""
@@ -54,6 +49,7 @@ class TestOnboardingService:
             risk_level="low",
             is_active=True,
             onboarding_state="invited",
+            telegram_chat_id="100002",
         )
         db.add(patient)
         db.commit()
@@ -95,7 +91,7 @@ class TestOnboardingService:
         assert patient.is_active is False
 
     def test_language_reply_completes_onboarding(self, db):
-        """Selecting a language after consent should complete onboarding."""
+        """Selecting a language after consent should advance to language_confirmed."""
         from app.models.models import Patient
         from app.services.onboarding_service import handle_onboarding_reply
 
@@ -106,6 +102,7 @@ class TestOnboardingService:
             risk_level="low",
             is_active=True,
             onboarding_state="consent_pending",
+            telegram_chat_id="100004",
         )
         db.add(patient)
         db.commit()
@@ -118,16 +115,12 @@ class TestOnboardingService:
             handle_onboarding_reply(db, patient, "2")  # Chinese
 
         db.refresh(patient)
-        assert patient.onboarding_state == "complete"
+        assert patient.onboarding_state == "language_confirmed"
         assert patient.language_preference == "zh"
-        # Should send welcome message
         mock_send.assert_called_once()
-        call_kwargs = mock_send.call_args
-        body = call_kwargs.kwargs.get("body", call_kwargs[1].get("body", ""))
-        assert "Medi-Nudge" in body
 
     def test_language_reply_english(self, db):
-        """Selecting English should set language to 'en' and complete."""
+        """Selecting English should set language to 'en' and advance to language_confirmed."""
         from app.models.models import Patient
         from app.services.onboarding_service import handle_onboarding_reply
 
@@ -138,23 +131,21 @@ class TestOnboardingService:
             risk_level="low",
             is_active=True,
             onboarding_state="consent_pending",
+            telegram_chat_id="100005",
         )
         db.add(patient)
         db.commit()
         db.refresh(patient)
 
-        with patch("app.services.telegram_service.send_text") as mock_send:
-            mock_msg = MagicMock()
-            mock_msg.status = "sent"
-            mock_send.return_value = mock_msg
+        with patch("app.services.telegram_service.send_text"):
             handle_onboarding_reply(db, patient, "1")
 
         db.refresh(patient)
-        assert patient.onboarding_state == "complete"
+        assert patient.onboarding_state == "language_confirmed"
         assert patient.language_preference == "en"
 
     def test_language_reply_malay(self, db):
-        """Selecting Malay should set language to 'ms' and complete."""
+        """Selecting Malay should set language to 'ms' and advance to language_confirmed."""
         from app.models.models import Patient
         from app.services.onboarding_service import handle_onboarding_reply
 
@@ -165,19 +156,17 @@ class TestOnboardingService:
             risk_level="low",
             is_active=True,
             onboarding_state="consent_pending",
+            telegram_chat_id="100006",
         )
         db.add(patient)
         db.commit()
         db.refresh(patient)
 
-        with patch("app.services.telegram_service.send_text") as mock_send:
-            mock_msg = MagicMock()
-            mock_msg.status = "sent"
-            mock_send.return_value = mock_msg
+        with patch("app.services.telegram_service.send_text"):
             handle_onboarding_reply(db, patient, "3")
 
         db.refresh(patient)
-        assert patient.onboarding_state == "complete"
+        assert patient.onboarding_state == "language_confirmed"
         assert patient.language_preference == "ms"
 
     def test_invalid_language_stays_in_consent_pending(self, db):
@@ -230,7 +219,7 @@ class TestOnboardingService:
         assert esc.reason == "onboarding_drop_off"
 
     def test_drop_off_retry_resends_invite(self, db):
-        """Drop-off with retry_count < 2 should re-send invite."""
+        """Drop-off with retry_count < 2 and telegram_chat_id set should re-send consent message."""
         from app.models.models import Patient
         from app.services.onboarding_service import handle_drop_off
 
@@ -241,6 +230,7 @@ class TestOnboardingService:
             risk_level="low",
             is_active=True,
             onboarding_state="invited",
+            telegram_chat_id="100009",
         )
         db.add(patient)
         db.commit()
@@ -267,7 +257,7 @@ class TestOnboardingWebhookIntegration:
         mock_msg.status = "sent"
         mock_send.return_value = mock_msg
 
-        # Create a patient in invited state
+        # Create a patient in invited state with telegram_chat_id matching the simulated chat.id
         patient = Patient(
             full_name="E2E Onboarding",
             phone_number="200001",
@@ -275,6 +265,7 @@ class TestOnboardingWebhookIntegration:
             risk_level="low",
             is_active=True,
             onboarding_state="invited",
+            telegram_chat_id="200001",
         )
         db.add(patient)
         db.commit()
@@ -300,7 +291,7 @@ class TestOnboardingWebhookIntegration:
         assert patient.onboarding_state == "consent_pending"
         assert patient.consent_channel == "telegram"
 
-        # Step 2: Patient picks language (Chinese)
+        # Step 2: Patient picks language (Chinese) → language_confirmed (not complete)
         with patch("app.routers.webhook.validate_telegram_token", return_value=True):
             resp = client.post(
                 "/api/webhook/telegram",
@@ -317,7 +308,7 @@ class TestOnboardingWebhookIntegration:
             )
         assert resp.status_code == 200
         db.refresh(patient)
-        assert patient.onboarding_state == "complete"
+        assert patient.onboarding_state == "language_confirmed"
         assert patient.language_preference == "zh"
 
     @patch("app.services.telegram_service.send_text")

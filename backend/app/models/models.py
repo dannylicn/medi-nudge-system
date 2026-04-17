@@ -37,9 +37,17 @@ class Patient(Base):
     consent_channel: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     contact_window_start: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)  # e.g. "15:00"
     contact_window_end: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    # Telegram linkage (set when patient scans QR or /start token is validated)
+    telegram_chat_id: Mapped[Optional[str]] = mapped_column(String(30), unique=True, nullable=True)
     # Caregiver contact (notified when patient misses doses repeatedly)
     caregiver_name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
-    caregiver_telegram_id: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    caregiver_phone_number: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)  # E.164 — used to send invite
+    caregiver_telegram_id: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)  # auto-set when caregiver links via bot
+    # Voice nudge preferences
+    nudge_delivery_mode: Mapped[str] = mapped_column(String(10), default="text", nullable=False)  # text | voice | both
+    selected_voice_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # ElevenLabs voice ID
+    # Conversation state — tracks what the bot is waiting for from this patient
+    pending_action: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # e.g. "voice_consent"
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -48,6 +56,7 @@ class Patient(Base):
     nudge_campaigns: Mapped[list["NudgeCampaign"]] = relationship("NudgeCampaign", back_populates="patient")
     escalation_cases: Mapped[list["EscalationCase"]] = relationship("EscalationCase", back_populates="patient")
     prescription_scans: Mapped[list["PrescriptionScan"]] = relationship("PrescriptionScan", back_populates="patient")
+    onboarding_tokens: Mapped[list["OnboardingToken"]] = relationship("OnboardingToken", back_populates="patient")
 
 
 # ---------------------------------------------------------------------------
@@ -231,6 +240,26 @@ class OutboundMessage(Base):
 
 
 # ---------------------------------------------------------------------------
+# DoseLog (tracks every dose event: taken, missed, skipped)
+# ---------------------------------------------------------------------------
+
+class DoseLog(Base):
+    __tablename__ = "dose_logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    patient_id: Mapped[int] = mapped_column(Integer, ForeignKey("patients.id"), nullable=False)
+    medication_id: Mapped[int] = mapped_column(Integer, ForeignKey("medications.id"), nullable=False)
+    patient_medication_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("patient_medications.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False)  # taken | missed | skipped
+    source: Mapped[str] = mapped_column(String(30), nullable=False)  # patient_reply | campaign_confirmed | caregiver | system_detected
+    logged_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+
+    patient: Mapped["Patient"] = relationship("Patient")
+    medication: Mapped["Medication"] = relationship("Medication")
+
+
+# ---------------------------------------------------------------------------
 # PrescriptionScan
 # ---------------------------------------------------------------------------
 
@@ -289,3 +318,42 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(200), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+
+
+# ---------------------------------------------------------------------------
+# OnboardingToken (one-time QR deep-link tokens)
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# VoiceProfile (caregiver voice clone for personalised nudges)
+# ---------------------------------------------------------------------------
+
+class VoiceProfile(Base):
+    __tablename__ = "voice_profiles"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    patient_id: Mapped[int] = mapped_column(Integer, ForeignKey("patients.id"), nullable=False)
+    donor_name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    donor_telegram_id: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    elevenlabs_voice_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    sample_file_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    patient_consent_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    donor_consent_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+
+    patient: Mapped["Patient"] = relationship("Patient")
+
+
+class OnboardingToken(Base):
+    __tablename__ = "onboarding_tokens"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    patient_id: Mapped[int] = mapped_column(Integer, ForeignKey("patients.id"), nullable=False)
+    token: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    used_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+    is_caregiver: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)  # True = caregiver invite token
+
+    patient: Mapped["Patient"] = relationship("Patient", back_populates="onboarding_tokens")

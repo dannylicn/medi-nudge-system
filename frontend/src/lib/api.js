@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (r) => r,
   (err) => {
-    if (err.response?.status === 401) {
+    if (err.response?.status === 401 && !window.location.pathname.includes("/login")) {
       clearToken();
       window.location.href = "/login";
     }
@@ -35,6 +35,8 @@ export const getPatient = (id) => api.get(`/api/patients/${id}`);
 export const createPatient = (data) => api.post("/api/patients", data);
 export const updatePatient = (id, data) => api.patch(`/api/patients/${id}`, data);
 export const deletePatient = (id) => api.delete(`/api/patients/${id}`);
+export const regenerateInviteLink = (id) => api.post(`/api/patients/${id}/invite-link`);
+export const generateCaregiverInviteLink = (id) => api.post(`/api/patients/${id}/caregiver-invite-link`);
 
 // Medication catalog
 export const getMedications = () => api.get("/api/medications");
@@ -57,6 +59,10 @@ export const getConditions = () => api.get("/api/conditions");
 
 // Nudge campaigns
 export const getNudgeCampaigns = (params) => api.get("/api/nudge-campaigns", { params });
+export const triggerNudgeCampaigns = () => api.post("/api/nudge-campaigns/trigger");
+export const triggerDailyReminders = () => api.post("/api/reminders/trigger");
+export const triggerPatientNudge = (patientId) => api.post(`/api/patients/${patientId}/nudge/trigger`);
+export const triggerPatientReminder = (patientId) => api.post(`/api/patients/${patientId}/reminder/trigger`);
 
 // Escalations
 export const getEscalations = (params) => api.get("/api/escalations", { params });
@@ -79,5 +85,10 @@ export const getAdherenceAnalytics = (params) =>
   api.get("/api/analytics/adherence", { params });
 export const getEscalationAnalytics = (params) =>
   api.get("/api/analytics/escalations", { params });
+export const getDoseHistory = (patientId, params) =>
+  api.get(`/api/patients/${patientId}/dose-history`, { params });
+export const getDoseAdherence = (params) =>
+  api.get("/api/analytics/dose-adherence", { params });
+export const getDashboardSummary = () => api.get("/api/dashboard/summary");
 
 export default api;

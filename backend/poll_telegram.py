@@ -57,10 +57,13 @@ def main():
 
                 # Forward to local webhook
                 try:
+                    headers = {}
+                    if WEBHOOK_SECRET:
+                        headers["X-Telegram-Bot-Api-Secret-Token"] = WEBHOOK_SECRET
                     r = httpx.post(
                         LOCAL_WEBHOOK,
                         json=update,
-                        headers={"X-Telegram-Bot-Api-Secret-Token": WEBHOOK_SECRET},
+                        headers=headers,
                         timeout=10,
                     )
                     print(f"  -> {r.status_code} {r.text[:100]}")

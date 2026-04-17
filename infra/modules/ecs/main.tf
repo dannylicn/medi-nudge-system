@@ -27,8 +27,11 @@ data "aws_secretsmanager_secret" "jwt_secret_key"          { name = "${local.sec
 data "aws_secretsmanager_secret" "openai_api_key"          { name = "${local.secret_base}/openai-api-key" }
 data "aws_secretsmanager_secret" "telegram_bot_token"      { name = "${local.secret_base}/telegram-bot-token" }
 data "aws_secretsmanager_secret" "telegram_webhook_secret" { name = "${local.secret_base}/telegram-webhook-secret" }
-data "aws_secretsmanager_secret" "elevenlabs_api_key"      { name = "${local.secret_base}/elevenlabs-api-key" }
-data "aws_secretsmanager_secret" "allowed_origins"         { name = "${local.secret_base}/allowed-origins" }
+data "aws_secretsmanager_secret" "elevenlabs_api_key"              { name = "${local.secret_base}/elevenlabs-api-key" }
+data "aws_secretsmanager_secret" "elevenlabs_default_voice_female" { name = "${local.secret_base}/elevenlabs-default-voice-female" }
+data "aws_secretsmanager_secret" "elevenlabs_default_voice_male"   { name = "${local.secret_base}/elevenlabs-default-voice-male" }
+data "aws_secretsmanager_secret" "telegram_bot_username"          { name = "${local.secret_base}/telegram-bot-username" }
+data "aws_secretsmanager_secret" "allowed_origins"                { name = "${local.secret_base}/allowed-origins" }
 
 resource "aws_ecs_cluster" "main" {
   name = "medi-nudge-${var.environment}"
@@ -84,9 +87,12 @@ resource "aws_ecs_task_definition" "api" {
       { name = "JWT_SECRET_KEY",            valueFrom = data.aws_secretsmanager_secret.jwt_secret_key.arn },
       { name = "OPENAI_API_KEY",            valueFrom = data.aws_secretsmanager_secret.openai_api_key.arn },
       { name = "TELEGRAM_BOT_TOKEN",        valueFrom = data.aws_secretsmanager_secret.telegram_bot_token.arn },
-      { name = "TELEGRAM_WEBHOOK_SECRET",   valueFrom = data.aws_secretsmanager_secret.telegram_webhook_secret.arn },
-      { name = "ELEVENLABS_API_KEY",        valueFrom = data.aws_secretsmanager_secret.elevenlabs_api_key.arn },
-      { name = "ALLOWED_ORIGINS",           valueFrom = data.aws_secretsmanager_secret.allowed_origins.arn },
+      { name = "TELEGRAM_WEBHOOK_SECRET",              valueFrom = data.aws_secretsmanager_secret.telegram_webhook_secret.arn },
+      { name = "TELEGRAM_BOT_USERNAME",              valueFrom = data.aws_secretsmanager_secret.telegram_bot_username.arn },
+      { name = "ELEVENLABS_API_KEY",                 valueFrom = data.aws_secretsmanager_secret.elevenlabs_api_key.arn },
+      { name = "ELEVENLABS_DEFAULT_VOICE_FEMALE",    valueFrom = data.aws_secretsmanager_secret.elevenlabs_default_voice_female.arn },
+      { name = "ELEVENLABS_DEFAULT_VOICE_MALE",      valueFrom = data.aws_secretsmanager_secret.elevenlabs_default_voice_male.arn },
+      { name = "ALLOWED_ORIGINS",                    valueFrom = data.aws_secretsmanager_secret.allowed_origins.arn },
     ]
 
     healthCheck = {
@@ -140,8 +146,11 @@ resource "aws_ecs_task_definition" "scheduler" {
       { name = "DATABASE_URL",            valueFrom = var.db_secret_arn },
       { name = "OPENAI_API_KEY",          valueFrom = data.aws_secretsmanager_secret.openai_api_key.arn },
       { name = "TELEGRAM_BOT_TOKEN",      valueFrom = data.aws_secretsmanager_secret.telegram_bot_token.arn },
-      { name = "TELEGRAM_WEBHOOK_SECRET", valueFrom = data.aws_secretsmanager_secret.telegram_webhook_secret.arn },
-      { name = "ELEVENLABS_API_KEY",      valueFrom = data.aws_secretsmanager_secret.elevenlabs_api_key.arn },
+      { name = "TELEGRAM_WEBHOOK_SECRET",           valueFrom = data.aws_secretsmanager_secret.telegram_webhook_secret.arn },
+      { name = "TELEGRAM_BOT_USERNAME",           valueFrom = data.aws_secretsmanager_secret.telegram_bot_username.arn },
+      { name = "ELEVENLABS_API_KEY",              valueFrom = data.aws_secretsmanager_secret.elevenlabs_api_key.arn },
+      { name = "ELEVENLABS_DEFAULT_VOICE_FEMALE", valueFrom = data.aws_secretsmanager_secret.elevenlabs_default_voice_female.arn },
+      { name = "ELEVENLABS_DEFAULT_VOICE_MALE",   valueFrom = data.aws_secretsmanager_secret.elevenlabs_default_voice_male.arn },
     ]
 
     logConfiguration = {
