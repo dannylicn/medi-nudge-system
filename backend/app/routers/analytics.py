@@ -105,27 +105,35 @@ def trigger_patient_nudge(
     db: Session = Depends(get_db),
     _user: User = Depends(get_current_user),
 ):
-    """Manually trigger refill gap detection for a single patient."""
-    from app.services import nudge_campaign_service
+    """Fire all pending nudge campaigns for a patient immediately (testing / manual override)."""
+    from app.services.nudge_campaign_service import fire_campaign
+    from app.models.models import NudgeCampaign
 
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient:
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    pms = db.query(PatientMedication).filter(
-        PatientMedication.patient_id == patient_id,
-        PatientMedication.is_active == True,
-    ).all()
+    pending = (
+        db.query(NudgeCampaign)
+        .filter(
+            NudgeCampaign.patient_id == patient_id,
+            NudgeCampaign.status == "pending",
+        )
+        .all()
+    )
 
-    results = {"checked": 0, "campaigns_created": 0, "errors": 0}
-    today = datetime.utcnow().date()
-    for pm in pms:
-        results["checked"] += 1
+    results = {"campaigns_fired": 0, "campaigns_failed": 0, "errors": 0}
+    for campaign in pending:
         try:
-            refill_gap_service._process_patient_medication(db, pm, today, results)
+            fire_campaign(db, campaign)
+            if campaign.status == "sent":
+                results["campaigns_fired"] += 1
+            else:
+                results["campaigns_failed"] += 1
         except Exception:
             results["errors"] += 1
+
     return results
 
 

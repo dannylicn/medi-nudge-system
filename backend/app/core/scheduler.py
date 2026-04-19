@@ -47,6 +47,15 @@ def start_scheduler():
         misfire_grace_time=3600,
     )
 
+    # Every 30 minutes — fire pending nudge campaigns whose fire_at <= now
+    scheduler.add_job(
+        _run_fire_due_campaigns,
+        IntervalTrigger(minutes=30),
+        id="fire_due_campaigns",
+        replace_existing=True,
+        misfire_grace_time=300,
+    )
+
     # Every 30 minutes — send medication reminders based on each patient's schedule (SGT)
     scheduler.add_job(
         _run_daily_medication_reminder,
@@ -54,6 +63,15 @@ def start_scheduler():
         id="daily_medication_reminder",
         replace_existing=True,
         misfire_grace_time=300,
+    )
+
+    # Daily at 09:05 SGT — side-effect check-in for medications started 3 days ago
+    scheduler.add_job(
+        _run_side_effect_checkin,
+        CronTrigger(hour=9, minute=5, timezone="Asia/Singapore"),
+        id="side_effect_checkin",
+        replace_existing=True,
+        misfire_grace_time=3600,
     )
 
     scheduler.start()
@@ -151,6 +169,28 @@ def _run_onboarding_drop_off_check():
         db.close()
     except Exception as exc:
         logger.error("Onboarding drop-off check failed: %s", exc)
+
+
+def _run_fire_due_campaigns():
+    """Fire all pending nudge campaigns whose fire_at <= now."""
+    try:
+        from app.services.nudge_campaign_service import fire_due_campaigns
+        results = fire_due_campaigns()
+        if results["fired"] or results["failed"]:
+            logger.info("fire_due_campaigns: %s", results)
+    except Exception as exc:
+        logger.error("fire_due_campaigns failed: %s", exc)
+
+
+def _run_side_effect_checkin():
+    """Check for medications started 3-4 days ago and send one-time check-in messages."""
+    logger.info("Running side-effect check-in ...")
+    try:
+        from app.services.side_effect_checkin_service import run_side_effect_checkin_check
+        results = run_side_effect_checkin_check()
+        logger.info("Side-effect check-in results: %s", results)
+    except Exception as exc:
+        logger.error("Side-effect check-in failed: %s", exc)
 
 
 def _run_daily_medication_reminder():

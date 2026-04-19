@@ -1,6 +1,6 @@
 # Spec Delta: medication-adherence-tracking (make-bot-agentic)
 
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: Medicine verification gate before PatientMedication creation
 When a patient types a medicine name during the onboarding manual-entry sub-flow, the system MUST fuzzy-search the `medications` catalogue before creating a `PatientMedication` record. A `PatientMedication` MUST only be created when the patient has confirmed a specific catalogued entry.

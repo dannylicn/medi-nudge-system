@@ -127,18 +127,19 @@ class TestStartCommand:
             mock_raw.assert_called_once()
             assert "already been used" in mock_raw.call_args[0][1].lower()
 
-    def test_no_token_creates_stub_and_prompts_nric(self, db):
+    def test_no_token_creates_stub_and_prompts_language(self, db):
         from app.services.onboarding_service import handle_start_command
         from app.models.models import Patient
 
-        with patch("app.services.onboarding_service._send_raw") as mock_raw:
+        with patch("app.services.onboarding_service._send_raw_keyboard") as mock_kbd:
             handle_start_command(db, "999004", None)
-            mock_raw.assert_called_once()
-            assert "nric" in mock_raw.call_args[0][1].lower()
+            mock_kbd.assert_called_once()
+            # First message should be the language selection welcome
+            assert "language" in mock_kbd.call_args[0][1].lower() or "medi-nudge" in mock_kbd.call_args[0][1].lower()
 
         stub = db.query(Patient).filter(Patient.telegram_chat_id == "999004").first()
         assert stub is not None
-        assert stub.onboarding_state == "identity_verification"
+        assert stub.onboarding_state == "self_lang"
         assert stub.is_active is False
 
 

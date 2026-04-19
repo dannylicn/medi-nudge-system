@@ -167,11 +167,25 @@ TOOL_SCHEMAS = [
 # Context builder (strips PII)
 # ---------------------------------------------------------------------------
 
+def _active_med_ids(patient_id: int, db: Session) -> list[int]:
+    """Return medication IDs that are currently active for a patient."""
+    from app.models.models import PatientMedication as _PM
+    return [
+        pm.medication_id for pm in
+        db.query(_PM).filter(_PM.patient_id == patient_id, _PM.is_active == True).all()  # noqa: E712
+    ]
+
+
 def _build_context(patient: Patient, db: Session) -> dict:
     """Build a compact context dict for the LLM. Strips NRIC hash and raw phone_number."""
+    med_ids = _active_med_ids(patient.id, db)
     active_campaign = (
         db.query(NudgeCampaign)
-        .filter(NudgeCampaign.patient_id == patient.id, NudgeCampaign.status == "sent")
+        .filter(
+            NudgeCampaign.patient_id == patient.id,
+            NudgeCampaign.status == "sent",
+            NudgeCampaign.medication_id.in_(med_ids) if med_ids else False,
+        )
         .order_by(NudgeCampaign.created_at.desc())
         .first()
     )
@@ -404,9 +418,14 @@ def _fallback_agent(patient: Patient, text: str, db: Session) -> None:
     response_type = classify_response(text)
     lang = patient.language_preference or "en"
 
+    med_ids = _active_med_ids(patient.id, db)
     open_campaign = (
         db.query(NudgeCampaign)
-        .filter(NudgeCampaign.patient_id == patient.id, NudgeCampaign.status == "sent")
+        .filter(
+            NudgeCampaign.patient_id == patient.id,
+            NudgeCampaign.status == "sent",
+            NudgeCampaign.medication_id.in_(med_ids) if med_ids else False,
+        )
         .order_by(NudgeCampaign.created_at.desc())
         .first()
     )

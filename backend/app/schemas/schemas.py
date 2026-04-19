@@ -205,6 +205,7 @@ class PatientMedicationOut(BaseModel):
     last_reminded_at: Optional[datetime]
     last_taken_at: Optional[datetime]
     is_active: bool
+    med_info_card_sent_at: Optional[datetime] = None
     medication: Optional[MedicationOut] = None
     dose_logs: list["DoseEventOut"] = []
 

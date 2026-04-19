@@ -2,14 +2,16 @@
 Telegram inbound webhook endpoint.
 Validates the X-Telegram-Bot-Api-Secret-Token header before processing.
 """
+import json
 import logging
+from datetime import datetime
 from fastapi import APIRouter, Request, Response, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.config import settings
-from app.models.models import Patient, NudgeCampaign, OutboundMessage, PatientMedication, VoiceProfile
+from app.models.models import Patient, NudgeCampaign, OutboundMessage, PatientMedication, VoiceProfile, PrescriptionScan
 from app.services.response_classifier import classify_response
-from app.services import nudge_campaign_service, onboarding_service, ocr_service, agent_service
+from app.services import nudge_campaign_service, onboarding_service, ocr_service, agent_service, escalation_service
 from app.services.telegram_service import validate_telegram_token, send_text, answer_callback_query
 
 logger = logging.getLogger(__name__)
@@ -107,6 +109,18 @@ async def inbound_telegram(
         agent_service.handle_medication_confirm_reply(patient, text, db)
         return {"ok": True}
 
+    # OCR fast-path confirmation pending
+    if patient.onboarding_state == "patient_pending_ocr_confirmation":
+        upper = text.strip().upper()
+        if upper == "CONFIRM":
+            _handle_ocr_confirm(db, patient)
+        elif upper == "EDIT":
+            _handle_ocr_edit(db, patient)
+        else:
+            # Re-prompt with buttons
+            _re_prompt_ocr_confirmation(db, patient)
+        return {"ok": True}
+
     # Onboarding flow
     if patient.onboarding_state in ONBOARDING_STATES:
         onboarding_service.handle_onboarding_reply(db, patient, text)
@@ -143,6 +157,14 @@ def _handle_callback_query(db: Session, callback_query: dict) -> None:
         agent_service.handle_medication_confirm_reply(patient, data, db)
         return
 
+    if patient.onboarding_state == "patient_pending_ocr_confirmation":
+        upper = data.strip().upper()
+        if upper == "CONFIRM":
+            _handle_ocr_confirm(db, patient)
+        elif upper == "EDIT":
+            _handle_ocr_edit(db, patient)
+        return
+
     if patient.onboarding_state in ONBOARDING_STATES:
         onboarding_service.handle_onboarding_reply(db, patient, data)
         return
@@ -157,6 +179,11 @@ def _handle_pending_action(db: Session, patient: Patient, message: dict, text: s
     Returns True if handled, False to fall through to normal routing.
     """
     action = patient.pending_action
+
+    if action == "schedule_confirm":
+        if not text:
+            return False
+        return _handle_schedule_confirm_reply(db, patient, text)
 
     if action == "voice_consent":
         if not text:
@@ -181,6 +208,85 @@ def _handle_pending_action(db: Session, patient: Patient, message: dict, text: s
     patient.pending_action = None
     db.commit()
     return False
+
+
+def _handle_schedule_confirm_reply(db: Session, patient: Patient, text: str) -> bool:
+    """Handle the patient's reply to the reminder-schedule confirmation prompt."""
+    from app.services import telegram_service as _tg
+
+    lower = text.strip().lower()
+    pending = json.loads(patient.consent_channel or "{}")
+    pm_id = pending.get("schedule_pm_id")
+    pm = db.query(PatientMedication).filter(PatientMedication.id == pm_id).first() if pm_id else None
+
+    if any(k in lower for k in ("ok", "okay", "yes", "ya", "好", "是", "setuju")):
+        # Patient confirmed the inferred schedule — nothing to change
+        patient.pending_action = None
+        patient.consent_channel = None
+        db.commit()
+        lang = patient.language_preference or "en"
+        ACK = {"en": "Got it! ✅", "zh": "好的！✅", "ms": "Baik! ✅", "ta": "சரி! ✅"}
+        _tg.send_text(
+            db=db, patient_id=patient.id,
+            to_phone=patient.telegram_chat_id or patient.phone_number,
+            body=ACK.get(lang, ACK["en"]),
+        )
+        return True
+
+    # Attempt to parse custom times from the patient's reply
+    custom_times = _parse_custom_times(text)
+    if custom_times and pm:
+        pm.reminder_times = custom_times
+        db.commit()
+        patient.pending_action = None
+        patient.consent_channel = None
+        db.commit()
+        lang = patient.language_preference or "en"
+        labels = " and ".join(
+            datetime.strptime(t, "%H:%M").strftime("%-I:%M %p") for t in custom_times
+        )
+        SAVED = {
+            "en": f"Got it — I'll remind you at {labels}. ✅",
+            "zh": f"好的，我将在 {labels} 提醒您。✅",
+            "ms": f"Baik — saya akan mengingatkan anda pada {labels}. ✅",
+            "ta": f"சரி — {labels} நேரத்தில் நினைவூட்டுவேன். ✅",
+        }
+        _tg.send_text(
+            db=db, patient_id=patient.id,
+            to_phone=patient.telegram_chat_id or patient.phone_number,
+            body=SAVED.get(lang, SAVED["en"]),
+        )
+        return True
+
+    # Could not parse — ask coordinator
+    from app.services import escalation_service as _esc
+    _esc.create_escalation(db=db, patient_id=patient.id, reason="patient_question", priority="low")
+    patient.pending_action = None
+    patient.consent_channel = None
+    db.commit()
+    _tg.send_text(
+        db=db, patient_id=patient.id,
+        to_phone=patient.telegram_chat_id or patient.phone_number,
+        body="Thank you — your care coordinator will confirm your reminder schedule shortly.",
+    )
+    return True
+
+
+def _parse_custom_times(text: str) -> list[str]:
+    """Parse freeform time strings like '7am and 9pm' into ['07:00', '21:00']."""
+    import re
+    pattern = r'(\d{1,2})(?::(\d{2}))?\s*(am|pm)'
+    matches = re.findall(pattern, text.lower())
+    times = []
+    for h, m, period in matches:
+        hour = int(h)
+        minute = int(m) if m else 0
+        if period == "pm" and hour != 12:
+            hour += 12
+        elif period == "am" and hour == 12:
+            hour = 0
+        times.append(f"{hour:02d}:{minute:02d}")
+    return times if times else []
 
 
 def _handle_voice_consent_reply(db: Session, patient: Patient, text: str) -> bool:
@@ -406,6 +512,163 @@ def _handle_caregiver_text(db: Session, patient: Patient, chat_id: str, text: st
     return False  # Not a consent reply
 
 
+def _handle_ocr_confirm(db: Session, patient: Patient) -> None:
+    """Patient confirmed the OCR-extracted fields. Auto-populate medications and advance onboarding."""
+    from app.services import telegram_service as _tg
+    pending = json.loads(patient.consent_channel or "{}")
+    scan_id = pending.get("pending_scan_id")
+    scan = db.query(PrescriptionScan).filter(PrescriptionScan.id == scan_id).first() if scan_id else None
+
+    if not scan:
+        logger.error("OCR confirm: no pending scan for patient %s", patient.id)
+        _send_reply(patient.telegram_chat_id, "Something went wrong. Please send the photo again.")
+        return
+
+    scan.status = "patient_confirmed"
+    db.commit()
+
+    # Background alert for coordinator (non-blocking)
+    escalation_service.create_escalation(
+        db=db,
+        patient_id=patient.id,
+        reason="ocr_patient_confirmed",
+        priority="low",
+    )
+
+    # Auto-populate Medication, PatientMedication, DispensingRecord
+    ocr_service._auto_populate_medication(db, scan)
+
+    # Advance onboarding
+    patient.onboarding_state = "confirm"
+    patient.consent_channel = None
+    db.commit()
+
+    lang = patient.language_preference or "en"
+    CONFIRM_ACK = {
+        "en": "Great, medications added! ✅",
+        "zh": "好的，药物已添加！✅",
+        "ms": "Bagus, ubat telah ditambah! ✅",
+        "ta": "சரி, மருந்துகள் சேர்க்கப்பட்டன! ✅",
+    }
+    _tg.send_text(
+        db=db,
+        patient_id=patient.id,
+        to_phone=patient.telegram_chat_id or patient.phone_number,
+        body=CONFIRM_ACK.get(lang, CONFIRM_ACK["en"]),
+    )
+
+    # Reminder-time auto-setup (Phase 3)
+    _setup_reminder_times_from_scan(db, patient, scan)
+
+    # Medication info card (Phase 4)
+    _send_medication_info_card(db, patient)
+
+
+def _handle_ocr_edit(db: Session, patient: Patient) -> None:
+    """Patient chose to have the scan reviewed by coordinator."""
+    pending = json.loads(patient.consent_channel or "{}")
+    scan_id = pending.get("pending_scan_id")
+    if scan_id:
+        scan = db.query(PrescriptionScan).filter(PrescriptionScan.id == scan_id).first()
+        if scan:
+            scan.status = "review"
+            db.commit()
+    patient.onboarding_state = "medication_capture"
+    patient.consent_channel = None
+    db.commit()
+    send_text(
+        db=db,
+        patient_id=patient.id,
+        to_phone=patient.telegram_chat_id or patient.phone_number,
+        body="Understood — your care team will review this and update your records shortly.",
+    )
+
+
+def _re_prompt_ocr_confirmation(db: Session, patient: Patient) -> None:
+    """Patient sent an unrecognised reply while in OCR confirmation state — re-send buttons."""
+    pending = json.loads(patient.consent_channel or "{}")
+    scan_id = pending.get("pending_scan_id")
+    scan = db.query(PrescriptionScan).filter(PrescriptionScan.id == scan_id).first() if scan_id else None
+    if scan:
+        onboarding_service.send_ocr_confirmation_prompt(db, patient, scan)
+
+
+def _setup_reminder_times_from_scan(db: Session, patient: Patient, scan: "PrescriptionScan") -> None:
+    """Parse OCR frequency and set PatientMedication.reminder_times; prompt patient to confirm."""
+    from app.services import telegram_service as _tg
+
+    field_map = {f.field_name: f.extracted_value for f in scan.fields if f.extracted_value}
+    frequency = field_map.get("frequency")
+    times = ocr_service._parse_frequency_to_times(frequency)
+
+    # Find the most recently created active PatientMedication for this patient
+    pm = (
+        db.query(PatientMedication)
+        .filter(PatientMedication.patient_id == patient.id, PatientMedication.is_active == True)  # noqa: E712
+        .order_by(PatientMedication.created_at.desc())
+        .first()
+    )
+    if not pm:
+        return
+
+    if times:
+        pm.reminder_times = times
+        db.commit()
+        # Store pm.id so schedule_confirm handler can find it
+        patient.consent_channel = json.dumps({"schedule_pm_id": pm.id, "reminder_times": times})
+        patient.pending_action = "schedule_confirm"
+        db.commit()
+
+        lang = patient.language_preference or "en"
+        time_labels = " and ".join(
+            datetime.strptime(t, "%H:%M").strftime("%-I:%M %p") for t in times
+        )
+        SCHEDULE_PROMPTS = {
+            "en": f"⏰ I've set up your reminders: {time_labels} daily.\n\nReply OK to keep this schedule or type your preferred times (e.g. \"7am and 9pm\").",
+            "zh": f"⏰ 我已设置提醒时间：每天 {time_labels}。\n\n回复「好的」保留此安排，或输入您的首选时间（例如：早上7点和晚上9点）。",
+            "ms": f"⏰ Saya telah tetapkan peringatan anda: {time_labels} setiap hari.\n\nBalas OK untuk kekal atau taip waktu pilihan anda (cth. \"7 pagi dan 9 malam\").",
+            "ta": f"⏰ நினைவூட்டல்களை அமைத்தேன்: தினமும் {time_labels}.\n\nஇந்த அட்டவணையை வைத்திருக்க OK என்று பதிலளிக்கவும் அல்லது விரும்பிய நேரங்களை தட்டச்சு செய்யவும்.",
+        }
+        _tg.send_text(
+            db=db,
+            patient_id=patient.id,
+            to_phone=patient.telegram_chat_id or patient.phone_number,
+            body=SCHEDULE_PROMPTS.get(lang, SCHEDULE_PROMPTS["en"]),
+        )
+
+
+def _send_medication_info_card(db: Session, patient: Patient) -> None:
+    """Send a medication info card for the most recently added medication (if not yet sent)."""
+    from app.services import telegram_service as _tg
+    from app.services.medication_info_service import generate_info_card
+
+    pm = (
+        db.query(PatientMedication)
+        .filter(PatientMedication.patient_id == patient.id, PatientMedication.is_active == True)  # noqa: E712
+        .order_by(PatientMedication.created_at.desc())
+        .first()
+    )
+    if not pm or pm.med_info_card_sent_at:
+        return
+
+    from app.models.models import Medication as MedModel
+    med = db.query(MedModel).filter(MedModel.id == pm.medication_id).first()
+    if not med:
+        return
+
+    lang = patient.language_preference or "en"
+    condition = patient.conditions[0] if patient.conditions else None
+    card = generate_info_card(med.name, lang, condition=condition)
+    _tg.send_text(
+        db=db,
+        patient_id=patient.id,
+        to_phone=patient.telegram_chat_id or patient.phone_number,
+        body=card,
+    )
+    pm.med_info_card_sent_at = datetime.utcnow()
+    db.commit()
+
+
 def _handle_photo(db: Session, patient: Patient, message: dict) -> None:
     """Download Telegram photo and route to OCR pipeline."""
     import httpx
@@ -434,12 +697,32 @@ def _handle_photo(db: Session, patient: Patient, message: dict) -> None:
         )
         dl_resp.raise_for_status()
 
-        ocr_service.ingest_image(
+        scan = ocr_service.ingest_image(
             db=db,
             patient_id=patient.id,
             image_bytes=dl_resp.content,
             source="telegram_photo",
         )
+        # OCR fast-path: patient self-confirmation for high-confidence scans during onboarding
+        if (
+            patient.onboarding_state == "medication_capture"
+            and ocr_service._is_high_confidence(scan)
+        ):
+            scan.status = "patient_pending"
+            patient.onboarding_state = "patient_pending_ocr_confirmation"
+            patient.consent_channel = json.dumps({"pending_scan_id": scan.id})
+            db.commit()
+            onboarding_service.send_ocr_confirmation_prompt(db, patient, scan)
+        else:
+            send_text(
+                db=db,
+                patient_id=patient.id,
+                to_phone=patient.telegram_chat_id or patient.phone_number,
+                body=(
+                    "I've received your prescription. "
+                    "Your care team will review it and get back to you shortly."
+                ),
+            )
     except Exception as exc:
         logger.error("Failed to download/process Telegram photo for patient %s: %s", patient.id, exc)
 

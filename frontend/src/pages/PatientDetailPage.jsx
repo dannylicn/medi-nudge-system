@@ -103,7 +103,7 @@ export default function PatientDetailPage() {
 
   const handleTriggerNudge = async () => {
     setTriggeringNudge(true); setTriggerResult(null);
-    try { const { data } = await triggerPatientNudge(id); setTriggerResult(`Nudge: ${data.campaigns_created} campaigns created, ${data.checked} meds checked`); await reload(); }
+    try { const { data } = await triggerPatientNudge(id); setTriggerResult(`Nudge: ${data.campaigns_fired} fired, ${data.campaigns_failed} failed`); await reload(); }
     catch { setTriggerResult("Failed to trigger nudge"); }
     finally { setTriggeringNudge(false); setTimeout(() => setTriggerResult(null), 5000); }
   };

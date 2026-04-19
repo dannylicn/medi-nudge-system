@@ -1,4 +1,4 @@
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: Onboarding multi-choice prompts SHALL use inline keyboard buttons
 

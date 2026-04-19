@@ -125,6 +125,7 @@ class PatientMedication(Base):
     last_taken_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+    med_info_card_sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
     patient: Mapped["Patient"] = relationship("Patient", back_populates="medications")
     medication: Mapped["Medication"] = relationship("Medication", back_populates="patient_medications")
@@ -185,6 +186,8 @@ class NudgeCampaign(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     last_sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    fire_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    campaign_type: Mapped[str] = mapped_column(String(50), default="refill_reminder", nullable=False)
 
     patient: Mapped["Patient"] = relationship("Patient", back_populates="nudge_campaigns")
     outbound_messages: Mapped[list["OutboundMessage"]] = relationship("OutboundMessage", back_populates="campaign")
@@ -269,10 +272,12 @@ class DoseLog(Base):
 # ---------------------------------------------------------------------------
 
 SCAN_VALID_TRANSITIONS = {
-    "pending": {"review", "rejected"},
-    "review": {"confirmed", "rejected"},
-    "confirmed": set(),
-    "rejected": set(),
+    "pending":           {"review", "rejected", "patient_pending"},
+    "patient_pending":   {"patient_confirmed", "review"},
+    "patient_confirmed": set(),
+    "review":            {"confirmed", "rejected"},
+    "confirmed":         set(),
+    "rejected":          set(),
 }
 
 
