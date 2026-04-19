@@ -37,10 +37,16 @@ ONBOARDING_STATES = {
     "medication_confirm_pending",
 }
 
-LANG_QUICK_REPLIES = (
-    "Please select your preferred language / 请选择语言 / Sila pilih bahasa / மொழியைத் தேர்ந்தெடுக்கவும்:\n"
-    "1. English\n2. 中文 (Chinese)\n3. Melayu\n4. தமிழ் (Tamil)"
+LANG_PROMPT_TEXT = (
+    "Please select your preferred language / 请选择语言 / Sila pilih bahasa / மொழியைத் தேர்ந்தெடுக்கவும்:"
 )
+LANG_BUTTONS = [[
+    {"text": "English", "callback_data": "1"},
+    {"text": "中文", "callback_data": "2"},
+    {"text": "Melayu", "callback_data": "3"},
+    {"text": "தமிழ்", "callback_data": "4"},
+]]
+
 LANG_MAP = {
     "1": "en", "english": "en",
     "2": "zh", "中文": "zh", "chinese": "zh",
@@ -70,43 +76,115 @@ CONSENT_MESSAGES = {
 }
 
 MEDICATION_PROMPT = {
-    "en": (
-        "Let's set up your medications. How would you like to add them?\n\n"
-        "1️⃣ Confirm medications already on file\n"
-        "2️⃣ Send a photo of your prescription\n"
-        "3️⃣ Enter medications manually\n\n"
-        "Reply 1, 2, or 3."
-    ),
-    "zh": "让我们设置您的药物。\n1️⃣ 确认已有记录\n2️⃣ 发送处方照片\n3️⃣ 手动输入\n\n回复 1、2 或 3。",
-    "ms": "Mari kita sediakan ubat anda.\n1️⃣ Sahkan rekod sedia ada\n2️⃣ Hantar foto preskripsi\n3️⃣ Masukkan manual\n\nBalas 1, 2 atau 3.",
-    "ta": "மருந்துகளை அமைப்போம்.\n1️⃣ ரெக்கார்டை உறுதிப்படுத்தவும்\n2️⃣ புகைப்படம் அனுப்பவும்\n3️⃣ கைமுறையாக உள்ளிடவும்\n\n1, 2 அல்லது 3 என பதிலளிக்கவும்.",
+    "en": "Let's set up your medications. How would you like to add them?",
+    "zh": "让我们设置您的药物，请选择方式：",
+    "ms": "Mari kita sediakan ubat anda. Pilih cara:",
+    "ta": "மருந்துகளை அமைப்போம். எவ்வாறு சேர்க்க விரும்புகிறீர்கள்?",
+}
+MEDICATION_BUTTONS = {
+    "en": [
+        [{"text": "✅ Confirm on file", "callback_data": "1"}],
+        [{"text": "📷 Send a photo", "callback_data": "2"}],
+        [{"text": "✏️ Enter manually", "callback_data": "3"}],
+    ],
+    "zh": [
+        [{"text": "✅ 确认已有记录", "callback_data": "1"}],
+        [{"text": "📷 发送处方照片", "callback_data": "2"}],
+        [{"text": "✏️ 手动输入", "callback_data": "3"}],
+    ],
+    "ms": [
+        [{"text": "✅ Sahkan rekod sedia ada", "callback_data": "1"}],
+        [{"text": "📷 Hantar foto preskripsi", "callback_data": "2"}],
+        [{"text": "✏️ Masukkan manual", "callback_data": "3"}],
+    ],
+    "ta": [
+        [{"text": "✅ ரெக்கார்டை உறுதிப்படுத்தவும்", "callback_data": "1"}],
+        [{"text": "📷 புகைப்படம் அனுப்பவும்", "callback_data": "2"}],
+        [{"text": "✏️ கைமுறையாக உள்ளிடவும்", "callback_data": "3"}],
+    ],
 }
 
 PREFERENCES_PROMPT = {
-    "en": (
-        "Almost done! When would you like to receive reminders?\n\n"
-        "1. Morning (8am–12pm)\n2. Afternoon (12pm–5pm)\n3. Evening (5pm–9pm)\n4. No preference\n\nReply 1–4."
-    ),
-    "zh": "快完成了！您希望何时收到提醒？\n1. 早上\n2. 下午\n3. 傍晚\n4. 无偏好\n\n回复 1–4。",
-    "ms": "Hampir selesai! Bilakah anda ingin menerima peringatan?\n1. Pagi\n2. Tengahari\n3. Petang\n4. Tiada pilihan\n\nBalas 1–4.",
-    "ta": "கிட்டத்தட்ட முடிந்தது! எப்போது நினைவூட்டல்கள் வேண்டும்?\n1. காலை\n2. மதியம்\n3. மாலை\n4. விருப்பமில்லை\n\n1–4 என பதிலளிக்கவும்.",
+    "en": "Almost done! When would you like to receive reminders?",
+    "zh": "快完成了！您希望何时收到提醒？",
+    "ms": "Hampir selesai! Bilakah anda ingin menerima peringatan?",
+    "ta": "கிட்டத்தட்ட முடிந்தது! எப்போது நினைவூட்டல்கள் வேண்டும்?",
+}
+PREFERENCES_BUTTONS = {
+    "en": [
+        [{"text": "☀️ Morning", "callback_data": "1"}, {"text": "🌤 Afternoon", "callback_data": "2"}],
+        [{"text": "🌆 Evening", "callback_data": "3"}, {"text": "🔕 No preference", "callback_data": "4"}],
+    ],
+    "zh": [
+        [{"text": "☀️ 早上", "callback_data": "1"}, {"text": "🌤 下午", "callback_data": "2"}],
+        [{"text": "🌆 傍晚", "callback_data": "3"}, {"text": "🔕 无偏好", "callback_data": "4"}],
+    ],
+    "ms": [
+        [{"text": "☀️ Pagi", "callback_data": "1"}, {"text": "🌤 Tengahari", "callback_data": "2"}],
+        [{"text": "🌆 Petang", "callback_data": "3"}, {"text": "🔕 Tiada pilihan", "callback_data": "4"}],
+    ],
+    "ta": [
+        [{"text": "☀️ காலை", "callback_data": "1"}, {"text": "🌤 மதியம்", "callback_data": "2"}],
+        [{"text": "🌆 மாலை", "callback_data": "3"}, {"text": "🔕 விருப்பமில்லை", "callback_data": "4"}],
+    ],
 }
 
 VOICE_PREFERENCE_PROMPT = {
-    "en": (
-        "How would you like to receive medication reminders?\n\n"
-        "1. Text only\n2. Voice only\n3. Both text and voice\n\nReply 1-3."
-    ),
-    "zh": "您希望如何收到用药提醒？\n1. 仅文字\n2. 仅语音\n3. 文字和语音\n\n回复 1-3。",
-    "ms": "Bagaimana anda mahu menerima peringatan ubat?\n1. Teks sahaja\n2. Suara sahaja\n3. Kedua-dua\n\nBalas 1-3.",
-    "ta": "மருந்து நினைவூட்டல்களை எவ்வாறு பெற விரும்புகிறீர்கள்?\n1. உரை மட்டும்\n2. குரல் மட்டும்\n3. இரண்டும்\n\n1-3 என பதிலளிக்கவும்.",
+    "en": "How would you like to receive medication reminders?",
+    "zh": "您希望如何收到用药提醒？",
+    "ms": "Bagaimana anda mahu menerima peringatan ubat?",
+    "ta": "மருந்து நினைவூட்டல்களை எவ்வாறு பெற விரும்புகிறீர்கள்?",
+}
+VOICE_PREFERENCE_BUTTONS = {
+    "en": [[
+        {"text": "💬 Text only", "callback_data": "1"},
+        {"text": "🔊 Voice only", "callback_data": "2"},
+        {"text": "💬🔊 Both", "callback_data": "3"},
+    ]],
+    "zh": [[
+        {"text": "💬 仅文字", "callback_data": "1"},
+        {"text": "🔊 仅语音", "callback_data": "2"},
+        {"text": "💬🔊 两者", "callback_data": "3"},
+    ]],
+    "ms": [[
+        {"text": "💬 Teks sahaja", "callback_data": "1"},
+        {"text": "🔊 Suara sahaja", "callback_data": "2"},
+        {"text": "💬🔊 Kedua-dua", "callback_data": "3"},
+    ]],
+    "ta": [[
+        {"text": "💬 உரை மட்டும்", "callback_data": "1"},
+        {"text": "🔊 குரல் மட்டும்", "callback_data": "2"},
+        {"text": "💬🔊 இரண்டும்", "callback_data": "3"},
+    ]],
 }
 
 VOICE_SELECTION_PROMPT = {
-    "en": "Choose a voice for your reminders:\n\n1. Female voice\n2. Male voice\n3. Record my own voice\n\nReply 1, 2 or 3.",
-    "zh": "选择提醒语音：\n1. 女声\n2. 男声\n3. 录制自己的声音\n\n回复 1、2 或 3。",
-    "ms": "Pilih suara untuk peringatan anda:\n1. Suara wanita\n2. Suara lelaki\n3. Rakam suara sendiri\n\nBalas 1, 2 atau 3.",
-    "ta": "நினைவூட்டலுக்கு குரல் தேர்ந்தெடுக்கவும்:\n1. பெண் குரல்\n2. ஆண் குரல்\n3. சொந்த குரல் பதிவு\n\n1, 2 அல்லது 3 என பதிலளிக்கவும்.",
+    "en": "Choose a voice for your reminders:",
+    "zh": "选择提醒语音：",
+    "ms": "Pilih suara untuk peringatan anda:",
+    "ta": "நினைவூட்டலுக்கு குரல் தேர்ந்தெடுக்கவும்:",
+}
+VOICE_SELECTION_BUTTONS = {
+    "en": [[
+        {"text": "👩 Female", "callback_data": "1"},
+        {"text": "👨 Male", "callback_data": "2"},
+        {"text": "🎙 Record my own", "callback_data": "3"},
+    ]],
+    "zh": [[
+        {"text": "👩 女声", "callback_data": "1"},
+        {"text": "👨 男声", "callback_data": "2"},
+        {"text": "🎙 录制自己的声音", "callback_data": "3"},
+    ]],
+    "ms": [[
+        {"text": "👩 Wanita", "callback_data": "1"},
+        {"text": "👨 Lelaki", "callback_data": "2"},
+        {"text": "🎙 Rakam sendiri", "callback_data": "3"},
+    ]],
+    "ta": [[
+        {"text": "👩 பெண் குரல்", "callback_data": "1"},
+        {"text": "👨 ஆண் குரல்", "callback_data": "2"},
+        {"text": "🎙 சொந்த குரல்", "callback_data": "3"},
+    ]],
 }
 
 VOICE_RECORD_PROMPT = {
@@ -403,7 +481,7 @@ def _handle_invite_reply(db: Session, patient: Patient, text: str) -> None:
         patient.consent_obtained_at = datetime.utcnow()
         patient.consent_channel = "telegram"
         db.commit()
-        _send_patient(db, patient, LANG_QUICK_REPLIES)
+        _send_patient_keyboard(db, patient, LANG_PROMPT_TEXT, LANG_BUTTONS)
     elif any(k in text for k in ("no", "tidak", "不要", "nope", "拒绝")):
         patient.is_active = False
         db.commit()
@@ -415,9 +493,13 @@ def _handle_consent_reply(db: Session, patient: Patient, text: str) -> None:
         patient.language_preference = lang
         patient.onboarding_state = "language_confirmed"
         db.commit()
-        _send_patient(db, patient, MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]),
+            MEDICATION_BUTTONS.get(lang, MEDICATION_BUTTONS["en"]),
+        )
     else:
-        _send_patient(db, patient, LANG_QUICK_REPLIES)
+        _send_patient_keyboard(db, patient, LANG_PROMPT_TEXT, LANG_BUTTONS)
 
 
 def _handle_language_reply(db: Session, patient: Patient, text: str) -> None:
@@ -444,7 +526,11 @@ def _handle_medication_capture(db: Session, patient: Patient, text: str) -> None
             patient.onboarding_state = "confirm"
             db.commit()
         else:
-            _send_patient(db, patient, "No medications on file. Send a photo (reply 2) or enter manually (reply 3).")
+            _send_patient_keyboard(
+                db, patient,
+                "No medications on file yet. How would you like to add them?",
+                MEDICATION_BUTTONS.get(lang, MEDICATION_BUTTONS["en"])[1:],  # only photo + manual options
+            )
     elif choice == "2":
         _send_patient(db, patient, "Please send a photo of your prescription or medicine label.")
     elif choice == "3":
@@ -452,7 +538,11 @@ def _handle_medication_capture(db: Session, patient: Patient, text: str) -> None
         db.commit()
         _send_patient(db, patient, "Please type the name of your first medication (e.g. Metformin 500mg). Reply *DONE* when finished.")
     else:
-        _send_patient(db, patient, MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]),
+            MEDICATION_BUTTONS.get(lang, MEDICATION_BUTTONS["en"]),
+        )
 
 
 def _handle_confirm_reply(db: Session, patient: Patient, text: str) -> None:
@@ -464,14 +554,22 @@ def _handle_confirm_reply(db: Session, patient: Patient, text: str) -> None:
         patient.onboarding_state = "preferences"
         db.commit()
         lang = patient.language_preference or "en"
-        _send_patient(db, patient, PREFERENCES_PROMPT.get(lang, PREFERENCES_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            PREFERENCES_PROMPT.get(lang, PREFERENCES_PROMPT["en"]),
+            PREFERENCES_BUTTONS.get(lang, PREFERENCES_BUTTONS["en"]),
+        )
     elif text.strip() == "done":
         _send_patient(db, patient, "Thank you! Reply *YES* to confirm your medication list.")
     elif any(k in text for k in ("no", "tidak", "不", "nope")):
         lang = patient.language_preference or "en"
         patient.onboarding_state = "medication_capture"
         db.commit()
-        _send_patient(db, patient, MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]),
+            MEDICATION_BUTTONS.get(lang, MEDICATION_BUTTONS["en"]),
+        )
     else:
         # Treat as manual entry — run through medicine verification gate
         from app.services import agent_service
@@ -483,7 +581,11 @@ def _handle_preferences_reply(db: Session, patient: Patient, text: str) -> None:
     window = CONTACT_WINDOWS.get(choice)
     if window is None:
         lang = patient.language_preference or "en"
-        _send_patient(db, patient, PREFERENCES_PROMPT.get(lang, PREFERENCES_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            PREFERENCES_PROMPT.get(lang, PREFERENCES_PROMPT["en"]),
+            PREFERENCES_BUTTONS.get(lang, PREFERENCES_BUTTONS["en"]),
+        )
         return
     start, end = window
     patient.contact_window_start = start
@@ -491,7 +593,11 @@ def _handle_preferences_reply(db: Session, patient: Patient, text: str) -> None:
     patient.onboarding_state = "voice_preference"
     db.commit()
     lang = patient.language_preference or "en"
-    _send_patient(db, patient, VOICE_PREFERENCE_PROMPT.get(lang, VOICE_PREFERENCE_PROMPT["en"]))
+    _send_patient_keyboard(
+        db, patient,
+        VOICE_PREFERENCE_PROMPT.get(lang, VOICE_PREFERENCE_PROMPT["en"]),
+        VOICE_PREFERENCE_BUTTONS.get(lang, VOICE_PREFERENCE_BUTTONS["en"]),
+    )
 
 
 def _handle_voice_preference_reply(db: Session, patient: Patient, text: str) -> None:
@@ -499,7 +605,11 @@ def _handle_voice_preference_reply(db: Session, patient: Patient, text: str) -> 
     mode = DELIVERY_MODE_MAP.get(choice)
     if mode is None:
         lang = patient.language_preference or "en"
-        _send_patient(db, patient, VOICE_PREFERENCE_PROMPT.get(lang, VOICE_PREFERENCE_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            VOICE_PREFERENCE_PROMPT.get(lang, VOICE_PREFERENCE_PROMPT["en"]),
+            VOICE_PREFERENCE_BUTTONS.get(lang, VOICE_PREFERENCE_BUTTONS["en"]),
+        )
         return
 
     patient.nudge_delivery_mode = mode
@@ -509,7 +619,11 @@ def _handle_voice_preference_reply(db: Session, patient: Patient, text: str) -> 
         patient.onboarding_state = "voice_selection"
         db.commit()
         lang = patient.language_preference or "en"
-        _send_patient(db, patient, VOICE_SELECTION_PROMPT.get(lang, VOICE_SELECTION_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            VOICE_SELECTION_PROMPT.get(lang, VOICE_SELECTION_PROMPT["en"]),
+            VOICE_SELECTION_BUTTONS.get(lang, VOICE_SELECTION_BUTTONS["en"]),
+        )
 
 
 def _handle_voice_selection_reply(db: Session, patient: Patient, text: str) -> None:
@@ -528,7 +642,11 @@ def _handle_voice_selection_reply(db: Session, patient: Patient, text: str) -> N
         return
     else:
         lang = patient.language_preference or "en"
-        _send_patient(db, patient, VOICE_SELECTION_PROMPT.get(lang, VOICE_SELECTION_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            VOICE_SELECTION_PROMPT.get(lang, VOICE_SELECTION_PROMPT["en"]),
+            VOICE_SELECTION_BUTTONS.get(lang, VOICE_SELECTION_BUTTONS["en"]),
+        )
         return
     _complete_onboarding(db, patient)
 
@@ -583,6 +701,15 @@ def _send_patient(db: Session, patient: Patient, body: str) -> None:
         logger.warning("Cannot send to patient %s — telegram_chat_id not set", patient.id)
         return
     telegram_service.send_text(db=db, patient_id=patient.id, to_phone=patient.telegram_chat_id, body=body)
+
+
+def _send_patient_keyboard(db: Session, patient: Patient, body: str, buttons: list) -> None:
+    if not patient.telegram_chat_id:
+        logger.warning("Cannot send keyboard to patient %s — telegram_chat_id not set", patient.id)
+        return
+    telegram_service.send_keyboard(
+        db=db, patient_id=patient.id, to_phone=patient.telegram_chat_id, body=body, buttons=buttons
+    )
 
 
 def _send_raw(chat_id: str, body: str) -> None:

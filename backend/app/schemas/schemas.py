@@ -206,6 +206,7 @@ class PatientMedicationOut(BaseModel):
     last_taken_at: Optional[datetime]
     is_active: bool
     medication: Optional[MedicationOut] = None
+    dose_logs: list["DoseEventOut"] = []
 
     class Config:
         from_attributes = True
@@ -340,6 +341,20 @@ class PrescriptionScanOut(BaseModel):
     uploaded_at: datetime
     fields: list[ExtractedFieldOut] = []
     # image_path intentionally excluded
+
+    class Config:
+        from_attributes = True
+
+
+# ---------------------------------------------------------------------------
+# DoseEvent (slim view used inside PatientMedicationOut)
+# ---------------------------------------------------------------------------
+
+class DoseEventOut(BaseModel):
+    id: int
+    status: str       # taken | missed | skipped
+    source: str       # patient_reply | campaign_confirmed | system_detected | caregiver
+    logged_at: datetime
 
     class Config:
         from_attributes = True

@@ -10,7 +10,7 @@ from app.core.config import settings
 from app.models.models import Patient, NudgeCampaign, OutboundMessage, PatientMedication, VoiceProfile
 from app.services.response_classifier import classify_response
 from app.services import nudge_campaign_service, onboarding_service, ocr_service, agent_service
-from app.services.telegram_service import validate_telegram_token, send_text
+from app.services.telegram_service import validate_telegram_token, send_text, answer_callback_query
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,12 @@ async def inbound_telegram(
     _validate_secret(request)
 
     update = await request.json()
+
+    # Handle inline keyboard button taps before the message guard
+    callback_query = update.get("callback_query")
+    if callback_query:
+        _handle_callback_query(db, callback_query)
+        return {"ok": True}
 
     message = update.get("message")
     if not message:
@@ -109,6 +115,40 @@ async def inbound_telegram(
     # Active patient — route through agentic handler (LLM or rule-based fallback)
     agent_service.run(patient, text, db)
     return {"ok": True}
+
+
+def _handle_callback_query(db: Session, callback_query: dict) -> None:
+    """Route an inline keyboard button tap as if the patient had typed the callback_data."""
+    cq_id = callback_query.get("id", "")
+    cq_message = callback_query.get("message", {})
+    chat_id = str(cq_message.get("chat", {}).get("id", ""))
+    data = callback_query.get("data", "").strip()
+
+    if not chat_id:
+        return
+
+    # Acknowledge immediately to dismiss the loading state on the button
+    answer_callback_query(cq_id)
+
+    if not data:
+        return
+
+    patient = db.query(Patient).filter(Patient.telegram_chat_id == chat_id).first()
+    if not patient:
+        onboarding_service.handle_start_command(db, chat_id, None)
+        return
+
+    # Route callback_data through the same path as a text message
+    if patient.onboarding_state == "medication_confirm_pending":
+        agent_service.handle_medication_confirm_reply(patient, data, db)
+        return
+
+    if patient.onboarding_state in ONBOARDING_STATES:
+        onboarding_service.handle_onboarding_reply(db, patient, data)
+        return
+
+    # Active patient (onboarding complete)
+    agent_service.run(patient, data, db)
 
 
 def _handle_pending_action(db: Session, patient: Patient, message: dict, text: str) -> bool:

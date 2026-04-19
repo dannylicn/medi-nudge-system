@@ -241,7 +241,7 @@ def _run_llm(messages: list[dict], tools: list[dict]) -> Optional[dict]:
     try:
         import openai
         client = openai.OpenAI(
-            api_key=settings.OPENAI_API_KEY or None,
+            api_key=settings.OPENAI_API_KEY or "ollama",
             base_url=settings.LLM_BASE_URL or None,
         )
         resp = client.chat.completions.create(

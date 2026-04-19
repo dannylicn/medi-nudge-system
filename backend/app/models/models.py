@@ -128,6 +128,11 @@ class PatientMedication(Base):
 
     patient: Mapped["Patient"] = relationship("Patient", back_populates="medications")
     medication: Mapped["Medication"] = relationship("Medication", back_populates="patient_medications")
+    dose_logs: Mapped[list["DoseLog"]] = relationship(
+        "DoseLog",
+        foreign_keys="[DoseLog.patient_medication_id]",
+        order_by="DoseLog.logged_at.desc()",
+    )
 
 
 # ---------------------------------------------------------------------------

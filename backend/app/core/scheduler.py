@@ -20,10 +20,10 @@ def start_scheduler():
     if not settings.SCHEDULER_ENABLED:
         logger.info("Scheduler disabled via SCHEDULER_ENABLED=false — skipping startup")
         return
-    # Daily at 08:00 UTC
+    # Daily at 08:00 SGT (UTC+8)
     scheduler.add_job(
         _run_refill_detection,
-        CronTrigger(hour=8, minute=0),
+        CronTrigger(hour=8, minute=0, timezone="Asia/Singapore"),
         id="daily_refill_detection",
         replace_existing=True,
         misfire_grace_time=3600,

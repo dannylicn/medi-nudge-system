@@ -3,7 +3,7 @@ import csv
 import io
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.models import Medication, PatientMedication, Patient, DispensingRecord, User
@@ -79,6 +79,7 @@ def list_patient_medications(
 ):
     return (
         db.query(PatientMedication)
+        .options(joinedload(PatientMedication.dose_logs))
         .filter(PatientMedication.patient_id == patient_id, PatientMedication.is_active == True)
         .all()
     )

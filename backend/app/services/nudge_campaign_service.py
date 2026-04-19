@@ -23,6 +23,20 @@ def _transition(db: Session, campaign: NudgeCampaign, new_status: str) -> NudgeC
     return campaign
 
 
+_COLLECTED_LABELS = {
+    "en": "✅ Collected",
+    "zh": "✅ 已领取",
+    "ms": "✅ Sudah ambil",
+    "ta": "✅ எடுத்தேன்",
+}
+
+
+def _collected_button(lang: str | None) -> list[list[dict]]:
+    """Return an inline keyboard with a single 'Collected' button (callback_data: YES)."""
+    label = _COLLECTED_LABELS.get(lang or "en", _COLLECTED_LABELS["en"])
+    return [[{"text": label, "callback_data": "YES"}]]
+
+
 def create_and_send(
     db: Session,
     patient: Patient,
@@ -76,11 +90,12 @@ def create_and_send(
 
     out_msg = None
     if send_text or not send_voice:
-        out_msg = telegram_service.send_text(
+        out_msg = telegram_service.send_keyboard(
             db=db,
             patient_id=patient.id,
             to_phone=chat_target,
             body=message,
+            buttons=_collected_button(patient.language_preference),
             campaign_id=campaign.id,
         )
 
@@ -102,12 +117,13 @@ def create_and_send(
                 campaign_id=campaign.id,
             )
         elif not out_msg:
-            # Voice failed and no text was sent — fall back to text
-            out_msg = telegram_service.send_text(
+            # Voice failed and no text was sent — fall back to text with button
+            out_msg = telegram_service.send_keyboard(
                 db=db,
                 patient_id=patient.id,
                 to_phone=chat_target,
                 body=message,
+                buttons=_collected_button(patient.language_preference),
                 campaign_id=campaign.id,
             )
 
