@@ -44,7 +44,7 @@ variable "github_repo" {
 variable "db_instance_class" {
   description = "RDS instance class"
   type        = string
-  default     = "db.t4g.small"
+  default     = "db.t4g.micro"
 }
 
 variable "db_multi_az" {

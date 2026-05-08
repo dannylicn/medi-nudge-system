@@ -1,6 +1,5 @@
 variable "environment"        { type = string }
 variable "vpc_id"             { type = string }
-variable "private_subnet_ids" { type = list(string) }
 variable "public_subnet_ids"  { type = list(string) }
 variable "ecs_sg_id"          { type = string }
 variable "db_instance_class"  { type = string }
@@ -24,7 +23,7 @@ resource "aws_secretsmanager_secret_version" "db_password" {
 
 resource "aws_db_subnet_group" "main" {
   name       = "medi-nudge-${var.environment}"
-  subnet_ids = concat(var.private_subnet_ids, var.public_subnet_ids)
+  subnet_ids = var.public_subnet_ids
   tags       = { Name = "medi-nudge-${var.environment}-db-subnet-group" }
 }
 
@@ -55,12 +54,6 @@ resource "aws_security_group" "rds" {
   }
 }
 
-resource "aws_kms_key" "rds" {
-  description             = "medi-nudge ${var.environment} RDS encryption key"
-  deletion_window_in_days = 14
-  enable_key_rotation     = true
-}
-
 resource "aws_db_instance" "main" {
   identifier              = "medi-nudge-${var.environment}"
   engine                  = "postgres"
@@ -70,18 +63,16 @@ resource "aws_db_instance" "main" {
   max_allocated_storage   = 100
   storage_type            = "gp3"
   storage_encrypted       = true
-  kms_key_id              = aws_kms_key.rds.arn
   db_name                 = "medinudge"
   username                = "medinudge"
   password                = random_password.db.result
   db_subnet_group_name    = aws_db_subnet_group.main.name
   vpc_security_group_ids  = [aws_security_group.rds.id]
   multi_az                = var.db_multi_az
-  publicly_accessible     = true
-  skip_final_snapshot     = false
-  final_snapshot_identifier = "medi-nudge-${var.environment}-final"
+  publicly_accessible     = false
+  skip_final_snapshot     = true
   backup_retention_period = 0
-  deletion_protection     = true
+  deletion_protection     = false
 
   tags = { Name = "medi-nudge-${var.environment}" }
 }

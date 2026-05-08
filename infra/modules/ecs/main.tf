@@ -2,7 +2,7 @@ variable "environment"           { type = string }
 variable "aws_region"            { type = string }
 variable "aws_account_id"        { type = string }
 variable "vpc_id"                { type = string }
-variable "private_subnet_ids"    { type = list(string) }
+variable "public_subnet_ids"     { type = list(string) }
 variable "alb_target_group_arn"  { type = string }
 variable "alb_sg_id"             { type = string }
 variable "ecs_sg_id"             { type = string }
@@ -215,9 +215,9 @@ resource "aws_ecs_service" "api" {
   force_new_deployment               = false
 
   network_configuration {
-    subnets          = var.private_subnet_ids
+    subnets          = var.public_subnet_ids
     security_groups  = [var.ecs_sg_id]
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
   load_balancer {
@@ -244,9 +244,9 @@ resource "aws_ecs_service" "scheduler" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = var.private_subnet_ids
+    subnets          = var.public_subnet_ids
     security_groups  = [var.ecs_sg_id]
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
   deployment_circuit_breaker {

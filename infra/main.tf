@@ -51,14 +51,13 @@ module "alb" {
 }
 
 module "rds" {
-  source             = "./modules/rds"
-  environment        = var.environment
-  vpc_id             = module.vpc.vpc_id
-  private_subnet_ids = module.vpc.private_subnet_ids
-  public_subnet_ids  = module.vpc.public_subnet_ids
-  ecs_sg_id          = aws_security_group.ecs.id
-  db_instance_class  = var.db_instance_class
-  db_multi_az        = var.db_multi_az
+  source            = "./modules/rds"
+  environment       = var.environment
+  vpc_id            = module.vpc.vpc_id
+  public_subnet_ids = module.vpc.public_subnet_ids
+  ecs_sg_id         = aws_security_group.ecs.id
+  db_instance_class = var.db_instance_class
+  db_multi_az       = var.db_multi_az
 }
 
 module "iam" {
@@ -80,7 +79,7 @@ module "ecs" {
   aws_region             = var.aws_region
   aws_account_id         = data.aws_caller_identity.current.account_id
   vpc_id                 = module.vpc.vpc_id
-  private_subnet_ids     = module.vpc.private_subnet_ids
+  public_subnet_ids      = module.vpc.public_subnet_ids
   alb_target_group_arn   = module.alb.target_group_arn
   alb_sg_id              = module.alb.alb_sg_id
   ecs_sg_id              = aws_security_group.ecs.id
