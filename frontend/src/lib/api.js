@@ -91,4 +91,8 @@ export const getDoseAdherence = (params) =>
   api.get("/api/analytics/dose-adherence", { params });
 export const getDashboardSummary = () => api.get("/api/dashboard/summary");
 
+// AI Summary
+export const getPatientAiSummary = (patientId, params) =>
+  api.get(`/api/patients/${patientId}/ai-summary`, { params });
+
 export default api;

@@ -151,3 +151,14 @@ def deactivate_patient(
         raise HTTPException(status_code=404, detail="Patient not found")
     patient.is_active = False
     db.commit()
+
+
+@router.get("/{patient_id}/ai-summary")
+def get_ai_summary(
+    patient_id: int,
+    refresh: bool = Query(default=False),
+    db: Session = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    from app.services.ai_summary_service import generate_patient_summary
+    return generate_patient_summary(db, patient_id, force_refresh=refresh)
