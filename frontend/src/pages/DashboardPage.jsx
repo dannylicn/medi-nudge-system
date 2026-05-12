@@ -164,6 +164,7 @@ export default function DashboardPage() {
               <thead>
                 <tr className="bg-surface-container-low text-on-surface/40 text-[10px] uppercase tracking-wider font-body">
                   <th className="px-6 py-4 font-bold">Patient</th>
+                  <th className="px-6 py-4 font-bold">Compliance</th>
                   <th className="px-6 py-4 font-bold">Risk</th>
                   <th className="px-6 py-4 font-bold">Language</th>
                   <th className="px-6 py-4 font-bold">Onboarding</th>
@@ -172,15 +173,31 @@ export default function DashboardPage() {
               </thead>
               <tbody className="divide-y divide-outline-variant/30">
                 {patientsLoading ? (
-                  <tr><td colSpan={5} className="px-6 py-10 text-center text-on-surface/30 font-body text-sm">Loading...</td></tr>
+                  <tr><td colSpan={6} className="px-6 py-10 text-center text-on-surface/30 font-body text-sm">Loading...</td></tr>
                 ) : patients.length === 0 ? (
-                  <tr><td colSpan={5} className="px-6 py-10 text-center text-on-surface/30 font-body text-sm">No patients found</td></tr>
+                  <tr><td colSpan={6} className="px-6 py-10 text-center text-on-surface/30 font-body text-sm">No patients found</td></tr>
                 ) : (
                   patients.map((p, i) => (
                     <tr key={p.id} className={`hover:bg-surface-container-low/50 transition-colors ${i % 2 === 0 ? "bg-surface-container-lowest" : ""}`}>
                       <td className="px-6 py-4">
                         <Link to={`/patients/${p.id}`} className="text-sm font-bold text-on-surface hover:text-primary">{p.full_name}</Link>
                         <p className="text-[10px] text-on-surface/40">{p.phone_number}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        {(() => {
+                          const c = data?.patient_compliance?.[p.id];
+                          if (!c) return <span className="text-on-surface/30 text-xs">--</span>;
+                          const score = c.compliance_score;
+                          const color = score >= 80 ? "text-green-600" : score >= 50 ? "text-yellow-600" : "text-error";
+                          return (
+                            <div className="flex items-center gap-1.5">
+                              <span className={`text-xs font-bold ${color}`}>{score}%</span>
+                              {c.critical_missed_count > 0 && (
+                                <span className="bg-error text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold">{c.critical_missed_count} crit</span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${RISK_CHIP[p.risk_level] || "bg-surface-container-highest text-on-surface/60"}`}>

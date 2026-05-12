@@ -5,7 +5,7 @@ import {
   updatePatient, getMedications, assignMedication,
   createDispensingRecord, getDispensingRecords, getConditions,
   regenerateInviteLink, generateCaregiverInviteLink, getDoseHistory,
-  triggerPatientNudge, triggerPatientReminder,
+  triggerPatientNudge, triggerPatientReminder, getPatientAiSummary,
 } from "../lib/api";
 
 const RISK_CHIP = {
@@ -68,6 +68,20 @@ export default function PatientDetailPage() {
   const [triggeringNudge, setTriggeringNudge] = useState(false);
   const [triggeringReminder, setTriggeringReminder] = useState(false);
   const [triggerResult, setTriggerResult] = useState(null);
+
+  // AI Summary
+  const [aiSummary, setAiSummary] = useState(null);
+  const [aiGeneratedAt, setAiGeneratedAt] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const loadAiSummary = async (refresh = false) => {
+    setAiLoading(true);
+    try {
+      const { data } = await getPatientAiSummary(id, { refresh });
+      setAiSummary(data.summary);
+      setAiGeneratedAt(data.generated_at);
+    } catch {} finally { setAiLoading(false); }
+  };
 
   const reload = async () => {
     try {
@@ -322,6 +336,33 @@ export default function PatientDetailPage() {
         </div>
       </div>
 
+      {/* AI Insights */}
+      <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center text-[10px] font-bold text-primary">AI</div>
+            <h3 className="font-display text-sm font-bold text-on-surface">AI Insights</h3>
+          </div>
+          {aiSummary && (
+            <button onClick={() => loadAiSummary(true)} disabled={aiLoading} className="text-xs text-primary hover:underline disabled:opacity-50">
+              {aiLoading ? "Generating..." : "Refresh"}
+            </button>
+          )}
+        </div>
+        {aiSummary ? (
+          <p className="text-sm text-on-surface/80 font-body leading-relaxed">{aiSummary}</p>
+        ) : aiLoading ? (
+          <p className="text-sm text-on-surface/30 font-body">Generating insights...</p>
+        ) : (
+          <button onClick={() => loadAiSummary(false)} className="text-sm text-primary hover:underline font-body">
+            Generate AI Summary
+          </button>
+        )}
+        {aiGeneratedAt && (
+          <p className="text-[10px] text-on-surface/30 mt-3">Generated {new Date(aiGeneratedAt).toLocaleString()}</p>
+        )}
+      </div>
+
       {/* Content: Refill Timeline + Behavior Signals */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Pharmacy Refill Timeline */}
@@ -422,7 +463,12 @@ export default function PatientDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {medications.map((m) => (
               <div key={m.id} className="bg-surface-container-low rounded-xl p-4">
-                <p className="text-sm font-bold text-on-surface">{m.medication?.name || m.medication?.generic_name}</p>
+                <p className="text-sm font-bold text-on-surface">
+                  {m.medication?.name || m.medication?.generic_name}
+                  {m.medication?.is_critical && (
+                    <span className="ml-2 bg-error text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold align-middle">CRITICAL</span>
+                  )}
+                </p>
                 <p className="text-xs text-on-surface/50 mt-1">{m.dosage || "No dosage"} | {m.frequency?.replace(/_/g, " ")} | refill {m.refill_interval_days ?? "30"}d</p>
                 <p className={`text-[10px] mt-2 font-bold ${m.is_active ? "text-tertiary-container" : "text-on-surface/30"}`}>{m.is_active ? "Active" : "Inactive"}</p>
               </div>

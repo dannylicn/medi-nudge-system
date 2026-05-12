@@ -176,6 +176,7 @@ class MedicationOut(BaseModel):
     generic_name: str
     category: Optional[str]
     default_refill_days: int
+    is_critical: bool = False
 
     class Config:
         from_attributes = True

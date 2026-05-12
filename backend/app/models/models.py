@@ -98,6 +98,7 @@ class Medication(Base):
     generic_name: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     category: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     default_refill_days: Mapped[int] = mapped_column(Integer, default=30, nullable=False)
+    is_critical: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
 
     patient_medications: Mapped[list["PatientMedication"]] = relationship("PatientMedication", back_populates="medication")
