@@ -190,16 +190,33 @@ def dashboard_summary(
         NudgeCampaign.status == "sent"
     ).count()
 
+    # Pre-compute critical medication IDs
+    critical_med_ids = set(
+        m.id for m in db.query(Medication).filter(Medication.is_critical == True).all()
+    )
+
     # At-risk patients: top 10 by worst dose adherence
     active_patients = db.query(Patient).filter(
         Patient.is_active == True, Patient.onboarding_state == "complete"
     ).all()
     patient_adherence = []
+    patient_compliance = {}
+    critical_missed_total = 0
     for p in active_patients:
         logs = [d for d in dose_logs_30d if d.patient_id == p.id]
         total = len(logs)
         taken = sum(1 for d in logs if d.status == "taken")
         rate = round(taken / total * 100, 1) if total else 100.0
+
+        critical_missed = sum(
+            1 for d in logs if d.status == "missed" and d.medication_id in critical_med_ids
+        )
+        critical_missed_total += critical_missed
+
+        patient_compliance[p.id] = {
+            "compliance_score": rate,
+            "critical_missed_count": critical_missed,
+        }
 
         # Last refill date
         last_disp = (
@@ -224,6 +241,7 @@ def dashboard_summary(
             "full_name": p.full_name,
             "risk_level": p.risk_level,
             "adherence_rate": rate,
+            "critical_missed_count": critical_missed,
             "last_refill": last_refill,
             "days_overdue": days_overdue,
         })
@@ -256,7 +274,9 @@ def dashboard_summary(
         "adherence_trend": adherence_trend,
         "high_risk_count": high_risk_count,
         "pending_refills": pending_refills,
+        "critical_missed_total": critical_missed_total,
         "at_risk_patients": at_risk_patients,
+        "patient_compliance": patient_compliance,
         "pending_escalations": escalations,
     }
 
