@@ -4,10 +4,10 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 const api = axios.create({ baseURL: BASE_URL });
 
-// Attach JWT from in-memory store (never localStorage)
-let _token = null;
-export const setToken = (t) => { _token = t; };
-export const clearToken = () => { _token = null; };
+// Attach JWT from sessionStorage (survives refresh, clears on tab close — never localStorage)
+let _token = sessionStorage.getItem("token");
+export const setToken = (t) => { _token = t; sessionStorage.setItem("token", t); };
+export const clearToken = () => { _token = null; sessionStorage.removeItem("token"); };
 
 api.interceptors.request.use((config) => {
   if (_token) config.headers.Authorization = `Bearer ${_token}`;
