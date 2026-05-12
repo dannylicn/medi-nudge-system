@@ -22,8 +22,6 @@ We conducted user research interviews at Sengkang General Hospital and a Nationa
 - **Platform fragmentation**: Caregivers noted HealthHub and SingHealth apps don't show the same data. Our system should be a single source of truth for the patient's medication schedule.
 - **Nurse's wishlist**: A dashboard showing missed doses and patient compliance patterns would be very useful. Educating patients on consequences of missing meds (especially critical ones) would help.
 
-Full interview transcripts: /Users/jolyn/Desktop/hackathon/hackathon_interviews.txt
-
 ## Key design principles from research
 
 - Voice nudges must feel warm and human, not robotic
@@ -52,25 +50,10 @@ Win or place as runner-up in the hackathon. This means:
 
 - **Backend**: Python FastAPI (port 8000), SQLAlchemy ORM, Alembic migrations, APScheduler
 - **Frontend**: React + Vite (port 5173 local), Tailwind CSS
-- **Database**: PostgreSQL 16 (RDS db.t4g.micro on AWS, SQLite locally)
+- **Database**: PostgreSQL 16 (RDS on AWS, SQLite locally)
 - **Infra**: Terraform, ECS Fargate (public subnets, no NAT), ALB, CloudFront, S3
 - **Integrations**: OpenAI (nudge message generation), ElevenLabs (voice nudges), Telegram Bot API
-
-## Live URLs
-
-- Web portal: https://d2osdk2gdq7n3i.cloudfront.net
-- API docs: https://d2osdk2gdq7n3i.cloudfront.net/docs
-- API (ALB): http://medi-nudge-staging-905906235.ap-southeast-1.elb.amazonaws.com
-- Telegram bot: @MediNudgeBot
-
-## AWS
-
-- Region: ap-southeast-1
-- Profile: agency_admin-354918370110
-- VPC: nova-vpc (172.16.1.0/24, public subnets only)
-- ECS cluster: medi-nudge-staging (api-service + scheduler-service)
-- ECR: medi-nudge-api
-- CloudFront proxies both frontend (S3) and /api/* (ALB) from one URL
+- **Region**: ap-southeast-1
 
 ## Local dev
 
@@ -85,39 +68,36 @@ uvicorn app.main:app --reload --port 8000
 cd frontend && npm install && npm run dev
 ```
 
-Login: admin@medinudge.sg / changeme123
+## Deploy
 
-## Deploy frontend
+Deploy commands reference Terraform outputs and AWS profile. See `infra/` for Terraform config.
+Do NOT hardcode AWS account IDs, subnet IDs, security group IDs, or resource ARNs in committed files.
 
 ```bash
+# Frontend: build, upload to S3 frontend bucket, invalidate CloudFront
 cd frontend && npm run build
-AWS_PROFILE=agency_admin-354918370110 aws s3 sync dist s3://medi-nudge-frontend-staging --region ap-southeast-1
-AWS_PROFILE=agency_admin-354918370110 aws cloudfront create-invalidation --distribution-id E1P4QR73CSXTYF --paths "/*" --region ap-southeast-1
-```
+aws s3 sync dist s3://<frontend-bucket> --region ap-southeast-1
+aws cloudfront create-invalidation --distribution-id <cf-dist-id> --paths "/*"
 
-## Deploy backend
-
-```bash
+# Backend: build Docker, push to ECR, restart ECS
 cd backend
-AWS_PROFILE=agency_admin-354918370110 aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 354918370110.dkr.ecr.ap-southeast-1.amazonaws.com
-docker build --platform linux/arm64 -t 354918370110.dkr.ecr.ap-southeast-1.amazonaws.com/medi-nudge-api:latest .
-docker push 354918370110.dkr.ecr.ap-southeast-1.amazonaws.com/medi-nudge-api:latest
-AWS_PROFILE=agency_admin-354918370110 aws ecs update-service --cluster medi-nudge-staging --service api-service --force-new-deployment --region ap-southeast-1
+docker build --platform linux/arm64 -t <ecr-repo-url>:latest .
+docker push <ecr-repo-url>:latest
+aws ecs update-service --cluster <ecs-cluster> --service api-service --force-new-deployment
+
+# Migration: run as one-off ECS task
+aws ecs run-task --cluster <ecs-cluster> --task-definition <migrate-task-def> --launch-type FARGATE ...
 ```
 
-## Run database migration on AWS
-
-```bash
-AWS_PROFILE=agency_admin-354918370110 aws ecs run-task --cluster medi-nudge-staging --task-definition medi-nudge-migrate-staging --launch-type FARGATE --network-configuration "awsvpcConfiguration={subnets=[subnet-0b7b0c35dc2ec701b],securityGroups=[sg-06e149633730e3316],assignPublicIp=ENABLED}" --region ap-southeast-1
-```
+Resource names and IDs can be found via `terraform output` in the `infra/` directory.
 
 ## Conventions
 
 - Commit messages: conventional commits (feat, fix, chore, docs, etc.)
 - No Co-Authored-By lines in commits
 - Explain code changes before making them
+- Deploy in logical batches, not per-step
 - Frontend env: .env.production has VITE_API_URL= (empty) for CloudFront; local dev defaults to localhost:8000
-- Terraform state: s3://medi-nudge-tfstate-gt with DynamoDB lock table medi-nudge-tfstate-lock
 
 ## Key files
 
