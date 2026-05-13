@@ -8,7 +8,7 @@ from app.core.database import SessionLocal, engine, Base
 from app.core.config import hash_sha256
 from app.models.models import (
     Patient, Medication, PatientMedication, DoseLog, User,
-    NudgeCampaign, Escalation,
+    NudgeCampaign, EscalationCase,
 )
 from app.core.security import get_password_hash
 
@@ -148,29 +148,29 @@ def seed():
             daily = 2 if pm.frequency == "twice_daily" else 1
             for day_offset in range(90, 0, -1):
                 day = now - timedelta(days=day_offset)
-                # High-risk patients miss more doses
                 adherence_rate = 0.65 if pm.patient.risk_level == "high" else (
                     0.80 if pm.patient.risk_level == "normal" else 0.92
                 )
                 for dose_num in range(daily):
                     hour = 8 if dose_num == 0 else 20
-                    scheduled = day.replace(hour=hour, minute=0, second=0, microsecond=0)
+                    log_time = day.replace(hour=hour, minute=random.randint(0, 30), second=0, microsecond=0)
                     taken = random.random() < adherence_rate
                     existing = db.query(DoseLog).filter(
                         DoseLog.patient_medication_id == pm.id,
-                        DoseLog.scheduled_at == scheduled,
+                        DoseLog.logged_at == log_time,
                     ).first()
                     if not existing:
                         db.add(DoseLog(
                             patient_id=pm.patient_id,
+                            medication_id=pm.medication_id,
                             patient_medication_id=pm.id,
                             status="taken" if taken else "missed",
-                            scheduled_at=scheduled,
-                            logged_at=scheduled + timedelta(minutes=random.randint(0, 30)) if taken else None,
+                            source="system_detected",
+                            logged_at=log_time,
                         ))
                         dose_count += 1
-                        if pm.patient.last_taken_at is None and taken:
-                            pm.patient.last_taken_at = scheduled
+                        if taken and pm.patient.last_taken_at is None:
+                            pm.patient.last_taken_at = log_time
         db.commit()
         print(f"Dose logs created: {dose_count}")
 
@@ -178,8 +178,8 @@ def seed():
         esc_count = 0
         for p in created_patients:
             if p.risk_level == "high":
-                if not db.query(Escalation).filter(Escalation.patient_id == p.id).first():
-                    db.add(Escalation(
+                if not db.query(EscalationCase).filter(EscalationCase.patient_id == p.id).first():
+                    db.add(EscalationCase(
                         patient_id=p.id,
                         reason="Consecutive missed doses — high risk patient",
                         status="open",
