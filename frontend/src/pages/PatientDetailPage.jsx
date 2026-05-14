@@ -328,10 +328,12 @@ export default function PatientDetailPage() {
               <h3 className="font-display text-sm font-bold text-on-surface mb-2">Risk Level</h3>
               <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${RISK_CHIP[patient.risk_level] || RISK_CHIP.normal}`}>{patient.risk_level}</span>
             </div>
+            {/* Voice Nudge — hidden for mid-review, uncomment for final pitch
             <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
               <h3 className="font-display text-sm font-bold text-on-surface mb-2">Voice Nudge</h3>
               <p className="text-xs text-on-surface/60">{patient.nudge_delivery_mode || "text"} {patient.selected_voice_id ? `(${patient.selected_voice_id.slice(0, 8)}...)` : "(default)"}</p>
             </div>
+            */}
           </div>
         </div>
       </div>
@@ -360,6 +362,35 @@ export default function PatientDetailPage() {
         )}
         {aiGeneratedAt && (
           <p className="text-[10px] text-on-surface/30 mt-3">Generated {new Date(aiGeneratedAt).toLocaleString()}</p>
+        )}
+      </div>
+
+      {/* Medications card */}
+      <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-display text-lg font-bold text-on-surface">Active Medications</h3>
+          <div className="flex gap-2">
+            <button onClick={openDispensing} className="text-xs text-primary border border-primary/30 rounded-full px-3 py-1.5 hover:bg-primary/5">Record Dispensing</button>
+            <button onClick={openAssignMed} className="text-xs bg-primary text-white rounded-full px-3 py-1.5 hover:opacity-90">+ Assign</button>
+          </div>
+        </div>
+        {medications.length === 0 ? (
+          <p className="text-sm text-on-surface/30">No medications on record</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {medications.map((m) => (
+              <div key={m.id} className="bg-surface-container-low rounded-xl p-4">
+                <p className="text-sm font-bold text-on-surface">
+                  {m.medication?.name || m.medication?.generic_name}
+                  {m.medication?.is_critical && (
+                    <span className="ml-2 bg-error text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold align-middle">CRITICAL</span>
+                  )}
+                </p>
+                <p className="text-xs text-on-surface/50 mt-1">{m.dosage || "No dosage"} | {m.frequency?.replace(/_/g, " ")} | refill {m.refill_interval_days ?? "30"}d</p>
+                <p className={`text-[10px] mt-2 font-bold ${m.is_active ? "text-tertiary-container" : "text-on-surface/30"}`}>{m.is_active ? "Active" : "Inactive"}</p>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
@@ -404,28 +435,65 @@ export default function PatientDetailPage() {
 
         {/* Right sidebar: Dose History + Campaigns */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Dose History */}
+          {/* Dose Summary by Medication */}
           <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
-            <h3 className="font-display text-md font-bold text-on-surface mb-4">Dose History (30 Days)</h3>
+            <h3 className="font-display text-md font-bold text-on-surface mb-4">Doses by Medication (30 Days)</h3>
             {doseHistory.length === 0 ? (
               <p className="text-sm text-on-surface/30 text-center py-4">No dose records yet</p>
-            ) : (
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {doseHistory.slice(0, 20).map((d) => (
-                  <div key={d.id} className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${d.status === "taken" ? "bg-tertiary-container" : "bg-error"}`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-on-surface truncate">{d.medication_name}</p>
-                      <p className="text-[10px] text-outline">{new Date(d.logged_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+            ) : (() => {
+              const byMed = {};
+              doseHistory.forEach(d => {
+                const name = d.medication_name || "Unknown";
+                if (!byMed[name]) byMed[name] = { taken: 0, missed: 0 };
+                if (d.status === "taken") byMed[name].taken++;
+                else byMed[name].missed++;
+              });
+              const meds = medications || [];
+              return (
+                <div className="space-y-3">
+                  {Object.entries(byMed).map(([name, counts]) => {
+                    const total = counts.taken + counts.missed;
+                    const rate = total ? Math.round(counts.taken / total * 100) : 0;
+                    const isCrit = meds.some(m => (m.medication?.name === name || m.medication?.generic_name === name) && m.medication?.is_critical);
+                    return (
+                      <div key={name} className="p-3 bg-surface-container-low rounded-xl">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-bold text-on-surface">
+                            {name}
+                            {isCrit && <span className="ml-2 bg-error text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold align-middle">CRITICAL</span>}
+                          </span>
+                          <span className={`text-xs font-bold ${rate >= 80 ? "text-green-600" : rate >= 50 ? "text-yellow-600" : "text-error"}`}>{rate}%</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex-1 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+                            <div className={`h-full rounded-full ${rate >= 80 ? "bg-green-500" : rate >= 50 ? "bg-yellow-500" : "bg-error"}`} style={{ width: `${rate}%` }} />
+                          </div>
+                          <span className="text-[10px] text-on-surface/40 whitespace-nowrap">{counts.taken}/{total} taken</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div className="pt-3 border-t border-outline-variant/20">
+                    <h4 className="text-xs font-bold text-on-surface/50 mb-2">Recent Activity</h4>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {doseHistory.slice(0, 50).map((d) => (
+                        <div key={d.id} className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${d.status === "taken" ? "bg-tertiary-container" : "bg-error"}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-on-surface truncate">{d.medication_name}</p>
+                            <p className="text-[10px] text-outline">{new Date(d.logged_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${d.status === "taken" ? "bg-tertiary-container/10 text-tertiary-container" : "bg-error-container text-on-error-container"}`}>{d.status}</span>
+                        </div>
+                      ))}
                     </div>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${d.status === "taken" ? "bg-tertiary-container/10 text-tertiary-container" : "bg-error-container text-on-error-container"}`}>{d.status}</span>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              );
+            })()}
           </div>
 
-          {/* Nudge Campaigns */}
+          {/* Nudge Campaigns — hidden for mid-review, uncomment for final pitch
           <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
             <h3 className="font-display text-md font-bold text-on-surface mb-4">Nudge Campaigns</h3>
             {campaigns.length === 0 ? (
@@ -445,10 +513,11 @@ export default function PatientDetailPage() {
               </div>
             )}
           </div>
+          */}
         </div>
       </div>
 
-      {/* Medications card */}
+      {/* Medications card — original position, moved above Refill Timeline
       <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display text-lg font-bold text-on-surface">Active Medications</h3>
@@ -476,6 +545,7 @@ export default function PatientDetailPage() {
           </div>
         )}
       </div>
+      */}
 
       {/* Assign Medication Modal */}
       {showAssignMed && (
