@@ -45,7 +45,7 @@ export default function AnalyticsPage() {
   }, [days]);
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="p-6 max-w-5xl w-full mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold text-on-surface tracking-tight">Analytics</h1>
         <select
