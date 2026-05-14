@@ -50,7 +50,7 @@ export default function MedicationsPage() {
   };
 
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="p-6 max-w-4xl w-full mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-display text-2xl font-bold text-on-surface tracking-tight">Medication Catalog</h1>
