@@ -23,11 +23,20 @@ logger = logging.getLogger(__name__)
 TOKEN_TTL_HOURS = 72
 
 ONBOARDING_STATES = {
+    # Coordinator-initiated path
     "identity_verification",
     "invited",
     "consent_pending",
     "language_confirmed",
+    # Self-registration path (fully bot-driven, no coordinator needed)
+    "self_lang",
+    "self_consent",
+    "self_name",
+    "self_nric",
+    "self_condition",
+    # Shared states (both paths converge here)
     "medication_capture",
+    "patient_pending_ocr_confirmation",
     "confirm",
     "preferences",
     "voice_preference",
@@ -37,10 +46,101 @@ ONBOARDING_STATES = {
     "medication_confirm_pending",
 }
 
-LANG_QUICK_REPLIES = (
-    "Please select your preferred language / 请选择语言 / Sila pilih bahasa / மொழியைத் தேர்ந்தெடுக்கவும்:\n"
-    "1. English\n2. 中文 (Chinese)\n3. Melayu\n4. தமிழ் (Tamil)"
+LANG_PROMPT_TEXT = (
+    "Please select your preferred language / 请选择语言 / Sila pilih bahasa / மொழியைத் தேர்ந்தெடுக்கவும்:"
 )
+LANG_BUTTONS = [[
+    {"text": "English", "callback_data": "1"},
+    {"text": "中文", "callback_data": "2"},
+    {"text": "Melayu", "callback_data": "3"},
+    {"text": "தமிழ்", "callback_data": "4"},
+]]
+
+SELF_WELCOME = (
+    "Welcome to Medi-Nudge! 👋\n\n"
+    "Please select your preferred language / 请选择语言 / Sila pilih bahasa / மொழியைத் தேர்ந்தெடுக்கவும்:"
+)
+
+SELF_CONSENT_MESSAGES = {
+    "en": (
+        "Medi-Nudge helps you manage your medications with personalised reminders.\n\n"
+        "Your information is stored securely in accordance with PDPA and will only be used "
+        "to support your medication care.\n\n"
+        "Do you agree to join? Reply *YES* to continue or *NO* to cancel."
+    ),
+    "zh": (
+        "Medi-Nudge 通过个性化提醒帮助您管理用药。\n\n"
+        "您的信息将根据个人数据保护法（PDPA）安全存储，仅用于支持您的用药护理。\n\n"
+        "您同意加入吗？回复 *同意* 继续，或 *拒绝* 取消。"
+    ),
+    "ms": (
+        "Medi-Nudge membantu anda mengurus ubat dengan peringatan yang diperibadikan.\n\n"
+        "Maklumat anda disimpan dengan selamat mengikut PDPA dan hanya digunakan untuk "
+        "menyokong penjagaan ubat anda.\n\n"
+        "Adakah anda bersetuju untuk menyertai? Balas *YA* untuk teruskan atau *TIDAK* untuk batal."
+    ),
+    "ta": (
+        "Medi-Nudge தனிப்பயன் நினைவூட்டல்கள் மூலம் உங்கள் மருந்துகளை நிர்வகிக்க உதவுகிறது.\n\n"
+        "உங்கள் தகவல் PDPA படி பாதுகாப்பாக சேமிக்கப்படும்.\n\n"
+        "சேர ஒப்புக்கொள்கிறீர்களா? தொடர *YES* என்று பதிலளிக்கவும் அல்லது ரத்து செய்ய *NO* என்று பதிலளிக்கவும்."
+    ),
+}
+
+SELF_NAME_PROMPTS = {
+    "en": "What is your full name? (as shown on your ID)",
+    "zh": "请输入您的全名（与身份证相同）：",
+    "ms": "Apakah nama penuh anda? (seperti pada IC anda)",
+    "ta": "உங்கள் முழு பெயர் என்ன? (அடையாள அட்டையில் உள்ளபடி)",
+}
+
+SELF_NRIC_PROMPTS = {
+    "en": (
+        "Please enter your NRIC or FIN number (e.g. S1234567A).\n\n"
+        "This is stored securely as a hash — we never see or store the actual number."
+    ),
+    "zh": "请输入您的身份证或FIN号码（例如 S1234567A）。\n\n此信息将以加密形式存储，保障您的隐私。",
+    "ms": "Sila masukkan nombor NRIC atau FIN anda (cth. S1234567A).\n\nMaklumat ini disimpan secara selamat.",
+    "ta": "உங்கள் NRIC அல்லது FIN எண்ணை உள்ளிடவும் (எ.கா. S1234567A).\n\nதகவல் பாதுகாப்பாக சேமிக்கப்படும்.",
+}
+
+SELF_CONDITION_PROMPTS = {
+    "en": "Which health condition(s) are you managing? Tap all that apply, then tap Done.",
+    "zh": "您正在管理哪些健康状况？请选择所有适用项，然后点击「完成」。",
+    "ms": "Apakah keadaan kesihatan yang anda urus? Pilih semua yang berkenaan, kemudian ketik Selesai.",
+    "ta": "நீங்கள் எந்த உடல்நல நிலைமைகளை நிர்வகிக்கிறீர்கள்? பொருந்தும் அனைத்தையும் தேர்ந்தெடுக்கவும்.",
+}
+
+SELF_CONDITION_BUTTONS = {
+    "en": [
+        [{"text": "🩸 Diabetes", "callback_data": "sc:Diabetes"},
+         {"text": "💉 Hypertension", "callback_data": "sc:Hypertension"}],
+        [{"text": "🫀 High Cholesterol", "callback_data": "sc:Hyperlipidemia"},
+         {"text": "✏️ Other (type below)", "callback_data": "sc:other"}],
+        [{"text": "➡️ None / Skip", "callback_data": "sc:none"}],
+    ],
+    "zh": [
+        [{"text": "🩸 糖尿病", "callback_data": "sc:Diabetes"},
+         {"text": "💉 高血压", "callback_data": "sc:Hypertension"}],
+        [{"text": "🫀 高胆固醇", "callback_data": "sc:Hyperlipidemia"},
+         {"text": "✏️ 其他（请输入）", "callback_data": "sc:other"}],
+        [{"text": "➡️ 无 / 跳过", "callback_data": "sc:none"}],
+    ],
+    "ms": [
+        [{"text": "🩸 Diabetes", "callback_data": "sc:Diabetes"},
+         {"text": "💉 Hipertensi", "callback_data": "sc:Hypertension"}],
+        [{"text": "🫀 Kolesterol Tinggi", "callback_data": "sc:Hyperlipidemia"},
+         {"text": "✏️ Lain-lain (taip di bawah)", "callback_data": "sc:other"}],
+        [{"text": "➡️ Tiada / Langkau", "callback_data": "sc:none"}],
+    ],
+    "ta": [
+        [{"text": "🩸 நீரிழிவு", "callback_data": "sc:Diabetes"},
+         {"text": "💉 உயர் இரத்த அழுத்தம்", "callback_data": "sc:Hypertension"}],
+        [{"text": "🫀 அதிக கொலஸ்ட்ரால்", "callback_data": "sc:Hyperlipidemia"},
+         {"text": "✏️ மற்றவை (கீழே தட்டச்சு)", "callback_data": "sc:other"}],
+        [{"text": "➡️ எதுவுமில்லை / தவிர்", "callback_data": "sc:none"}],
+    ],
+}
+
 LANG_MAP = {
     "1": "en", "english": "en",
     "2": "zh", "中文": "zh", "chinese": "zh",
@@ -70,43 +170,115 @@ CONSENT_MESSAGES = {
 }
 
 MEDICATION_PROMPT = {
-    "en": (
-        "Let's set up your medications. How would you like to add them?\n\n"
-        "1️⃣ Confirm medications already on file\n"
-        "2️⃣ Send a photo of your prescription\n"
-        "3️⃣ Enter medications manually\n\n"
-        "Reply 1, 2, or 3."
-    ),
-    "zh": "让我们设置您的药物。\n1️⃣ 确认已有记录\n2️⃣ 发送处方照片\n3️⃣ 手动输入\n\n回复 1、2 或 3。",
-    "ms": "Mari kita sediakan ubat anda.\n1️⃣ Sahkan rekod sedia ada\n2️⃣ Hantar foto preskripsi\n3️⃣ Masukkan manual\n\nBalas 1, 2 atau 3.",
-    "ta": "மருந்துகளை அமைப்போம்.\n1️⃣ ரெக்கார்டை உறுதிப்படுத்தவும்\n2️⃣ புகைப்படம் அனுப்பவும்\n3️⃣ கைமுறையாக உள்ளிடவும்\n\n1, 2 அல்லது 3 என பதிலளிக்கவும்.",
+    "en": "Let's set up your medications. How would you like to add them?",
+    "zh": "让我们设置您的药物，请选择方式：",
+    "ms": "Mari kita sediakan ubat anda. Pilih cara:",
+    "ta": "மருந்துகளை அமைப்போம். எவ்வாறு சேர்க்க விரும்புகிறீர்கள்?",
+}
+MEDICATION_BUTTONS = {
+    "en": [
+        [{"text": "✅ Confirm on file", "callback_data": "1"}],
+        [{"text": "📷 Send a photo", "callback_data": "2"}],
+        [{"text": "✏️ Enter manually", "callback_data": "3"}],
+    ],
+    "zh": [
+        [{"text": "✅ 确认已有记录", "callback_data": "1"}],
+        [{"text": "📷 发送处方照片", "callback_data": "2"}],
+        [{"text": "✏️ 手动输入", "callback_data": "3"}],
+    ],
+    "ms": [
+        [{"text": "✅ Sahkan rekod sedia ada", "callback_data": "1"}],
+        [{"text": "📷 Hantar foto preskripsi", "callback_data": "2"}],
+        [{"text": "✏️ Masukkan manual", "callback_data": "3"}],
+    ],
+    "ta": [
+        [{"text": "✅ ரெக்கார்டை உறுதிப்படுத்தவும்", "callback_data": "1"}],
+        [{"text": "📷 புகைப்படம் அனுப்பவும்", "callback_data": "2"}],
+        [{"text": "✏️ கைமுறையாக உள்ளிடவும்", "callback_data": "3"}],
+    ],
 }
 
 PREFERENCES_PROMPT = {
-    "en": (
-        "Almost done! When would you like to receive reminders?\n\n"
-        "1. Morning (8am–12pm)\n2. Afternoon (12pm–5pm)\n3. Evening (5pm–9pm)\n4. No preference\n\nReply 1–4."
-    ),
-    "zh": "快完成了！您希望何时收到提醒？\n1. 早上\n2. 下午\n3. 傍晚\n4. 无偏好\n\n回复 1–4。",
-    "ms": "Hampir selesai! Bilakah anda ingin menerima peringatan?\n1. Pagi\n2. Tengahari\n3. Petang\n4. Tiada pilihan\n\nBalas 1–4.",
-    "ta": "கிட்டத்தட்ட முடிந்தது! எப்போது நினைவூட்டல்கள் வேண்டும்?\n1. காலை\n2. மதியம்\n3. மாலை\n4. விருப்பமில்லை\n\n1–4 என பதிலளிக்கவும்.",
+    "en": "Almost done! When would you like to receive reminders?",
+    "zh": "快完成了！您希望何时收到提醒？",
+    "ms": "Hampir selesai! Bilakah anda ingin menerima peringatan?",
+    "ta": "கிட்டத்தட்ட முடிந்தது! எப்போது நினைவூட்டல்கள் வேண்டும்?",
+}
+PREFERENCES_BUTTONS = {
+    "en": [
+        [{"text": "☀️ Morning", "callback_data": "1"}, {"text": "🌤 Afternoon", "callback_data": "2"}],
+        [{"text": "🌆 Evening", "callback_data": "3"}, {"text": "🔕 No preference", "callback_data": "4"}],
+    ],
+    "zh": [
+        [{"text": "☀️ 早上", "callback_data": "1"}, {"text": "🌤 下午", "callback_data": "2"}],
+        [{"text": "🌆 傍晚", "callback_data": "3"}, {"text": "🔕 无偏好", "callback_data": "4"}],
+    ],
+    "ms": [
+        [{"text": "☀️ Pagi", "callback_data": "1"}, {"text": "🌤 Tengahari", "callback_data": "2"}],
+        [{"text": "🌆 Petang", "callback_data": "3"}, {"text": "🔕 Tiada pilihan", "callback_data": "4"}],
+    ],
+    "ta": [
+        [{"text": "☀️ காலை", "callback_data": "1"}, {"text": "🌤 மதியம்", "callback_data": "2"}],
+        [{"text": "🌆 மாலை", "callback_data": "3"}, {"text": "🔕 விருப்பமில்லை", "callback_data": "4"}],
+    ],
 }
 
 VOICE_PREFERENCE_PROMPT = {
-    "en": (
-        "How would you like to receive medication reminders?\n\n"
-        "1. Text only\n2. Voice only\n3. Both text and voice\n\nReply 1-3."
-    ),
-    "zh": "您希望如何收到用药提醒？\n1. 仅文字\n2. 仅语音\n3. 文字和语音\n\n回复 1-3。",
-    "ms": "Bagaimana anda mahu menerima peringatan ubat?\n1. Teks sahaja\n2. Suara sahaja\n3. Kedua-dua\n\nBalas 1-3.",
-    "ta": "மருந்து நினைவூட்டல்களை எவ்வாறு பெற விரும்புகிறீர்கள்?\n1. உரை மட்டும்\n2. குரல் மட்டும்\n3. இரண்டும்\n\n1-3 என பதிலளிக்கவும்.",
+    "en": "How would you like to receive medication reminders?",
+    "zh": "您希望如何收到用药提醒？",
+    "ms": "Bagaimana anda mahu menerima peringatan ubat?",
+    "ta": "மருந்து நினைவூட்டல்களை எவ்வாறு பெற விரும்புகிறீர்கள்?",
+}
+VOICE_PREFERENCE_BUTTONS = {
+    "en": [[
+        {"text": "💬 Text only", "callback_data": "1"},
+        {"text": "🔊 Voice only", "callback_data": "2"},
+        {"text": "💬🔊 Both", "callback_data": "3"},
+    ]],
+    "zh": [[
+        {"text": "💬 仅文字", "callback_data": "1"},
+        {"text": "🔊 仅语音", "callback_data": "2"},
+        {"text": "💬🔊 两者", "callback_data": "3"},
+    ]],
+    "ms": [[
+        {"text": "💬 Teks sahaja", "callback_data": "1"},
+        {"text": "🔊 Suara sahaja", "callback_data": "2"},
+        {"text": "💬🔊 Kedua-dua", "callback_data": "3"},
+    ]],
+    "ta": [[
+        {"text": "💬 உரை மட்டும்", "callback_data": "1"},
+        {"text": "🔊 குரல் மட்டும்", "callback_data": "2"},
+        {"text": "💬🔊 இரண்டும்", "callback_data": "3"},
+    ]],
 }
 
 VOICE_SELECTION_PROMPT = {
-    "en": "Choose a voice for your reminders:\n\n1. Female voice\n2. Male voice\n3. Record my own voice\n\nReply 1, 2 or 3.",
-    "zh": "选择提醒语音：\n1. 女声\n2. 男声\n3. 录制自己的声音\n\n回复 1、2 或 3。",
-    "ms": "Pilih suara untuk peringatan anda:\n1. Suara wanita\n2. Suara lelaki\n3. Rakam suara sendiri\n\nBalas 1, 2 atau 3.",
-    "ta": "நினைவூட்டலுக்கு குரல் தேர்ந்தெடுக்கவும்:\n1. பெண் குரல்\n2. ஆண் குரல்\n3. சொந்த குரல் பதிவு\n\n1, 2 அல்லது 3 என பதிலளிக்கவும்.",
+    "en": "Choose a voice for your reminders:",
+    "zh": "选择提醒语音：",
+    "ms": "Pilih suara untuk peringatan anda:",
+    "ta": "நினைவூட்டலுக்கு குரல் தேர்ந்தெடுக்கவும்:",
+}
+VOICE_SELECTION_BUTTONS = {
+    "en": [[
+        {"text": "👩 Female", "callback_data": "1"},
+        {"text": "👨 Male", "callback_data": "2"},
+        {"text": "🎙 Record my own", "callback_data": "3"},
+    ]],
+    "zh": [[
+        {"text": "👩 女声", "callback_data": "1"},
+        {"text": "👨 男声", "callback_data": "2"},
+        {"text": "🎙 录制自己的声音", "callback_data": "3"},
+    ]],
+    "ms": [[
+        {"text": "👩 Wanita", "callback_data": "1"},
+        {"text": "👨 Lelaki", "callback_data": "2"},
+        {"text": "🎙 Rakam sendiri", "callback_data": "3"},
+    ]],
+    "ta": [[
+        {"text": "👩 பெண் குரல்", "callback_data": "1"},
+        {"text": "👨 ஆண் குரல்", "callback_data": "2"},
+        {"text": "🎙 சொந்த குரல்", "callback_data": "3"},
+    ]],
 }
 
 VOICE_RECORD_PROMPT = {
@@ -313,20 +485,17 @@ def handle_start_command(db: Session, chat_id: str, token_arg: "str | None") -> 
             handle_onboarding_reply(db, existing, "")
         return
 
+    # Self-registration: create stub and start with language selection
     stub = Patient(
-        full_name="Unknown",
+        full_name="",
         phone_number=f"tg_{chat_id}",
         telegram_chat_id=chat_id,
-        onboarding_state="identity_verification",
+        onboarding_state="self_lang",
         is_active=False,
     )
     db.add(stub)
     db.commit()
-    _send_raw(
-        chat_id,
-        "Welcome to Medi-Nudge! 👋\n\n"
-        "To link your account, please enter your full NRIC/FIN number (e.g. S1234567A).",
-    )
+    _send_raw_keyboard(chat_id, SELF_WELCOME, LANG_BUTTONS)
 
 
 # ---------------------------------------------------------------------------
@@ -338,10 +507,18 @@ def handle_onboarding_reply(db: Session, patient: Patient, text: str) -> None:
     text_lower = text.strip().lower()
 
     dispatch = {
+        # Self-registration path
+        "self_lang":      _handle_self_lang,
+        "self_consent":   _handle_self_consent,
+        "self_name":      _handle_self_name,
+        "self_nric":      _handle_self_nric,
+        "self_condition": _handle_self_condition,
+        # Coordinator-initiated path
         "identity_verification": handle_identity_verification,
         "invited": _handle_invite_reply,
         "consent_pending": _handle_consent_reply,
         "language_confirmed": _handle_language_reply,
+        # Shared states
         "medication_capture": _handle_medication_capture,
         "confirm": _handle_confirm_reply,
         "preferences": _handle_preferences_reply,
@@ -355,6 +532,120 @@ def handle_onboarding_reply(db: Session, patient: Patient, text: str) -> None:
     else:
         _send_patient(db, patient, "Reply HELP for assistance or wait for your care team to contact you.")
         escalation_service.create_escalation(db=db, patient_id=patient.id, reason="patient_question")
+
+
+# ---------------------------------------------------------------------------
+# Self-registration handlers
+# ---------------------------------------------------------------------------
+
+def _handle_self_lang(db: Session, patient: Patient, text: str) -> None:
+    """Language selection — first step of self-registration."""
+    # text arrives lowercased; callback_data is "1"/"2"/"3"/"4"
+    lang = LANG_MAP.get(text.strip())
+    if not lang:
+        _send_raw_keyboard(patient.telegram_chat_id, SELF_WELCOME, LANG_BUTTONS)
+        return
+    patient.language_preference = lang
+    patient.onboarding_state = "self_consent"
+    db.commit()
+    _send_patient(db, patient, SELF_CONSENT_MESSAGES.get(lang, SELF_CONSENT_MESSAGES["en"]))
+
+
+def _handle_self_consent(db: Session, patient: Patient, text: str) -> None:
+    lang = patient.language_preference or "en"
+    if any(k in text for k in ("yes", "ya", "好", "同意", "setuju")):
+        patient.consent_obtained_at = datetime.utcnow()
+        patient.consent_channel = "telegram"
+        patient.onboarding_state = "self_name"
+        db.commit()
+        _send_patient(db, patient, SELF_NAME_PROMPTS.get(lang, SELF_NAME_PROMPTS["en"]))
+    elif any(k in text for k in ("no", "tidak", "不要", "拒绝", "nope")):
+        patient.is_active = False
+        db.commit()
+    else:
+        _send_patient(db, patient, SELF_CONSENT_MESSAGES.get(lang, SELF_CONSENT_MESSAGES["en"]))
+
+
+def _handle_self_name(db: Session, patient: Patient, text: str) -> None:
+    lang = patient.language_preference or "en"
+    name = text.strip().title()
+    if len(name) < 2:
+        _send_patient(db, patient, SELF_NAME_PROMPTS.get(lang, SELF_NAME_PROMPTS["en"]))
+        return
+    patient.full_name = name
+    patient.onboarding_state = "self_nric"
+    db.commit()
+    _send_patient(db, patient, SELF_NRIC_PROMPTS.get(lang, SELF_NRIC_PROMPTS["en"]))
+
+
+def _handle_self_nric(db: Session, patient: Patient, text: str) -> None:
+    lang = patient.language_preference or "en"
+    nric_input = text.strip().upper()
+    if len(nric_input) < 7:
+        _send_patient(db, patient, SELF_NRIC_PROMPTS.get(lang, SELF_NRIC_PROMPTS["en"]))
+        return
+    patient.nric_hash = hash_sha256(nric_input)
+    patient.onboarding_state = "self_condition"
+    db.commit()
+    _send_patient_keyboard(
+        db, patient,
+        SELF_CONDITION_PROMPTS.get(lang, SELF_CONDITION_PROMPTS["en"]),
+        SELF_CONDITION_BUTTONS.get(lang, SELF_CONDITION_BUTTONS["en"]),
+    )
+
+
+def _handle_self_condition(db: Session, patient: Patient, text: str) -> None:
+    """Handle condition selection — supports callback (sc:X) and free-text input."""
+    lang = patient.language_preference or "en"
+
+    # Parse callback_data (e.g. "sc:diabetes", "sc:none", "sc:other")
+    raw = text.strip()
+    if raw.startswith("sc:"):
+        key = raw[3:]
+        if key == "none":
+            patient.conditions = []
+        elif key == "other":
+            # Ask patient to type their condition
+            OTHER_PROMPT = {
+                "en": "Please type your health condition(s) (e.g. Asthma, Kidney disease):",
+                "zh": "请输入您的健康状况（例如：哮喘、肾脏疾病）：",
+                "ms": "Sila taip keadaan kesihatan anda (cth. Asma, Penyakit buah pinggang):",
+                "ta": "உங்கள் உடல்நல நிலைமைகளை தட்டச்சு செய்யவும்:",
+            }
+            _send_patient(db, patient, OTHER_PROMPT.get(lang, OTHER_PROMPT["en"]))
+            # Stay in self_condition to receive the typed text
+            return
+        else:
+            # Map normalised key back to proper name
+            _COND_MAP = {
+                "diabetes": "Diabetes",
+                "hypertension": "Hypertension",
+                "hyperlipidemia": "Hyperlipidemia",
+            }
+            condition = _COND_MAP.get(key.lower(), key.title())
+            existing = list(patient.conditions or [])
+            if condition not in existing:
+                existing.append(condition)
+            patient.conditions = existing
+    else:
+        # Free-text entry (e.g. from "Other" prompt or direct typing)
+        typed = raw.strip().title()
+        if typed:
+            existing = list(patient.conditions or [])
+            for part in [c.strip() for c in typed.split(",") if c.strip()]:
+                if part and part not in existing:
+                    existing.append(part)
+            patient.conditions = existing
+
+    # Activate patient and advance to medication capture
+    patient.is_active = True
+    patient.onboarding_state = "medication_capture"
+    db.commit()
+    _send_patient_keyboard(
+        db, patient,
+        MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]),
+        MEDICATION_BUTTONS.get(lang, MEDICATION_BUTTONS["en"]),
+    )
 
 
 def handle_identity_verification(db: Session, patient: Patient, text: str) -> None:
@@ -403,7 +694,7 @@ def _handle_invite_reply(db: Session, patient: Patient, text: str) -> None:
         patient.consent_obtained_at = datetime.utcnow()
         patient.consent_channel = "telegram"
         db.commit()
-        _send_patient(db, patient, LANG_QUICK_REPLIES)
+        _send_patient_keyboard(db, patient, LANG_PROMPT_TEXT, LANG_BUTTONS)
     elif any(k in text for k in ("no", "tidak", "不要", "nope", "拒绝")):
         patient.is_active = False
         db.commit()
@@ -415,9 +706,13 @@ def _handle_consent_reply(db: Session, patient: Patient, text: str) -> None:
         patient.language_preference = lang
         patient.onboarding_state = "language_confirmed"
         db.commit()
-        _send_patient(db, patient, MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]),
+            MEDICATION_BUTTONS.get(lang, MEDICATION_BUTTONS["en"]),
+        )
     else:
-        _send_patient(db, patient, LANG_QUICK_REPLIES)
+        _send_patient_keyboard(db, patient, LANG_PROMPT_TEXT, LANG_BUTTONS)
 
 
 def _handle_language_reply(db: Session, patient: Patient, text: str) -> None:
@@ -444,7 +739,11 @@ def _handle_medication_capture(db: Session, patient: Patient, text: str) -> None
             patient.onboarding_state = "confirm"
             db.commit()
         else:
-            _send_patient(db, patient, "No medications on file. Send a photo (reply 2) or enter manually (reply 3).")
+            _send_patient_keyboard(
+                db, patient,
+                "No medications on file yet. How would you like to add them?",
+                MEDICATION_BUTTONS.get(lang, MEDICATION_BUTTONS["en"])[1:],  # only photo + manual options
+            )
     elif choice == "2":
         _send_patient(db, patient, "Please send a photo of your prescription or medicine label.")
     elif choice == "3":
@@ -452,7 +751,11 @@ def _handle_medication_capture(db: Session, patient: Patient, text: str) -> None
         db.commit()
         _send_patient(db, patient, "Please type the name of your first medication (e.g. Metformin 500mg). Reply *DONE* when finished.")
     else:
-        _send_patient(db, patient, MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]),
+            MEDICATION_BUTTONS.get(lang, MEDICATION_BUTTONS["en"]),
+        )
 
 
 def _handle_confirm_reply(db: Session, patient: Patient, text: str) -> None:
@@ -461,17 +764,28 @@ def _handle_confirm_reply(db: Session, patient: Patient, text: str) -> None:
             PatientMedication.patient_id == patient.id,
             PatientMedication.is_active == False,  # noqa: E712
         ).update({"is_active": True})
+        db.commit()
+        # Send info card for newly activated medications (manual-entry path)
+        _send_info_cards_for_new_medications(db, patient)
         patient.onboarding_state = "preferences"
         db.commit()
         lang = patient.language_preference or "en"
-        _send_patient(db, patient, PREFERENCES_PROMPT.get(lang, PREFERENCES_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            PREFERENCES_PROMPT.get(lang, PREFERENCES_PROMPT["en"]),
+            PREFERENCES_BUTTONS.get(lang, PREFERENCES_BUTTONS["en"]),
+        )
     elif text.strip() == "done":
         _send_patient(db, patient, "Thank you! Reply *YES* to confirm your medication list.")
     elif any(k in text for k in ("no", "tidak", "不", "nope")):
         lang = patient.language_preference or "en"
         patient.onboarding_state = "medication_capture"
         db.commit()
-        _send_patient(db, patient, MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            MEDICATION_PROMPT.get(lang, MEDICATION_PROMPT["en"]),
+            MEDICATION_BUTTONS.get(lang, MEDICATION_BUTTONS["en"]),
+        )
     else:
         # Treat as manual entry — run through medicine verification gate
         from app.services import agent_service
@@ -483,7 +797,11 @@ def _handle_preferences_reply(db: Session, patient: Patient, text: str) -> None:
     window = CONTACT_WINDOWS.get(choice)
     if window is None:
         lang = patient.language_preference or "en"
-        _send_patient(db, patient, PREFERENCES_PROMPT.get(lang, PREFERENCES_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            PREFERENCES_PROMPT.get(lang, PREFERENCES_PROMPT["en"]),
+            PREFERENCES_BUTTONS.get(lang, PREFERENCES_BUTTONS["en"]),
+        )
         return
     start, end = window
     patient.contact_window_start = start
@@ -491,7 +809,11 @@ def _handle_preferences_reply(db: Session, patient: Patient, text: str) -> None:
     patient.onboarding_state = "voice_preference"
     db.commit()
     lang = patient.language_preference or "en"
-    _send_patient(db, patient, VOICE_PREFERENCE_PROMPT.get(lang, VOICE_PREFERENCE_PROMPT["en"]))
+    _send_patient_keyboard(
+        db, patient,
+        VOICE_PREFERENCE_PROMPT.get(lang, VOICE_PREFERENCE_PROMPT["en"]),
+        VOICE_PREFERENCE_BUTTONS.get(lang, VOICE_PREFERENCE_BUTTONS["en"]),
+    )
 
 
 def _handle_voice_preference_reply(db: Session, patient: Patient, text: str) -> None:
@@ -499,7 +821,11 @@ def _handle_voice_preference_reply(db: Session, patient: Patient, text: str) -> 
     mode = DELIVERY_MODE_MAP.get(choice)
     if mode is None:
         lang = patient.language_preference or "en"
-        _send_patient(db, patient, VOICE_PREFERENCE_PROMPT.get(lang, VOICE_PREFERENCE_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            VOICE_PREFERENCE_PROMPT.get(lang, VOICE_PREFERENCE_PROMPT["en"]),
+            VOICE_PREFERENCE_BUTTONS.get(lang, VOICE_PREFERENCE_BUTTONS["en"]),
+        )
         return
 
     patient.nudge_delivery_mode = mode
@@ -509,7 +835,11 @@ def _handle_voice_preference_reply(db: Session, patient: Patient, text: str) -> 
         patient.onboarding_state = "voice_selection"
         db.commit()
         lang = patient.language_preference or "en"
-        _send_patient(db, patient, VOICE_SELECTION_PROMPT.get(lang, VOICE_SELECTION_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            VOICE_SELECTION_PROMPT.get(lang, VOICE_SELECTION_PROMPT["en"]),
+            VOICE_SELECTION_BUTTONS.get(lang, VOICE_SELECTION_BUTTONS["en"]),
+        )
 
 
 def _handle_voice_selection_reply(db: Session, patient: Patient, text: str) -> None:
@@ -528,7 +858,11 @@ def _handle_voice_selection_reply(db: Session, patient: Patient, text: str) -> N
         return
     else:
         lang = patient.language_preference or "en"
-        _send_patient(db, patient, VOICE_SELECTION_PROMPT.get(lang, VOICE_SELECTION_PROMPT["en"]))
+        _send_patient_keyboard(
+            db, patient,
+            VOICE_SELECTION_PROMPT.get(lang, VOICE_SELECTION_PROMPT["en"]),
+            VOICE_SELECTION_BUTTONS.get(lang, VOICE_SELECTION_BUTTONS["en"]),
+        )
         return
     _complete_onboarding(db, patient)
 
@@ -546,6 +880,13 @@ def _complete_onboarding(db: Session, patient: Patient) -> None:
         send_caregiver_invite(db, patient)
     except Exception as exc:
         logger.warning("Caregiver invite send failed for patient %s: %s", patient.id, exc)
+
+    # Immediately create side-effect check-in campaigns for all active medications
+    try:
+        from app.services.side_effect_checkin_service import run_side_effect_checkin_check
+        run_side_effect_checkin_check(db, patient_id=patient.id)
+    except Exception as exc:
+        logger.warning("Side-effect check-in trigger failed for patient %s: %s", patient.id, exc)
 
 
 # ---------------------------------------------------------------------------
@@ -578,11 +919,127 @@ def handle_drop_off(db: Session, patient: Patient, retry_count: int) -> None:
 # Helpers
 # ---------------------------------------------------------------------------
 
+_OCR_CONFIRM_PROMPTS = {
+    "en": (
+        "I've read your prescription label. Does this look correct?\n\n"
+        "{details}\n\n"
+        "Reply CONFIRM to accept or EDIT to send to your care team for review."
+    ),
+    "zh": (
+        "我已读取您的处方标签。这些信息是否正确？\n\n"
+        "{details}\n\n"
+        "回复「确认」接受，或「修改」交由护理团队审核。"
+    ),
+    "ms": (
+        "Saya telah membaca label preskripsi anda. Adakah ini betul?\n\n"
+        "{details}\n\n"
+        "Balas CONFIRM untuk terima atau EDIT untuk hantar kepada pasukan penjagaan anda."
+    ),
+    "ta": (
+        "உங்கள் மருந்து லேபிளை படித்தேன். இது சரியா?\n\n"
+        "{details}\n\n"
+        "CONFIRM என ஒப்புக்கொள்ள பதிலளிக்கவும் அல்லது EDIT என்று பராமரிப்பு குழுவிற்கு அனுப்பவும்."
+    ),
+}
+
+_OCR_CONFIRM_BUTTONS = [
+    [{"text": "✅ CONFIRM", "callback_data": "CONFIRM"}],
+    [{"text": "✏️ EDIT", "callback_data": "EDIT"}],
+]
+
+
+def send_ocr_confirmation_prompt(db: "Session", patient: "Patient", scan: object) -> None:
+    """Send the patient a summary of OCR-extracted fields for self-confirmation."""
+    lang = patient.language_preference or "en"
+    field_map = {f.field_name: f.extracted_value for f in scan.fields if f.extracted_value}
+
+    lines = []
+    if field_map.get("medication_name"):
+        lines.append(f"💊 Medication: {field_map['medication_name']}")
+    if field_map.get("dosage"):
+        lines.append(f"📋 Dosage: {field_map['dosage']}")
+    if field_map.get("frequency"):
+        lines.append(f"🔁 Frequency: {field_map['frequency']}")
+    if field_map.get("dispense_date"):
+        lines.append(f"📅 Dispense date: {field_map['dispense_date']}")
+    details = "\n".join(lines) if lines else "(no fields extracted)"
+
+    tmpl = _OCR_CONFIRM_PROMPTS.get(lang, _OCR_CONFIRM_PROMPTS["en"])
+    body = tmpl.format(details=details)
+    _send_patient_keyboard(db, patient, body, _OCR_CONFIRM_BUTTONS)
+
+
 def _send_patient(db: Session, patient: Patient, body: str) -> None:
     if not patient.telegram_chat_id:
         logger.warning("Cannot send to patient %s — telegram_chat_id not set", patient.id)
         return
     telegram_service.send_text(db=db, patient_id=patient.id, to_phone=patient.telegram_chat_id, body=body)
+
+
+def _send_info_cards_for_new_medications(db: Session, patient: Patient) -> None:
+    """Send medication info cards for any newly activated medications that haven't received one yet."""
+    from datetime import datetime as _dt
+    from app.services.medication_info_service import generate_info_card
+    from app.models.models import Medication as MedModel
+
+    lang = patient.language_preference or "en"
+    condition = patient.conditions[0] if patient.conditions else None
+
+    pms = (
+        db.query(PatientMedication)
+        .filter(
+            PatientMedication.patient_id == patient.id,
+            PatientMedication.is_active == True,  # noqa: E712
+            PatientMedication.med_info_card_sent_at.is_(None),
+        )
+        .all()
+    )
+    for pm in pms:
+        med = db.query(MedModel).filter(MedModel.id == pm.medication_id).first()
+        if not med:
+            continue
+        try:
+            card = generate_info_card(med.name, lang, condition=condition)
+            telegram_service.send_text(
+                db=db,
+                patient_id=patient.id,
+                to_phone=patient.telegram_chat_id or patient.phone_number,
+                body=card,
+            )
+            pm.med_info_card_sent_at = _dt.utcnow()
+        except Exception as exc:
+            logger.warning("Failed to send info card for medication %s: %s", med.name, exc)
+    db.commit()
+
+
+def _send_patient_keyboard(db: Session, patient: Patient, body: str, buttons: list) -> None:
+    if not patient.telegram_chat_id:
+        logger.warning("Cannot send keyboard to patient %s — telegram_chat_id not set", patient.id)
+        return
+    telegram_service.send_keyboard(
+        db=db, patient_id=patient.id, to_phone=patient.telegram_chat_id, body=body, buttons=buttons
+    )
+
+
+def _send_raw_keyboard(chat_id: str, body: str, buttons: list) -> None:
+    """Send a keyboard message to an unregistered chat (no OutboundMessage record)."""
+    import httpx
+    if not settings.TELEGRAM_BOT_TOKEN:
+        logger.info("Simulated keyboard to %s: %s", chat_id, body)
+        return
+    try:
+        httpx.post(
+            f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage",
+            json={
+                "chat_id": chat_id,
+                "text": body,
+                "parse_mode": "Markdown",
+                "reply_markup": {"inline_keyboard": buttons},
+            },
+            timeout=10,
+        )
+    except Exception as exc:
+        logger.error("Failed to send raw keyboard to %s: %s", chat_id, exc)
 
 
 def _send_raw(chat_id: str, body: str) -> None:

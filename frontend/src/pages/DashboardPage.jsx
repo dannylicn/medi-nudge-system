@@ -26,7 +26,7 @@ const PRIORITY_STYLE = {
 
 export default function DashboardPage() {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
   // Patient list state
   const [patients, setPatients] = useState([]);
@@ -51,7 +51,7 @@ export default function DashboardPage() {
     try {
       const { data: d } = await getDashboardSummary();
       setData(d);
-    } catch {} finally { setLoading(false); }
+    } catch { /* no-op */ } finally { setLoading(false); }
   };
 
   // Load patient list
@@ -61,10 +61,12 @@ export default function DashboardPage() {
       const { data } = await getPatients({ page, page_size: PAGE_SIZE, search: search || undefined, risk_level: riskFilter || undefined });
       setPatients(data.items);
       setTotal(data.total);
-    } catch {} finally { setPatientsLoading(false); }
+    } catch { /* no-op */ } finally { setPatientsLoading(false); }
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadDashboard(); getConditions().then(({ data }) => setConditionsList(data)).catch(() => {}); }, []);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchPatients(); }, [page, riskFilter]);
   useEffect(() => { const t = setTimeout(fetchPatients, 350); return () => clearTimeout(t); }, [search]);
 
@@ -77,11 +79,11 @@ export default function DashboardPage() {
       setNewPatient({ full_name: "", phone_number: "", nric: "", language_preference: "en", conditions: [], caregiver_name: "", caregiver_phone_number: "" });
       fetchPatients();
       loadDashboard();
-    } catch {} finally { setEnrolling(false); }
+    } catch { /* no-op */ } finally { setEnrolling(false); }
   };
 
   const handleDismissEscalation = async (id) => {
-    try { await updateEscalation(id, { status: "resolved" }); loadDashboard(); } catch {}
+    try { await updateEscalation(id, { status: "resolved" }); loadDashboard(); } catch { /* no-op */ }
   };
 
   const totalPages = Math.ceil(total / PAGE_SIZE);

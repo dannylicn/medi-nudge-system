@@ -139,6 +139,8 @@ class TestBuildContext:
     def test_active_campaign_included(self, db):
         patient = _make_patient(db)
         med = _make_medication(db)
+        pm = PatientMedication(patient_id=patient.id, medication_id=med.id, is_active=True)
+        db.add(pm)
         campaign = NudgeCampaign(
             patient_id=patient.id, medication_id=med.id,
             status="sent", days_overdue=5, attempt_number=1, language="en",
@@ -216,6 +218,8 @@ class TestFallbackAgent:
     def test_singlish_taken_resolves_campaign(self, db):
         patient = _make_patient(db)
         med = _make_medication(db)
+        pm = PatientMedication(patient_id=patient.id, medication_id=med.id, is_active=True)
+        db.add(pm)
         campaign = NudgeCampaign(
             patient_id=patient.id, medication_id=med.id,
             status="sent", days_overdue=3, attempt_number=1, language="en",
@@ -261,6 +265,8 @@ class TestFallbackAgent:
         """When no LLM key, agent_service.run() must behave identically to fallback."""
         patient = _make_patient(db)
         med = _make_medication(db)
+        pm = PatientMedication(patient_id=patient.id, medication_id=med.id, is_active=True)
+        db.add(pm)
         campaign = NudgeCampaign(
             patient_id=patient.id, medication_id=med.id,
             status="sent", days_overdue=1, attempt_number=1, language="en",

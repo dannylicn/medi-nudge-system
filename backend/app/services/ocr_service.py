@@ -21,6 +21,12 @@ logger = logging.getLogger(__name__)
 
 CONFIDENCE_THRESHOLD = 0.75
 
+# Fast-path thresholds: required fields must all meet this to bypass coordinator review
+_FAST_PATH_REQUIRED = ("medication_name", "dosage", "frequency")
+_FAST_PATH_DATE_FIELDS = ("dispense_date", "expiry_date")
+_FAST_PATH_HIGH = 0.85
+_FAST_PATH_DATE = 0.75
+
 FIELD_NAMES = [
     "medication_name", "generic_name", "dosage", "frequency",
     "refill_days", "prescriber", "clinic", "dispense_date",
@@ -38,6 +44,37 @@ def _parse_ocr_fields(raw_fields: list) -> list:
             "confidence": float(f.get("confidence", 0.0)),
         })
     return result
+
+
+def _is_high_confidence(scan: "PrescriptionScan") -> bool:
+    """Return True when the scan meets the fast-path confidence gate."""
+    field_map = {f.field_name: f.confidence for f in scan.fields}
+    if any(field_map.get(f, 0.0) < _FAST_PATH_HIGH for f in _FAST_PATH_REQUIRED):
+        return False
+    if not any(field_map.get(f, 0.0) >= _FAST_PATH_DATE for f in _FAST_PATH_DATE_FIELDS):
+        return False
+    return True
+
+
+def _parse_frequency_to_times(text: str | None) -> list[str]:
+    """Map an OCR-extracted frequency string to a list of HH:MM reminder times (SGT).
+    Returns [] when the text is unrecognised or absent."""
+    if not text:
+        return []
+    t = text.strip().lower()
+    if any(k in t for k in ("once daily", "once a day", " od", "od ")):
+        return ["08:00"]
+    if any(k in t for k in ("twice daily", "two times")) or t == "bd" or " bd" in t or t.endswith("bd"):
+        return ["08:00", "20:00"]
+    if any(k in t for k in ("three times", "tds", "tid")):
+        return ["08:00", "14:00", "20:00"]
+    if any(k in t for k in ("four times", "qid")):
+        return ["08:00", "12:00", "16:00", "20:00"]
+    if any(k in t for k in ("with meals", "before meals")):
+        return ["07:30", "12:30", "18:30"]
+    if any(k in t for k in ("at night", "nocte")):
+        return ["21:00"]
+    return []
 
 
 def ingest_image(

@@ -231,7 +231,7 @@ class TestVoiceDeliveryFallback:
         db.add(med)
         db.commit()
 
-        with patch("app.services.telegram_service.send_text") as mock_send, \
+        with patch("app.services.telegram_service.send_keyboard") as mock_send, \
              patch("app.services.tts_service.generate_voice_message") as mock_tts:
             mock_send.return_value = MagicMock(status="sent")
 
@@ -268,7 +268,7 @@ class TestVoiceDeliveryFallback:
         db.add(med)
         db.commit()
 
-        with patch("app.services.telegram_service.send_text") as mock_send, \
+        with patch("app.services.telegram_service.send_keyboard") as mock_send, \
              patch("app.services.tts_service.generate_voice_message") as mock_tts:
             mock_send.return_value = MagicMock(status="sent")
             mock_tts.return_value = None  # TTS failed
@@ -276,6 +276,6 @@ class TestVoiceDeliveryFallback:
             from app.services.nudge_campaign_service import create_and_send
             campaign = create_and_send(db, patient, med, days_overdue=5)
 
-            # Should fall back to text
+            # Should fall back to text with button
             mock_send.assert_called()
             assert campaign.status == "sent"

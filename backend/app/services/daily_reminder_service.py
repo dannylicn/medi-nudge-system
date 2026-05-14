@@ -18,6 +18,19 @@ from app.services import caregiver_service
 logger = logging.getLogger(__name__)
 SGT = ZoneInfo("Asia/Singapore")
 
+_TAKEN_LABELS = {
+    "en": "✅ Taken",
+    "zh": "✅ 已服",
+    "ms": "✅ Sudah",
+    "ta": "✅ எடுத்தேன்",
+}
+
+
+def _taken_button(lang: str | None) -> list[list[dict]]:
+    """Return an inline keyboard with a single 'Taken' button (callback_data: TAKEN)."""
+    label = _TAKEN_LABELS.get(lang or "en", _TAKEN_LABELS["en"])
+    return [[{"text": label, "callback_data": "TAKEN"}]]
+
 # Default reminder times by frequency (SGT)
 FREQUENCY_DEFAULTS: dict[str, list[str]] = {
     "once_daily":        ["08:00"],
@@ -177,11 +190,12 @@ def _send_due_reminders(
     send_voice = patient.nudge_delivery_mode in ("voice", "both")
 
     if send_text or not send_voice:
-        telegram_service.send_text(
+        telegram_service.send_keyboard(
             db=db,
             patient_id=patient.id,
             to_phone=chat_target,
             body=message,
+            buttons=_taken_button(patient.language_preference),
         )
 
     if send_voice:
@@ -198,12 +212,13 @@ def _send_due_reminders(
                 ogg_path=ogg_path,
             )
         elif not send_text:
-            # Voice failed, no text sent yet — fall back
-            telegram_service.send_text(
+            # Voice failed, no text sent yet — fall back with button
+            telegram_service.send_keyboard(
                 db=db,
                 patient_id=patient.id,
                 to_phone=chat_target,
                 body=message,
+                buttons=_taken_button(patient.language_preference),
             )
 
     results["reminders_sent"] += 1

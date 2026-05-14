@@ -28,9 +28,13 @@ def compute_days_overdue(last_dispensed, supply_days: int):
     return (today - due).days
 
 
-def detect_and_trigger(db: Session | None = None) -> dict:
+def detect_and_trigger(
+    db: Session | None = None,
+    patient_id: int | None = None,
+) -> dict:
     """
-    Scan all active PatientMedication records for refill gaps.
+    Scan active PatientMedication records for refill gaps.
+    When ``patient_id`` is provided, only that patient's medications are checked.
     Returns summary counts for observability.
     """
     owns_session = db is None
@@ -41,12 +45,14 @@ def detect_and_trigger(db: Session | None = None) -> dict:
 
     try:
         today = datetime.utcnow().date()
-        active_pms = (
+        query = (
             db.query(PatientMedication)
             .join(Patient, PatientMedication.patient_id == Patient.id)
             .filter(PatientMedication.is_active == True, Patient.is_active == True)
-            .all()
         )
+        if patient_id is not None:
+            query = query.filter(PatientMedication.patient_id == patient_id)
+        active_pms = query.all()
 
         for pm in active_pms:
             results["checked"] += 1
