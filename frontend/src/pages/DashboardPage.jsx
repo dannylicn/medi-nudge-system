@@ -127,9 +127,9 @@ export default function DashboardPage() {
       )}
 
       {/* Content: Patient Table + Escalations Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Patient Registry with search, filters, pagination */}
-        <div className="lg:col-span-2 bg-surface-container-lowest rounded-3xl shadow-ambient overflow-hidden">
+        <div className="lg:col-span-3 bg-surface-container-lowest rounded-3xl shadow-ambient overflow-hidden">
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -164,13 +164,13 @@ export default function DashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-surface-container-low text-on-surface/40 text-[10px] uppercase tracking-wider font-body">
-                  <th className="px-6 py-4 font-bold">Patient</th>
-                  <th className="px-6 py-4 font-bold">Compliance</th>
-                  <th className="px-6 py-4 font-bold">Risk</th>
-                  <th className="px-6 py-4 font-bold">Language</th>
-                  <th className="px-6 py-4 font-bold">Onboarding</th>
-                  <th className="px-6 py-4 font-bold">Active</th>
+                <tr className="bg-surface-container-low text-on-surface/40 text-xs uppercase tracking-wider font-body">
+                  <th className="px-4 py-3 font-bold">Patient</th>
+                  <th className="px-4 py-3 font-bold">Doses Taken</th>
+                  <th className="px-4 py-3 font-bold">Risk</th>
+                  <th className="px-4 py-3 font-bold">Language</th>
+                  <th className="px-4 py-3 font-bold">Onboarding</th>
+                  <th className="px-4 py-3 font-bold">Active</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/30">
@@ -181,11 +181,11 @@ export default function DashboardPage() {
                 ) : (
                   patients.map((p, i) => (
                     <tr key={p.id} className={`hover:bg-surface-container-low/50 transition-colors ${i % 2 === 0 ? "bg-surface-container-lowest" : ""}`}>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3">
                         <Link to={`/patients/${p.id}`} className="text-sm font-bold text-on-surface hover:text-primary">{p.full_name}</Link>
-                        <p className="text-[10px] text-on-surface/40">{p.phone_number}</p>
+                        <p className="text-xs text-on-surface/40">{p.phone_number}</p>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3">
                         {(() => {
                           const c = data?.patient_compliance?.[p.id];
                           if (!c) return <span className="text-on-surface/30 text-xs">--</span>;
@@ -193,23 +193,23 @@ export default function DashboardPage() {
                           const color = score >= 80 ? "text-green-600" : score >= 50 ? "text-yellow-600" : "text-error";
                           return (
                             <div className="flex items-center gap-1.5">
-                              <span className={`text-xs font-bold ${color}`}>{score}%</span>
+                              <span className={`text-sm font-bold ${color}`}>{score}%</span>
                               {c.critical_missed_count > 0 && (
-                                <span className="bg-error text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold">{c.critical_missed_count} crit</span>
+                                <span title={`${c.critical_missed_count} critical medication doses missed`}>⚠️</span>
                               )}
                             </div>
                           );
                         })()}
                       </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${RISK_CHIP[p.risk_level] || "bg-surface-container-highest text-on-surface/60"}`}>
+                      <td className="px-4 py-3">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${RISK_CHIP[p.risk_level] || "bg-surface-container-highest text-on-surface/60"}`}>
                           {p.risk_level}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-xs text-on-surface/60 uppercase">{p.language_preference}</td>
-                      <td className="px-6 py-4 text-xs text-on-surface/50">{p.onboarding_state}</td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-block w-2 h-2 rounded-full ${p.is_active ? "bg-tertiary-container" : "bg-surface-container-highest"}`} />
+                      <td className="px-4 py-3 text-xs text-on-surface/60 uppercase">{p.language_preference}</td>
+                      <td className="px-4 py-3 text-xs text-on-surface/50">{p.onboarding_state}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-block w-2.5 h-2.5 rounded-full ${p.is_active ? "bg-tertiary-container" : "bg-surface-container-highest"}`} />
                       </td>
                     </tr>
                   ))

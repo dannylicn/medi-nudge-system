@@ -20,9 +20,9 @@ export default function Layout({ children }) {
   };
 
   return (
-    <div className="flex h-screen bg-surface">
+    <div className="flex min-h-screen bg-surface">
       {/* Sidebar — no border, background shift only */}
-      <aside className="w-56 bg-surface-container-low flex flex-col shadow-ambient">
+      <aside className="w-56 bg-surface-container-low flex flex-col shadow-ambient sticky top-0 h-screen">
         <div className="px-5 py-5">
           <span className="font-display text-lg font-bold text-primary tracking-tight">
             MediNudge
@@ -57,7 +57,7 @@ export default function Layout({ children }) {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-auto bg-surface">{children}</main>
+      <main className="flex-1 bg-surface">{children}</main>
     </div>
   );
 }
