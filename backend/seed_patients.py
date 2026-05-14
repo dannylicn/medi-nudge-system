@@ -10,7 +10,7 @@ from app.models.models import (
     Patient, Medication, PatientMedication, DoseLog, User,
     NudgeCampaign, EscalationCase,
 )
-from app.core.security import get_password_hash
+from app.core.security import hash_password
 
 PATIENTS = [
     dict(full_name="Tan Wei Liang", phone_number="+6591234001", nric="S7012345A",
@@ -70,7 +70,7 @@ def seed():
         if not db.query(User).filter(User.email == "coordinator@medi-nudge.demo").first():
             db.add(User(
                 email="coordinator@medi-nudge.demo",
-                hashed_password=get_password_hash("Demo1234!"),
+                hashed_password=hash_password("Demo1234!"),
                 full_name="Demo Coordinator",
             ))
             db.commit()
@@ -131,7 +131,6 @@ def seed():
                             frequency=freq,
                             reminder_times=times,
                             refill_interval_days=30,
-                            start_date=(now - timedelta(days=random.randint(30, 180))).date(),
                             is_active=True,
                             last_reminded_at=now - timedelta(hours=random.randint(1, 48)),
                         )
@@ -169,8 +168,8 @@ def seed():
                             logged_at=log_time,
                         ))
                         dose_count += 1
-                        if taken and pm.patient.last_taken_at is None:
-                            pm.patient.last_taken_at = log_time
+                        if taken:
+                            pm.last_taken_at = log_time
         db.commit()
         print(f"Dose logs created: {dose_count}")
 
