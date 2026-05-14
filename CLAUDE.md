@@ -1,5 +1,8 @@
 # Medi-Nudge System
 
+@.claude/memory/defects.md
+@_state.md
+
 Medication adherence system for chronic disease patients in Singapore.
 Hackathon project, demo pitch on 25 May 2026. Mid-review bazaar on Friday 16 May.
 

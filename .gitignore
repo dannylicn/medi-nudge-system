@@ -44,3 +44,7 @@ frontend/dist/
 # Secrets / keys
 *.pem
 *.key
+
+# Claude Code local state
+.claude/memory/
+_state.md
