@@ -1,6 +1,6 @@
 # Spec Delta: nudge-campaigns (make-bot-agentic)
 
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: Agentic inbound message handling
 Inbound Telegram messages from active (non-onboarding) patients MUST be processed by an LLM agent when `OPENAI_API_KEY` or `LLM_BASE_URL` is configured. The agent operates a tool-calling loop capped at 3 iterations per turn. When no LLM key is available, the system MUST fall back to the existing rule-based `classify_response()` path — preserving full functionality without an API key.

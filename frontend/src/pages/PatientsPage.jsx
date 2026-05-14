@@ -55,6 +55,7 @@ export default function PatientsPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPatients();
   }, [page, riskFilter]);
 

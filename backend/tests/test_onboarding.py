@@ -55,18 +55,18 @@ class TestOnboardingService:
         db.commit()
         db.refresh(patient)
 
-        with patch("app.services.telegram_service.send_text") as mock_send:
-            mock_msg = MagicMock()
-            mock_msg.status = "sent"
-            mock_send.return_value = mock_msg
+        mock_msg = MagicMock()
+        mock_msg.status = "sent"
+        with patch("app.services.telegram_service.send_keyboard") as mock_kbd:
+            mock_kbd.return_value = mock_msg
             handle_onboarding_reply(db, patient, "Yes")
 
         db.refresh(patient)
         assert patient.onboarding_state == "consent_pending"
         assert patient.consent_obtained_at is not None
         assert patient.consent_channel == "telegram"
-        # Should send language selection prompt
-        mock_send.assert_called_once()
+        # Should send language selection prompt as inline keyboard
+        mock_kbd.assert_called_once()
 
     def test_invite_reply_no_deactivates_patient(self, db):
         """Replying NO to invite should deactivate the patient."""
@@ -108,16 +108,17 @@ class TestOnboardingService:
         db.commit()
         db.refresh(patient)
 
-        with patch("app.services.telegram_service.send_text") as mock_send:
-            mock_msg = MagicMock()
-            mock_msg.status = "sent"
-            mock_send.return_value = mock_msg
+        mock_msg = MagicMock()
+        mock_msg.status = "sent"
+        with patch("app.services.telegram_service.send_keyboard") as mock_kbd:
+            mock_kbd.return_value = mock_msg
             handle_onboarding_reply(db, patient, "2")  # Chinese
 
         db.refresh(patient)
         assert patient.onboarding_state == "language_confirmed"
         assert patient.language_preference == "zh"
-        mock_send.assert_called_once()
+        # Language confirmed → medication prompt sent as inline keyboard
+        mock_kbd.assert_called_once()
 
     def test_language_reply_english(self, db):
         """Selecting English should set language to 'en' and advance to language_confirmed."""

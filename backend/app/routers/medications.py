@@ -3,7 +3,7 @@ import csv
 import io
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.models import Medication, PatientMedication, Patient, DispensingRecord, User
@@ -79,6 +79,7 @@ def list_patient_medications(
 ):
     return (
         db.query(PatientMedication)
+        .options(joinedload(PatientMedication.dose_logs))
         .filter(PatientMedication.patient_id == patient_id, PatientMedication.is_active == True)
         .all()
     )
@@ -117,6 +118,31 @@ def create_dispensing_record(
     db.add(record)
     db.commit()
     db.refresh(record)
+
+    # Pre-schedule a refill nudge campaign for when this medication becomes overdue.
+    # fire_at = dispensed_at + days_supply + WARNING_DAYS
+    try:
+        from datetime import timedelta
+        from app.models.models import Patient, Medication as MedModel, PatientMedication
+        from app.services.nudge_campaign_service import create_campaign
+
+        patient = db.query(Patient).filter(Patient.id == record.patient_id).first()
+        medication = db.query(MedModel).filter(MedModel.id == record.medication_id).first()
+        pm = db.query(PatientMedication).filter(
+            PatientMedication.patient_id == record.patient_id,
+            PatientMedication.medication_id == record.medication_id,
+            PatientMedication.is_active == True,  # noqa: E712
+        ).first()
+        if patient and medication and pm and patient.onboarding_state == "complete":
+            from app.core.config import settings as _s
+            fire_at = record.dispensed_at + timedelta(days=record.days_supply + _s.WARNING_DAYS)
+            create_campaign(
+                db=db, patient=patient, medication=medication,
+                days_overdue=0, fire_at=fire_at,
+            )
+    except Exception:
+        pass  # Never fail the API call due to background job errors
+
     return record
 
 

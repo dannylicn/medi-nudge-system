@@ -33,6 +33,7 @@ export default function OcrReviewPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchScans();
   }, [statusFilter]);
 
