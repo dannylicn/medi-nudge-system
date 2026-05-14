@@ -90,7 +90,7 @@ export default function DashboardPage() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
-      {/* Hero Metrics Bento Grid */}
+      {/* Hero Metrics Bento Grid — hidden for mid-review, uncomment for final pitch
       {data && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="md:col-span-2 bg-gradient-to-br from-primary to-primary-container p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
@@ -125,6 +125,7 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+      */}
 
       {/* Content: Patient Table + Escalations Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -253,6 +254,28 @@ export default function DashboardPage() {
                 {data.pending_escalations.length === 0 && (
                   <p className="text-sm text-on-surface/30 font-body text-center py-4">No pending escalations</p>
                 )}
+              </div>
+            </div>
+          )}
+          {data && (
+            <div className="bg-surface-container-lowest p-6 rounded-3xl shadow-ambient">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-full bg-error-container text-error flex items-center justify-center text-sm font-bold">!!</div>
+                <div>
+                  <p className="text-on-surface/50 font-body text-xs font-medium">High Risk Patients</p>
+                  <h3 className="text-2xl font-display font-bold text-on-surface">{data.high_risk_count}</h3>
+                </div>
+              </div>
+            </div>
+          )}
+          {data && (
+            <div className="bg-surface-container-lowest p-6 rounded-3xl shadow-ambient">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-full bg-secondary-container text-secondary flex items-center justify-center text-sm font-bold">Rx</div>
+                <div>
+                  <p className="text-on-surface/50 font-body text-xs font-medium">Pending Refills</p>
+                  <h3 className="text-2xl font-display font-bold text-on-surface">{data.pending_refills}</h3>
+                </div>
               </div>
             </div>
           )}

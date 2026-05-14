@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
         <div className="py-16 text-center font-body text-on-surface/30">Loading...</div>
       ) : (
         <div className="space-y-5">
-          {/* Campaign adherence rate over time */}
+          {/* Refill Adherence Rate — hidden for mid-review, uncomment for final pitch
           <div className="bg-surface-container-lowest rounded-2xl shadow-ambient p-6">
             <h2 className="font-display text-base font-bold text-on-surface mb-5">Refill Adherence Rate</h2>
             <ResponsiveContainer width="100%" height={260}>
@@ -86,6 +86,7 @@ export default function AnalyticsPage() {
               </LineChart>
             </ResponsiveContainer>
           </div>
+          */}
 
           {/* Dose adherence rate over time */}
           <div className="bg-surface-container-lowest rounded-2xl shadow-ambient p-6">

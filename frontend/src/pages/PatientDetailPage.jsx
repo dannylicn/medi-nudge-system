@@ -102,7 +102,7 @@ export default function PatientDetailPage() {
     } catch { /* interceptor */ }
   };
 
-  useEffect(() => { const load = async () => { await reload(); setLoading(false); }; load(); }, [id]);
+  useEffect(() => { const load = async () => { await reload(); setLoading(false); loadAiSummary(); }; load(); }, [id]);
 
   // --- Handlers (unchanged logic) ---
   const startEditConditions = () => { setSelectedConditions([...(patient?.conditions || [])]); setEditingConditions(true); };
