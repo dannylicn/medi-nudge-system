@@ -88,3 +88,35 @@ A: ECS Fargate auto-scales. RDS can be upgraded. CloudFront handles CDN. But for
 5. **Show escalation flow** (30s): Point out how missed doses automatically escalate to the coordinator dashboard.
 
 6. **Close with impact** (30s): "Our system catches what self-reporting misses. It's not just reminders — it's pattern detection powered by real user research."
+
+## Analytics Charts — What Each Chart Shows
+
+### Dose Adherence Rate (line chart)
+- **Data source:** DoseLog table — every time a patient takes or misses a scheduled dose, a record is created
+- **How it works:** Groups all dose records by week across ALL patients, then counts:
+  - **Taken:** number of doses with status "taken" (e.g. 531 doses taken in week 16)
+  - **Missed:** number of doses with status "missed" (e.g. 216 doses missed in week 16)
+  - **Adherence %:** taken / (taken + missed) × 100 (e.g. 531/747 = 71.1%)
+- **What it tells a nurse:** "Are patients overall getting better or worse at taking their meds week over week?"
+- **Known issue:** Currently shows Taken and Missed raw counts on the same axis as Adherence %, which makes the chart confusing (shows "531%" which is not a real percentage — it's a count). Fix planned: remove Taken/Missed lines, keep only Adherence %.
+
+### Adherence by Medication (table)
+- **Data source:** Same DoseLog table, grouped by medication instead of by week
+- **What it shows:** For each medication: total doses scheduled, how many taken, how many missed, adherence %
+- **What it tells a nurse:** "Which medications are patients struggling with most?" Sorted worst-first.
+
+### Escalation Volume by Week (bar chart)
+- **Data source:** EscalationCase table — created when patients don't respond to nudges, report side effects, or miss doses repeatedly
+- **What it shows:** Number of escalation cases per week, colour-coded by priority (urgent, high, normal, low)
+- **What it tells a nurse:** "Are escalations increasing or decreasing? What severity?"
+
+### Doses Taken (dashboard column)
+- **Data source:** Same DoseLog table, filtered per patient for the last 30 days
+- **How it works:** (doses taken / total doses) × 100 per patient
+- **What the ⚠️ icon means:** This patient has missed doses of a critical medication (e.g. Warfarin, Gliclazide) — hover to see how many
+
+### AI Insights (patient detail page)
+- **Data source:** Patient's 30-day dose history, medications, conditions — sent to OpenAI
+- **What it generates:** A 2-3 sentence plain English summary of the patient's adherence pattern with an actionable recommendation
+- **Example:** "Siti is frequently missing doses of Gliclazide and Warfarin, particularly on weekends. Recommend a check-in call to explore barriers."
+- **Auto-generates** when nurse clicks into a patient. Refresh button to regenerate. Cached for 24 hours.
