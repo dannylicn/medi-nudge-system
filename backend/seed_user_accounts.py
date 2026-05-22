@@ -63,5 +63,65 @@ def seed():
         db.close()
 
 
+def seed_demo_notes():
+    """Seed realistic caregiver notes for Tan Wei Liang (demo patient)."""
+    from app.models.models import CaregiverNote
+    from datetime import datetime, timedelta
+
+    db = SessionLocal()
+    try:
+        tan = db.query(Patient).filter(Patient.full_name == "Tan Wei Liang").first()
+        if not tan:
+            print("  Tan Wei Liang not found, skipping demo notes")
+            return
+
+        existing = db.query(CaregiverNote).filter(CaregiverNote.patient_id == tan.id).count()
+        if existing:
+            print(f"  Demo notes already exist ({existing}), skipping")
+            return
+
+        now = datetime.utcnow()
+        notes = [
+            CaregiverNote(
+                patient_id=tan.id,
+                author_name="Tan Mei Ling",
+                author_role="caregiver",
+                category="behavior",
+                content="Mum seemed confused about which pills to take after lunch. Had to remind her twice.",
+                created_at=now - timedelta(days=2, hours=3),
+            ),
+            CaregiverNote(
+                patient_id=tan.id,
+                author_name="Tan Mei Ling",
+                author_role="caregiver",
+                category="side_effect",
+                content="She said the new medication makes her dizzy in the morning. Lasted about 30 minutes.",
+                created_at=now - timedelta(days=1, hours=8),
+            ),
+            CaregiverNote(
+                patient_id=tan.id,
+                author_name="Tan Mei Ling",
+                author_role="caregiver",
+                category="missed_dose",
+                content="Checked the pillbox, she missed her afternoon Warfarin again. Says she forgot.",
+                created_at=now - timedelta(hours=5),
+            ),
+            CaregiverNote(
+                patient_id=tan.id,
+                author_name="Sarah Tan (Nurse)",
+                author_role="admin",
+                category="general",
+                content="Called patient — caregiver confirms patient has been skipping Warfarin on weekends. Will schedule home visit.",
+                created_at=now - timedelta(hours=2),
+            ),
+        ]
+        db.add_all(notes)
+        db.commit()
+        print(f"  Seeded {len(notes)} demo caregiver notes for Tan Wei Liang")
+    finally:
+        db.close()
+
+
 if __name__ == "__main__":
     seed()
+    seed_demo_notes()

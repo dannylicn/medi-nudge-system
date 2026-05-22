@@ -316,6 +316,37 @@ class EscalationCaseUpdate(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# CaregiverNote
+# ---------------------------------------------------------------------------
+
+CAREGIVER_NOTE_CATEGORIES = {"missed_dose", "wrong_dose", "side_effect", "behavior", "general"}
+
+class CaregiverNoteCreate(BaseModel):
+    category: str
+    content: Optional[str] = None
+
+    @field_validator("category")
+    @classmethod
+    def validate_category(cls, v: str) -> str:
+        if v not in CAREGIVER_NOTE_CATEGORIES:
+            raise ValueError(f"category must be one of {CAREGIVER_NOTE_CATEGORIES}")
+        return v
+
+
+class CaregiverNoteOut(BaseModel):
+    id: int
+    patient_id: int
+    author_name: str
+    author_role: str
+    category: str
+    content: Optional[str]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ---------------------------------------------------------------------------
 # PrescriptionScan
 # ---------------------------------------------------------------------------
 

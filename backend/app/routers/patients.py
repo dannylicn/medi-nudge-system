@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.core.config import hash_sha256
-from app.models.models import Patient, User
-from app.schemas.schemas import PatientCreate, PatientOut, PatientUpdate, PatientListResponse
+from app.models.models import Patient, User, CaregiverNote
+from app.schemas.schemas import PatientCreate, PatientOut, PatientUpdate, PatientListResponse, CaregiverNoteCreate, CaregiverNoteOut
 from app.services.onboarding_service import generate_invite_token, generate_caregiver_invite_token
 
 router = APIRouter(prefix="/api/patients", tags=["patients"])
@@ -162,3 +162,41 @@ def get_ai_summary(
 ):
     from app.services.ai_summary_service import generate_patient_summary
     return generate_patient_summary(db, patient_id, force_refresh=refresh)
+
+
+@router.post("/{patient_id}/caregiver-notes", response_model=CaregiverNoteOut, status_code=201)
+def create_caregiver_note(
+    patient_id: int,
+    payload: CaregiverNoteCreate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    note = CaregiverNote(
+        patient_id=patient_id,
+        author_name=user.full_name,
+        author_role=user.role,
+        category=payload.category,
+        content=payload.content,
+    )
+    db.add(note)
+    db.commit()
+    db.refresh(note)
+    return note
+
+
+@router.get("/{patient_id}/caregiver-notes", response_model=list[CaregiverNoteOut])
+def list_caregiver_notes(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    return (
+        db.query(CaregiverNote)
+        .filter(CaregiverNote.patient_id == patient_id)
+        .order_by(CaregiverNote.created_at.desc())
+        .limit(50)
+        .all()
+    )
