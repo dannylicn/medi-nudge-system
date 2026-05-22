@@ -99,6 +99,7 @@ class Medication(Base):
     category: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     default_refill_days: Mapped[int] = mapped_column(Integer, default=30, nullable=False)
     is_critical: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    missed_dose_info: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
 
     patient_medications: Mapped[list["PatientMedication"]] = relationship("PatientMedication", back_populates="medication")
@@ -327,6 +328,8 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
     full_name: Mapped[str] = mapped_column(String(200), nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(200), nullable=False)
+    role: Mapped[str] = mapped_column(String(20), default="admin", nullable=False)
+    patient_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("patients.id"), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
 

@@ -11,13 +11,15 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { getAdherenceAnalytics, getEscalationAnalytics, getDoseAdherence } from "../lib/api";
+import { getAdherenceAnalytics, getEscalationAnalytics, getDoseAdherence, getCriticalAdherence, getMissedDoseHeatmap } from "../lib/api";
 
 export default function AnalyticsPage() {
   const [adherence, setAdherence] = useState([]);
   const [escalations, setEscalations] = useState([]);
   const [doseAdherence, setDoseAdherence] = useState([]);
   const [doseByMed, setDoseByMed] = useState([]);
+  const [criticalAdherence, setCriticalAdherence] = useState([]);
+  const [heatmap, setHeatmap] = useState([]);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
 
@@ -25,16 +27,20 @@ export default function AnalyticsPage() {
     const load = async () => {
       setLoading(true);
       try {
-        const [{ data: adh }, { data: esc }, { data: dose }, { data: doseMed }] = await Promise.all([
+        const [{ data: adh }, { data: esc }, { data: dose }, { data: doseMed }, { data: critAdh }, { data: hm }] = await Promise.all([
           getAdherenceAnalytics({ days }),
           getEscalationAnalytics({ days }),
           getDoseAdherence({ days }),
           getDoseAdherence({ days, group_by: "medication" }),
+          getCriticalAdherence({ days }),
+          getMissedDoseHeatmap({ days }),
         ]);
         setAdherence(adh);
         setEscalations(esc);
         setDoseAdherence(dose);
         setDoseByMed(doseMed);
+        setCriticalAdherence(critAdh);
+        setHeatmap(hm);
       } catch {
         // interceptor handles
       } finally {
@@ -103,11 +109,8 @@ export default function AnalyticsPage() {
                     domain={[0, 100]}
                     tick={{ fontSize: 11, fontFamily: "Inter" }}
                   />
-                  <Tooltip formatter={(v, name) => [name === "adherence_rate" ? `${v}%` : v, name === "adherence_rate" ? "Adherence" : name]} />
-                  <Legend />
+                  <Tooltip formatter={(v) => [`${v}%`, "Adherence"]} />
                   <Line type="monotone" dataKey="adherence_rate" stroke="#006565" strokeWidth={2.5} dot={false} name="Adherence %" />
-                  <Line type="monotone" dataKey="taken" stroke="#338236" strokeWidth={1.5} dot={false} name="Taken" />
-                  <Line type="monotone" dataKey="missed" stroke="#ba1a1a" strokeWidth={1.5} dot={false} name="Missed" />
                 </LineChart>
               </ResponsiveContainer>
             )}
@@ -153,6 +156,69 @@ export default function AnalyticsPage() {
               </div>
             )}
           </div>
+
+          {/* Critical vs Non-Critical Adherence */}
+          {criticalAdherence.length > 0 && (
+            <div className="bg-surface-container-lowest rounded-2xl shadow-ambient p-6">
+              <h2 className="font-display text-base font-bold text-on-surface mb-5">Critical vs Non-Critical Medication Adherence</h2>
+              <ResponsiveContainer width="100%" height={260}>
+                <LineChart data={criticalAdherence}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e3e5" />
+                  <XAxis dataKey="week" tick={{ fontSize: 11, fontFamily: "Inter" }} />
+                  <YAxis tickFormatter={(v) => `${v}%`} domain={[0, 100]} tick={{ fontSize: 11, fontFamily: "Inter" }} />
+                  <Tooltip formatter={(v) => [`${v}%`]} />
+                  <Legend />
+                  <Line type="monotone" dataKey="critical_adherence" stroke="#ba1a1a" strokeWidth={2.5} dot={false} name="Critical Medications" />
+                  <Line type="monotone" dataKey="non_critical_adherence" stroke="#006565" strokeWidth={2.5} dot={false} name="Non-Critical Medications" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Missed Dose Heatmap */}
+          {heatmap.length > 0 && (() => {
+            const maxCount = Math.max(...heatmap.map(h => h.missed_count), 1);
+            const days_order = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+            const slots = ["Morning", "Afternoon", "Evening", "Night"];
+            const getCount = (day, slot) => heatmap.find(h => h.day === day && h.time_slot === slot)?.missed_count || 0;
+            return (
+              <div className="bg-surface-container-lowest rounded-2xl shadow-ambient p-6">
+                <h2 className="font-display text-base font-bold text-on-surface mb-2">Missed Doses by Day & Time</h2>
+                <p className="text-xs text-on-surface/50 mb-5">Darker red = more missed doses. Helps identify when patients are most likely to forget.</p>
+                <div className="overflow-hidden rounded-xl">
+                  <table className="w-full font-body text-sm">
+                    <thead>
+                      <tr>
+                        <th className="px-3 py-2 text-left text-[10px] text-on-surface/40 uppercase tracking-widest"></th>
+                        {days_order.map(d => <th key={d} className="px-3 py-2 text-center text-[10px] text-on-surface/40 uppercase tracking-widest">{d}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {slots.map(slot => (
+                        <tr key={slot}>
+                          <td className="px-3 py-2 text-xs font-medium text-on-surface/60">{slot}</td>
+                          {days_order.map(day => {
+                            const count = getCount(day, slot);
+                            const intensity = count > 0 ? 0.15 + (count / maxCount) * 0.7 : 0;
+                            return (
+                              <td key={day} className="px-3 py-2 text-center">
+                                <div
+                                  className="w-full py-2 rounded-lg text-xs font-bold"
+                                  style={{ backgroundColor: count > 0 ? `rgba(186, 26, 26, ${intensity})` : "rgba(0,0,0,0.03)", color: intensity > 0.4 ? "white" : "rgba(0,0,0,0.6)" }}
+                                >
+                                  {count}
+                                </div>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Escalation volume */}
           <div className="bg-surface-container-lowest rounded-2xl shadow-ambient p-6">

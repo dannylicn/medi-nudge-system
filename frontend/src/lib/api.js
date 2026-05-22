@@ -89,6 +89,10 @@ export const getDoseHistory = (patientId, params) =>
   api.get(`/api/patients/${patientId}/dose-history`, { params });
 export const getDoseAdherence = (params) =>
   api.get("/api/analytics/dose-adherence", { params });
+export const getCriticalAdherence = (params) =>
+  api.get("/api/analytics/critical-adherence", { params });
+export const getMissedDoseHeatmap = (params) =>
+  api.get("/api/analytics/missed-dose-heatmap", { params });
 export const getDashboardSummary = () => api.get("/api/dashboard/summary");
 
 // AI Summary
