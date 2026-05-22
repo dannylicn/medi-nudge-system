@@ -6,6 +6,7 @@ import {
   createDispensingRecord, getDispensingRecords, getConditions,
   regenerateInviteLink, generateCaregiverInviteLink, getDoseHistory,
   triggerPatientNudge, triggerPatientReminder, getPatientAiSummary,
+  getCaregiverNotes, createCaregiverNote,
 } from "../lib/api";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer } from "recharts";
 
@@ -76,6 +77,12 @@ export default function PatientDetailPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiTab, setAiTab] = useState("summary");
 
+  // Caregiver Notes
+  const [caregiverNotes, setCaregiverNotes] = useState([]);
+  const [showNoteForm, setShowNoteForm] = useState(false);
+  const [noteForm, setNoteForm] = useState({ category: "general", content: "" });
+  const [noteSaving, setNoteSaving] = useState(false);
+
   const loadAiSummary = async (refresh = false) => {
     setAiLoading(true);
     try {
@@ -104,7 +111,21 @@ export default function PatientDetailPage() {
     } catch { /* interceptor */ }
   };
 
-  useEffect(() => { const load = async () => { await reload(); setLoading(false); loadAiSummary(); }; load(); }, [id]);
+  const loadNotes = async () => {
+    try { const { data } = await getCaregiverNotes(id); setCaregiverNotes(data); } catch {}
+  };
+  const handleSubmitNote = async (e) => {
+    e.preventDefault();
+    setNoteSaving(true);
+    try {
+      await createCaregiverNote(id, noteForm);
+      setNoteForm({ category: "general", content: "" });
+      setShowNoteForm(false);
+      await loadNotes();
+    } catch {} finally { setNoteSaving(false); }
+  };
+
+  useEffect(() => { const load = async () => { await reload(); setLoading(false); loadAiSummary(); loadNotes(); }; load(); }, [id]);
 
   // --- Handlers (unchanged logic) ---
   const startEditConditions = () => { setSelectedConditions([...(patient?.conditions || [])]); setEditingConditions(true); };
@@ -421,6 +442,59 @@ export default function PatientDetailPage() {
                 </div>
               ))
             )}
+          </div>
+        )}
+      </div>
+
+      {/* Caregiver Notes */}
+      <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-display text-sm font-bold text-on-surface">Caregiver Notes</h3>
+          <button onClick={() => setShowNoteForm(!showNoteForm)} className="text-xs bg-primary text-white rounded-full px-3 py-1.5 hover:opacity-90">
+            {showNoteForm ? "Cancel" : "+ Add Note"}
+          </button>
+        </div>
+        {showNoteForm && (
+          <form onSubmit={handleSubmitNote} className="mb-4 p-4 bg-surface-container-low rounded-xl space-y-3">
+            <div>
+              <label className="block text-[10px] font-medium text-on-surface/70 uppercase tracking-wider mb-1">Category</label>
+              <select value={noteForm.category} onChange={(e) => setNoteForm(f => ({ ...f, category: e.target.value }))} className="w-full bg-surface-container-highest rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-fixed">
+                <option value="missed_dose">Missed Dose</option>
+                <option value="wrong_dose">Wrong Dose / Amount</option>
+                <option value="side_effect">Side Effect</option>
+                <option value="behavior">Behavior Concern</option>
+                <option value="general">General Observation</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-medium text-on-surface/70 uppercase tracking-wider mb-1">Note (optional)</label>
+              <textarea value={noteForm.content} onChange={(e) => setNoteForm(f => ({ ...f, content: e.target.value }))} placeholder="What did you observe?" rows={2} className="w-full bg-surface-container-highest rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-fixed resize-none" />
+            </div>
+            <button type="submit" disabled={noteSaving} className="bg-primary text-white rounded-full px-4 py-1.5 text-xs font-bold disabled:opacity-60">
+              {noteSaving ? "Saving..." : "Submit Note"}
+            </button>
+          </form>
+        )}
+        {caregiverNotes.length === 0 ? (
+          <p className="text-sm text-on-surface/30 text-center py-4">No caregiver notes yet</p>
+        ) : (
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {caregiverNotes.map((n) => (
+              <div key={n.id} className="p-3 bg-surface-container-low rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${
+                    n.category === "missed_dose" ? "bg-error-container text-on-error-container" :
+                    n.category === "wrong_dose" ? "bg-error-container text-on-error-container" :
+                    n.category === "side_effect" ? "bg-yellow-100 text-yellow-800" :
+                    n.category === "behavior" ? "bg-secondary-container text-secondary" :
+                    "bg-surface-container-highest text-on-surface/60"
+                  }`}>{n.category.replace(/_/g, " ")}</span>
+                  <span className="text-[9px] text-on-surface/40">{n.author_name} ({n.author_role})</span>
+                  <span className="text-[9px] text-on-surface/30 ml-auto">{new Date(n.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+                {n.content && <p className="text-xs text-on-surface/70">{n.content}</p>}
+              </div>
+            ))}
           </div>
         )}
       </div>
