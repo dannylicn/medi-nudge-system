@@ -15,7 +15,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
     if not user or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     token = create_access_token({"sub": user.email})
-    return TokenResponse(access_token=token)
+    return TokenResponse(access_token=token, role=user.role, patient_id=user.patient_id, full_name=user.full_name)
 
 
 @router.post("/register", response_model=TokenResponse, include_in_schema=False)

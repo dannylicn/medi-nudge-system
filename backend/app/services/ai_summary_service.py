@@ -56,6 +56,7 @@ def generate_patient_summary(db: Session, patient_id: int, force_refresh: bool =
         per_med_stats[med.name] = {
             "generic": med.generic_name,
             "is_critical": med.is_critical,
+            "missed_dose_info": med.missed_dose_info,
             "total": total,
             "taken": taken,
             "missed": missed,
@@ -80,6 +81,8 @@ def generate_patient_summary(db: Session, patient_id: int, force_refresh: bool =
             weekday_counts = Counter(stats["missed_weekdays"]).most_common(3)
             pattern = ", ".join(f"{day} ({count})" for day, count in weekday_counts)
             med_summary_lines.append(f"  Most missed on: {pattern}")
+        if stats["missed_dose_info"]:
+            med_summary_lines.append(f"  Consequence of missing: {stats['missed_dose_info']}")
 
     med_summary_text = "\n".join(med_summary_lines)
 
@@ -92,6 +95,8 @@ def generate_patient_summary(db: Session, patient_id: int, force_refresh: bool =
                 "Focus on: (1) which specific medications are being missed and when, (2) any concerning patterns "
                 "(e.g. irregular timing suggesting self-adjustment, weekday vs weekend differences), "
                 "(3) one specific actionable recommendation. "
+                "If a medication is marked [CRITICAL] and has missed dose consequences listed, "
+                "briefly mention the real-world impact (e.g. 'blood sugar may stay too high'). "
                 "Use the patient's first name. Be factual, not alarmist. Do not use medical jargon."
             ),
         },

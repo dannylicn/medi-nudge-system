@@ -373,3 +373,74 @@ def dose_adherence_analytics(
         d["adherence_rate"] = round(d["taken"] / d["total"] * 100, 1) if d["total"] else 0.0
         result.append(d)
     return result
+
+
+@router.get("/api/analytics/critical-adherence")
+def critical_adherence_analytics(
+    days: int = Query(default=30, ge=7, le=365),
+    db: Session = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    """Weekly adherence split by critical vs non-critical medications."""
+    critical_med_ids = set(
+        m.id for m in db.query(Medication).filter(Medication.is_critical == True).all()
+    )
+    since = datetime.utcnow() - timedelta(days=days)
+    logs = db.query(DoseLog).filter(DoseLog.logged_at >= since).all()
+
+    weekly: dict[str, dict] = {}
+    for log in logs:
+        week = log.logged_at.strftime("%Y-W%W")
+        if week not in weekly:
+            weekly[week] = {"week": week, "critical_total": 0, "critical_taken": 0, "non_critical_total": 0, "non_critical_taken": 0}
+        is_crit = log.medication_id in critical_med_ids
+        if is_crit:
+            weekly[week]["critical_total"] += 1
+            if log.status == "taken":
+                weekly[week]["critical_taken"] += 1
+        else:
+            weekly[week]["non_critical_total"] += 1
+            if log.status == "taken":
+                weekly[week]["non_critical_taken"] += 1
+
+    result = []
+    for w in sorted(weekly.keys()):
+        d = weekly[w]
+        d["critical_adherence"] = round(d["critical_taken"] / d["critical_total"] * 100, 1) if d["critical_total"] else 0.0
+        d["non_critical_adherence"] = round(d["non_critical_taken"] / d["non_critical_total"] * 100, 1) if d["non_critical_total"] else 0.0
+        result.append(d)
+    return result
+
+
+@router.get("/api/analytics/missed-dose-heatmap")
+def missed_dose_heatmap(
+    days: int = Query(default=30, ge=7, le=365),
+    db: Session = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    """Missed dose counts grouped by day of week and time of day."""
+    since = datetime.utcnow() - timedelta(days=days)
+    logs = db.query(DoseLog).filter(DoseLog.logged_at >= since, DoseLog.status == "missed").all()
+
+    days_order = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    slots = ["Morning", "Afternoon", "Evening", "Night"]
+    counts: dict[tuple[str, str], int] = {}
+    for day in days_order:
+        for slot in slots:
+            counts[(day, slot)] = 0
+
+    for log in logs:
+        dow = log.logged_at.weekday()
+        day_name = days_order[dow]
+        hour = log.logged_at.hour
+        if 6 <= hour < 12:
+            slot = "Morning"
+        elif 12 <= hour < 17:
+            slot = "Afternoon"
+        elif 17 <= hour < 22:
+            slot = "Evening"
+        else:
+            slot = "Night"
+        counts[(day_name, slot)] += 1
+
+    return [{"day": day, "time_slot": slot, "missed_count": counts[(day, slot)]} for day in days_order for slot in slots]

@@ -37,6 +37,9 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    role: str = "admin"
+    patient_id: Optional[int] = None
+    full_name: str = ""
 
 
 # ---------------------------------------------------------------------------
@@ -177,6 +180,7 @@ class MedicationOut(BaseModel):
     category: Optional[str]
     default_refill_days: int
     is_critical: bool = False
+    missed_dose_info: Optional[str] = None
 
     class Config:
         from_attributes = True

@@ -7,6 +7,7 @@ import {
   regenerateInviteLink, generateCaregiverInviteLink, getDoseHistory,
   triggerPatientNudge, triggerPatientReminder, getPatientAiSummary,
 } from "../lib/api";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer } from "recharts";
 
 const RISK_CHIP = {
   high: "bg-error-container text-on-error-container",
@@ -73,6 +74,7 @@ export default function PatientDetailPage() {
   const [aiSummary, setAiSummary] = useState(null);
   const [aiGeneratedAt, setAiGeneratedAt] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiTab, setAiTab] = useState("summary");
 
   const loadAiSummary = async (refresh = false) => {
     setAiLoading(true);
@@ -146,6 +148,46 @@ export default function PatientDetailPage() {
   const adherenceRate = totalDoses > 0 ? Math.round(takenCount / totalDoses * 100) : 100;
   const missedCount = doseHistory.filter((d) => d.status === "missed").length;
   const medNames = medications.map((m) => m.medication?.name || m.medication?.generic_name).filter(Boolean).join(", ");
+
+  // "What's Impacting Adherence" computations
+  const byMedComputed = {};
+  doseHistory.forEach(d => {
+    const name = d.medication_name || "Unknown";
+    if (!byMedComputed[name]) byMedComputed[name] = { taken: 0, missed: 0 };
+    if (d.status === "taken") byMedComputed[name].taken++;
+    else byMedComputed[name].missed++;
+  });
+
+  const worstMed = Object.entries(byMedComputed)
+    .map(([name, c]) => ({ name, rate: c.taken + c.missed > 0 ? Math.round(c.taken / (c.taken + c.missed) * 100) : 100, missed: c.missed }))
+    .filter(m => m.missed > 0)
+    .sort((a, b) => a.rate - b.rate)[0];
+
+  const worstMedObj = worstMed ? medications.find(m => (m.medication?.name === worstMed.name || m.medication?.generic_name === worstMed.name)) : null;
+
+  const missedDays = {};
+  doseHistory.filter(d => d.status === "missed").forEach(d => {
+    const day = new Date(d.logged_at).toLocaleDateString(undefined, { weekday: "long" });
+    missedDays[day] = (missedDays[day] || 0) + 1;
+  });
+  const topMissedDays = Object.entries(missedDays).sort((a, b) => b[1] - a[1]).slice(0, 2);
+
+  const maxConsecutiveMissed = medications.reduce((max, m) => Math.max(max, m.consecutive_missed_doses || 0), 0);
+
+  // Daily adherence trend (for chart)
+  const dailyTrend = (() => {
+    const byDay = {};
+    doseHistory.forEach(d => {
+      const day = new Date(d.logged_at).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      if (!byDay[day]) byDay[day] = { taken: 0, missed: 0 };
+      if (d.status === "taken") byDay[day].taken++;
+      else byDay[day].missed++;
+    });
+    return Object.entries(byDay).map(([day, c]) => ({
+      day,
+      adherence: c.taken + c.missed > 0 ? Math.round(c.taken / (c.taken + c.missed) * 100) : null,
+    })).reverse();
+  })();
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -265,107 +307,152 @@ export default function PatientDetailPage() {
         </div>
       )}
 
-      {/* Bento Grid: Adherence Score + Conditions/Risk */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        {/* Adherence Risk Score Card */}
-        <div className="md:col-span-4 bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden">
-          <h3 className="text-sm font-body text-outline mb-6">Dose Adherence (30 Days)</h3>
-          <div className="relative mb-6">
-            <svg className="w-40 h-40 transform -rotate-90">
-              <circle className="text-surface-container-high" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" strokeWidth="8" />
+      {/* 1. Adherence Score + What's Impacting */}
+      <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col md:flex-row items-center md:items-start gap-6">
+        <div className="flex flex-col items-center text-center flex-shrink-0">
+          <div className="relative">
+            <svg className="w-32 h-32 transform -rotate-90">
+              <circle className="text-surface-container-high" cx="64" cy="64" fill="transparent" r="56" stroke="currentColor" strokeWidth="6" />
               <circle
                 className={adherenceRate >= 80 ? "text-tertiary-container" : adherenceRate >= 50 ? "text-secondary" : "text-error"}
-                cx="80" cy="80" fill="transparent" r="70" stroke="currentColor"
-                strokeWidth="12" strokeLinecap="round"
-                strokeDasharray="440" strokeDashoffset={440 - (440 * adherenceRate / 100)}
+                cx="64" cy="64" fill="transparent" r="56" stroke="currentColor"
+                strokeWidth="10" strokeLinecap="round"
+                strokeDasharray="352" strokeDashoffset={352 - (352 * adherenceRate / 100)}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={`font-display text-5xl font-extrabold ${adherenceRate >= 80 ? "text-tertiary-container" : adherenceRate >= 50 ? "text-secondary" : "text-error"}`}>{adherenceRate}</span>
-              <span className="text-[10px] text-outline uppercase tracking-widest font-bold">
+              <span className={`font-display text-3xl font-extrabold ${adherenceRate >= 80 ? "text-tertiary-container" : adherenceRate >= 50 ? "text-secondary" : "text-error"}`}>{adherenceRate}%</span>
+              <span className="text-[9px] text-outline uppercase tracking-widest font-bold">
                 {adherenceRate >= 80 ? "On Track" : adherenceRate >= 50 ? "Moderate" : "High Risk"}
               </span>
             </div>
           </div>
-          <p className="text-xs text-on-surface/50">{takenCount} taken / {missedCount} missed of {totalDoses} doses</p>
+          <p className="text-[10px] text-on-surface/40 mt-2">{takenCount} taken / {missedCount} missed</p>
         </div>
-
-        {/* Conditions + Caregiver info */}
-        <div className="md:col-span-8 space-y-6">
-          {/* Conditions card */}
-          <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-display text-sm font-bold text-on-surface">Conditions</h3>
-              {!editingConditions && <button onClick={startEditConditions} className="text-xs text-primary hover:underline">Edit</button>}
-            </div>
-            {editingConditions ? (
-              <div>
-                <div className="grid grid-cols-3 gap-1.5 max-h-40 overflow-y-auto rounded-xl bg-surface-container-highest p-3 mb-3">
-                  {conditionsList.map((c) => (
-                    <label key={c.id} className="flex items-center gap-2 cursor-pointer py-1 px-1.5 rounded-lg hover:bg-surface-container-low">
-                      <input type="checkbox" checked={selectedConditions.includes(c.name)} onChange={() => toggleCondition(c.name)} className="accent-primary w-3.5 h-3.5" />
-                      <span className="text-xs text-on-surface">{c.name}</span>
-                    </label>
-                  ))}
+        {missedCount > 0 && (
+          <div className="flex-1 min-w-0 space-y-3">
+            <p className="text-[10px] text-outline uppercase tracking-widest font-bold">What's impacting adherence</p>
+            <div className="space-y-2">
+              {worstMed && (
+                <div className="flex items-center gap-2 p-2.5 bg-surface-container-low rounded-lg">
+                  <span className="text-sm">💊</span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-on-surface truncate">
+                      {worstMed.name} {worstMedObj?.medication?.is_critical && <span className="text-[8px] bg-error text-white px-1 py-0.5 rounded-full ml-1">CRITICAL</span>}
+                    </p>
+                    <p className="text-[10px] text-on-surface/50">{worstMed.rate}% adherence — {worstMed.missed} missed doses</p>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={saveConditions} disabled={savingConditions} className="bg-primary text-white rounded-full px-4 py-1.5 text-xs font-bold">{savingConditions ? "..." : "Save"}</button>
-                  <button onClick={() => setEditingConditions(false)} className="text-xs text-on-surface/50">Cancel</button>
+              )}
+              {topMissedDays.length > 0 && (
+                <div className="flex items-center gap-2 p-2.5 bg-surface-container-low rounded-lg">
+                  <span className="text-sm">📅</span>
+                  <div>
+                    <p className="text-xs font-bold text-on-surface">Pattern detected</p>
+                    <p className="text-[10px] text-on-surface/50">Most misses on {topMissedDays.map(([day]) => day).join(" & ")}</p>
+                  </div>
                 </div>
-              </div>
-            ) : patient.conditions?.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {patient.conditions.map((c) => <span key={c} className="bg-surface-container-highest text-on-surface/60 text-xs px-2.5 py-1 rounded-full">{c}</span>)}
-              </div>
-            ) : (
-              <p className="text-sm text-on-surface/30">No conditions recorded</p>
-            )}
-          </div>
-
-          {/* Voice + risk level */}
-          <div className="grid grid-cols-2 gap-6">
-            <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
-              <h3 className="font-display text-sm font-bold text-on-surface mb-2">Risk Level</h3>
-              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${RISK_CHIP[patient.risk_level] || RISK_CHIP.normal}`}>{patient.risk_level}</span>
+              )}
+              {maxConsecutiveMissed >= 3 && (
+                <div className="flex items-center gap-2 p-2.5 bg-surface-container-low rounded-lg">
+                  <span className="text-sm">⚠️</span>
+                  <div>
+                    <p className="text-xs font-bold text-on-surface">Streak alert</p>
+                    <p className="text-[10px] text-on-surface/50">{maxConsecutiveMissed} consecutive missed doses</p>
+                  </div>
+                </div>
+              )}
             </div>
-            {/* Voice Nudge — hidden for mid-review, uncomment for final pitch
-            <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
-              <h3 className="font-display text-sm font-bold text-on-surface mb-2">Voice Nudge</h3>
-              <p className="text-xs text-on-surface/60">{patient.nudge_delivery_mode || "text"} {patient.selected_voice_id ? `(${patient.selected_voice_id.slice(0, 8)}...)` : "(default)"}</p>
-            </div>
-            */}
           </div>
-        </div>
+        )}
       </div>
 
-      {/* AI Insights */}
+      {/* 2. AI Insights */}
       <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center text-[10px] font-bold text-primary">AI</div>
             <h3 className="font-display text-sm font-bold text-on-surface">AI Insights</h3>
           </div>
-          {aiSummary && (
-            <button onClick={() => loadAiSummary(true)} disabled={aiLoading} className="text-xs text-primary hover:underline disabled:opacity-50">
-              {aiLoading ? "Generating..." : "Refresh"}
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            <div className="flex bg-surface-container-highest rounded-full p-0.5">
+              <button onClick={() => setAiTab("summary")} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${aiTab === "summary" ? "bg-primary text-white" : "text-on-surface/60 hover:text-on-surface"}`}>Summary</button>
+              <button onClick={() => setAiTab("missed")} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${aiTab === "missed" ? "bg-primary text-white" : "text-on-surface/60 hover:text-on-surface"}`}>If You Miss</button>
+            </div>
+            {aiTab === "summary" && aiSummary && (
+              <button onClick={() => loadAiSummary(true)} disabled={aiLoading} className="text-xs text-primary hover:underline disabled:opacity-50">
+                {aiLoading ? "Generating..." : "Refresh"}
+              </button>
+            )}
+          </div>
         </div>
-        {aiSummary ? (
-          <p className="text-sm text-on-surface/80 font-body leading-relaxed">{aiSummary}</p>
-        ) : aiLoading ? (
-          <p className="text-sm text-on-surface/30 font-body">Generating insights...</p>
-        ) : (
-          <button onClick={() => loadAiSummary(false)} className="text-sm text-primary hover:underline font-body">
-            Generate AI Summary
-          </button>
+
+        {aiTab === "summary" && (
+          <>
+            {aiSummary ? (
+              <p className="text-sm text-on-surface/80 font-body leading-relaxed">{aiSummary}</p>
+            ) : aiLoading ? (
+              <p className="text-sm text-on-surface/30 font-body">Generating insights...</p>
+            ) : (
+              <button onClick={() => loadAiSummary(false)} className="text-sm text-primary hover:underline font-body">
+                Generate AI Summary
+              </button>
+            )}
+            {aiGeneratedAt && (
+              <p className="text-[10px] text-on-surface/30 mt-3">Generated {new Date(aiGeneratedAt).toLocaleString()}</p>
+            )}
+          </>
         )}
-        {aiGeneratedAt && (
-          <p className="text-[10px] text-on-surface/30 mt-3">Generated {new Date(aiGeneratedAt).toLocaleString()}</p>
+
+        {aiTab === "missed" && (
+          <div className="space-y-3">
+            {medications.filter(m => m.medication?.missed_dose_info).length === 0 ? (
+              <p className="text-sm text-on-surface/30 font-body">No medication education data available.</p>
+            ) : (
+              medications.filter(m => m.medication?.missed_dose_info).map(m => (
+                <div key={m.id} className="p-3 bg-surface-container-low rounded-xl">
+                  <p className="text-xs font-bold text-on-surface mb-1">
+                    {m.medication?.name || m.medication?.generic_name}
+                    {m.medication?.is_critical && (
+                      <span className="ml-2 bg-error text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold align-middle">CRITICAL</span>
+                    )}
+                  </p>
+                  <p className="text-sm text-on-surface/70 font-body leading-relaxed">{m.medication.missed_dose_info}</p>
+                </div>
+              ))
+            )}
+          </div>
         )}
       </div>
 
-      {/* Medications card */}
+      {/* 3. Adherence Trend Chart */}
+      {dailyTrend.length > 1 && (
+        <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display text-sm font-bold text-on-surface">Adherence Trend (30 Days)</h3>
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1 text-[10px] text-outline"><span className="w-2 h-2 rounded-full bg-[#006565]" /> Daily %</span>
+              <span className="flex items-center gap-1 text-[10px] text-outline"><span className="w-6 h-0.5 bg-on-surface/20 inline-block" /> 80% goal</span>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={180}>
+            <LineChart data={dailyTrend} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
+              <XAxis dataKey="day" tick={{ fontSize: 10 }} interval={Math.max(Math.floor(dailyTrend.length / 7) - 1, 0)} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+              <Tooltip formatter={(v) => [`${v}%`, "Adherence"]} />
+              <ReferenceLine y={80} stroke="rgba(0,0,0,0.15)" strokeDasharray="4 4" label={{ value: "Goal", position: "right", fontSize: 9, fill: "rgba(0,0,0,0.3)" }} />
+              <Line type="monotone" dataKey="adherence" stroke="#006565" strokeWidth={2} dot={(props) => {
+                const { cx, cy, payload } = props;
+                if (payload.adherence === null) return null;
+                return <circle cx={cx} cy={cy} r={3} fill={payload.adherence < 50 ? "#ba1a1a" : "#006565"} stroke="none" />;
+              }} connectNulls />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* 4. Active Medications */}
       <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display text-lg font-bold text-on-surface">Active Medications</h3>
@@ -394,12 +481,41 @@ export default function PatientDetailPage() {
         )}
       </div>
 
-      {/* Content: Refill Timeline + Behavior Signals */}
+      {/* 5. Conditions */}
+      <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-display text-sm font-bold text-on-surface">Conditions</h3>
+          {!editingConditions && <button onClick={startEditConditions} className="text-xs text-primary hover:underline">Edit</button>}
+        </div>
+        {editingConditions ? (
+          <div>
+            <div className="grid grid-cols-3 gap-1.5 max-h-40 overflow-y-auto rounded-xl bg-surface-container-highest p-3 mb-3">
+              {conditionsList.map((c) => (
+                <label key={c.id} className="flex items-center gap-2 cursor-pointer py-1 px-1.5 rounded-lg hover:bg-surface-container-low">
+                  <input type="checkbox" checked={selectedConditions.includes(c.name)} onChange={() => toggleCondition(c.name)} className="accent-primary w-3.5 h-3.5" />
+                  <span className="text-xs text-on-surface">{c.name}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button onClick={saveConditions} disabled={savingConditions} className="bg-primary text-white rounded-full px-4 py-1.5 text-xs font-bold">{savingConditions ? "..." : "Save"}</button>
+              <button onClick={() => setEditingConditions(false)} className="text-xs text-on-surface/50">Cancel</button>
+            </div>
+          </div>
+        ) : patient.conditions?.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {patient.conditions.map((c) => <span key={c} className="bg-surface-container-highest text-on-surface/60 text-xs px-2.5 py-1 rounded-full">{c}</span>)}
+          </div>
+        ) : (
+          <p className="text-sm text-on-surface/30">No conditions recorded</p>
+        )}
+      </div>
+
+      {/* 6-8. Pharmacy Refill Timeline (left) + Doses by Medication & Recent Activity (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Pharmacy Refill Timeline */}
-        <div className="lg:col-span-7 bg-surface-container-lowest rounded-xl p-8 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="font-display text-lg font-bold text-on-surface">Pharmacy Refill Timeline</h3>
+        <div className="lg:col-span-7 bg-surface-container-lowest rounded-xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-display text-sm font-bold text-on-surface">Pharmacy Refill Timeline</h3>
             <div className="flex gap-3">
               <span className="flex items-center gap-1.5 text-[10px] font-bold text-outline uppercase tracking-wider"><span className="w-2 h-2 rounded-full bg-tertiary-container" /> On Time</span>
               <span className="flex items-center gap-1.5 text-[10px] font-bold text-outline uppercase tracking-wider"><span className="w-2 h-2 rounded-full bg-error" /> Late</span>
@@ -408,7 +524,7 @@ export default function PatientDetailPage() {
           {dispensingRecords.length === 0 ? (
             <p className="text-sm text-on-surface/30 text-center py-8">No dispensing records</p>
           ) : (
-            <div className="relative space-y-10 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-highest">
+            <div className="relative space-y-8 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-highest">
               {dispensingRecords.slice(0, 8).map((r) => {
                 const med = medications.find((m) => m.medication_id === r.medication_id);
                 const medName = med?.medication?.name || `Medication #${r.medication_id}`;
@@ -422,9 +538,7 @@ export default function PatientDetailPage() {
                         <h4 className="text-sm font-bold text-on-surface">{medName}</h4>
                         <p className="text-xs text-outline mt-0.5">{r.days_supply}d supply{r.quantity ? ` | ${r.quantity} units` : ""} | {r.source}</p>
                       </div>
-                      <div className="text-right">
-                        <span className="text-[10px] text-outline">{new Date(r.dispensed_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
-                      </div>
+                      <span className="text-[10px] text-outline">{new Date(r.dispensed_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
                     </div>
                   </div>
                 );
@@ -433,11 +547,10 @@ export default function PatientDetailPage() {
           )}
         </div>
 
-        {/* Right sidebar: Dose History + Campaigns */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Dose Summary by Medication */}
+          {/* Doses by Medication */}
           <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
-            <h3 className="font-display text-md font-bold text-on-surface mb-4">Doses by Medication (30 Days)</h3>
+            <h3 className="font-display text-sm font-bold text-on-surface mb-4">Doses by Medication (30 Days)</h3>
             {doseHistory.length === 0 ? (
               <p className="text-sm text-on-surface/30 text-center py-4">No dose records yet</p>
             ) : (() => {
@@ -450,70 +563,50 @@ export default function PatientDetailPage() {
               });
               const meds = medications || [];
               return (
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {Object.entries(byMed).map(([name, counts]) => {
                     const total = counts.taken + counts.missed;
                     const rate = total ? Math.round(counts.taken / total * 100) : 0;
                     const isCrit = meds.some(m => (m.medication?.name === name || m.medication?.generic_name === name) && m.medication?.is_critical);
                     return (
-                      <div key={name} className="p-3 bg-surface-container-low rounded-xl">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-bold text-on-surface">
+                      <div key={name}>
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-xs font-medium text-on-surface truncate">
                             {name}
-                            {isCrit && <span className="ml-2 bg-error text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold align-middle">CRITICAL</span>}
+                            {isCrit && <span className="ml-1.5 bg-error text-white text-[7px] px-1 py-0.5 rounded-full font-bold">CRITICAL</span>}
                           </span>
-                          <span className={`text-xs font-bold ${rate >= 80 ? "text-green-600" : rate >= 50 ? "text-yellow-600" : "text-error"}`}>{rate}%</span>
+                          <span className={`text-xs font-bold flex-shrink-0 ml-2 ${rate >= 80 ? "text-green-600" : rate >= 50 ? "text-yellow-600" : "text-error"}`}>{rate}%</span>
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex-1 bg-surface-container-highest rounded-full h-2 overflow-hidden">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
                             <div className={`h-full rounded-full ${rate >= 80 ? "bg-green-500" : rate >= 50 ? "bg-yellow-500" : "bg-error"}`} style={{ width: `${rate}%` }} />
                           </div>
-                          <span className="text-[10px] text-on-surface/40 whitespace-nowrap">{counts.taken}/{total} taken</span>
+                          <span className="text-[9px] text-on-surface/40">{counts.taken}/{total}</span>
                         </div>
                       </div>
                     );
                   })}
-                  <div className="pt-3 border-t border-outline-variant/20">
-                    <h4 className="text-xs font-bold text-on-surface/50 mb-2">Recent Activity</h4>
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {doseHistory.slice(0, 50).map((d) => (
-                        <div key={d.id} className="flex items-center gap-3">
-                          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${d.status === "taken" ? "bg-tertiary-container" : "bg-error"}`} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-on-surface truncate">{d.medication_name}</p>
-                            <p className="text-[10px] text-outline">{new Date(d.logged_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
-                          </div>
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${d.status === "taken" ? "bg-tertiary-container/10 text-tertiary-container" : "bg-error-container text-on-error-container"}`}>{d.status}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               );
             })()}
           </div>
 
-          {/* Nudge Campaigns — hidden for mid-review, uncomment for final pitch
+          {/* Recent Activity */}
           <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
-            <h3 className="font-display text-md font-bold text-on-surface mb-4">Nudge Campaigns</h3>
-            {campaigns.length === 0 ? (
-              <p className="text-sm text-on-surface/30 text-center py-4">No campaigns yet</p>
-            ) : (
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {campaigns.map((c) => (
-                  <div key={c.id} className="p-3 bg-surface-container-low rounded-xl">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold text-on-surface">Campaign #{c.id}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${CAMPAIGN_STATUS_CHIP[c.status] || "bg-surface-container-highest text-on-surface/60"}`}>{c.status}</span>
-                    </div>
-                    <p className="text-[10px] text-outline">Attempt {c.attempt_number} | {c.days_overdue}d overdue | {new Date(c.created_at).toLocaleDateString()}</p>
-                    {c.response_type && <p className="text-[10px] text-primary font-medium mt-1">Response: {c.response_type}</p>}
+            <h3 className="font-display text-sm font-bold text-on-surface mb-4">Recent Activity</h3>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {doseHistory.slice(0, 30).map((d) => (
+                <div key={d.id} className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${d.status === "taken" ? "bg-tertiary-container" : "bg-error"}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-on-surface truncate">{d.medication_name}</p>
+                    <p className="text-[10px] text-outline">{new Date(d.logged_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
                   </div>
-                ))}
-              </div>
-            )}
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${d.status === "taken" ? "bg-tertiary-container/10 text-tertiary-container" : "bg-error-container text-on-error-container"}`}>{d.status}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          */}
         </div>
       </div>
 
