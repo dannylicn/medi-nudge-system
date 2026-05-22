@@ -5,7 +5,7 @@ import LoginPage from "./pages/LoginPage";
 // PatientsPage merged into DashboardPage
 import PatientDetailPage from "./pages/PatientDetailPage";
 import EscalationsPage from "./pages/EscalationsPage";
-import OcrReviewPage from "./pages/OcrReviewPage";
+// import OcrReviewPage from "./pages/OcrReviewPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import MedicationsPage from "./pages/MedicationsPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -31,7 +31,7 @@ function AppRoutes() {
                 <Route path="/patients/:id" element={<PatientDetailPage />} />
                 <Route path="/medications" element={<MedicationsPage />} />
                 <Route path="/escalations" element={<EscalationsPage />} />
-                <Route path="/ocr-review" element={<OcrReviewPage />} />
+                {/* <Route path="/ocr-review" element={<OcrReviewPage />} /> */}
                 <Route path="/analytics" element={<AnalyticsPage />} />
               </Routes>
             </Layout>
