@@ -253,12 +253,14 @@ export default function PatientDetailPage() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          {/* Nudge/Reminder triggers hidden — Telegram integration not demo-ready
           <button onClick={handleTriggerNudge} disabled={triggeringNudge} className="px-4 py-2 rounded-full border border-primary/30 text-primary text-xs font-medium hover:bg-primary/5 disabled:opacity-60">
             {triggeringNudge ? "Triggering..." : "Trigger Nudge"}
           </button>
           <button onClick={handleTriggerReminder} disabled={triggeringReminder} className="px-4 py-2 rounded-full border border-primary/30 text-primary text-xs font-medium hover:bg-primary/5 disabled:opacity-60">
             {triggeringReminder ? "Triggering..." : "Trigger Reminder"}
           </button>
+          */}
           <button onClick={openDispensing} className="px-4 py-2 rounded-full border border-outline text-on-surface text-xs font-medium hover:bg-surface-container transition-colors">
             Record Dispensing
           </button>
@@ -272,7 +274,7 @@ export default function PatientDetailPage() {
         <div className="px-4 py-2.5 bg-tertiary-container/20 border border-tertiary-container/30 rounded-xl font-body text-sm text-on-surface/70">{triggerResult}</div>
       )}
 
-      {/* Telegram QR / Caregiver Invite */}
+      {/* Telegram QR / Caregiver Invite — hidden, Telegram integration not demo-ready
       {(!patient.telegram_chat_id || patient.caregiver_name) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {!patient.telegram_chat_id && (
@@ -327,6 +329,7 @@ export default function PatientDetailPage() {
           )}
         </div>
       )}
+      */}
 
       {/* 1. Adherence Score + What's Impacting */}
       <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col md:flex-row items-center md:items-start gap-6">

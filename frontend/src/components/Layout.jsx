@@ -5,7 +5,7 @@ const NAV = [
   { label: "Dashboard", to: "/dashboard", icon: "📋" },
   { label: "Medications", to: "/medications", icon: "💊" },
   { label: "Escalations", to: "/escalations", icon: "🚨" },
-  { label: "OCR Review", to: "/ocr-review", icon: "📷" },
+  // { label: "OCR Review", to: "/ocr-review", icon: "📷" },
   { label: "Analytics", to: "/analytics", icon: "📊" },
 ];
 
