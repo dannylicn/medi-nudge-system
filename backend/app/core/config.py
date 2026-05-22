@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./medi_nudge.db"
     JWT_SECRET_KEY: str = "changeme-replace-in-production"
     JWT_ALGORITHM: str = "HS256"
-    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 360
     OPENAI_API_KEY: str = ""
     LLM_BASE_URL: str = ""
     LLM_MODEL: str = "gpt-4o"
