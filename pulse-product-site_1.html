@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Pulse — Medication adherence that actually works</title>
+    <meta
+      name="description"
+      content="A smart medication adherence companion for chronic patients, their caregivers, and the care ecosystem in Singapore."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter+Tight:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #faf7f2;
+        --bg-warm: #f2ede4;
+        --ink: #0e1a2b;
+        --ink-soft: #38465a;
+        --muted: #7a8595;
+        --accent: #e85a3c;
+        --accent-soft: #fbe5dd;
+        --teal: #0f4c5c;
+        --teal-soft: #d9e7ea;
+        --green: #2f7d5b;
+        --gold: #c8923e;
+        --line: rgba(14, 26, 43, 0.1);
+        --shadow-sm: 0 1px 2px rgba(14, 26, 43, 0.06);
+        --shadow-md: 0 8px 28px rgba(14, 26, 43, 0.1);
+        --shadow-lg: 0 24px 60px rgba(14, 26, 43, 0.18);
+        --radius: 18px;
+        --radius-lg: 28px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Inter Tight", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        line-height: 1.5;
+        overflow-x: hidden;
+      }
+
+      /* ============ TYPE ============ */
+      .serif {
+        font-family: "Fraunces", Georgia, serif;
+        font-optical-sizing: auto;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: "Fraunces", Georgia, serif;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+        font-weight: 500;
+      }
+      .eyebrow {
+        font-family: "Inter Tight", sans-serif;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--accent);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .eyebrow::before {
+        content: "";
+        width: 18px;
+        height: 1px;
+        background: var(--accent);
+      }
+
+      /* ============ LAYOUT ============ */
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      section {
+        padding: 80px 0;
+        position: relative;
+      }
+      @media (max-width: 640px) {
+        section {
+          padding: 64px 0;
+        }
+      }
+
+      /* ============ NAV ============ */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 16px 24px;
+        background: rgba(250, 247, 242, 0.85);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        border-bottom: 1px solid transparent;
+        transition: border-color 0.3s;
+      }
+      nav.scrolled {
+        border-bottom-color: var(--line);
+      }
+      .nav-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .logo {
+        font-family: "Fraunces", serif;
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .logo-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 4px var(--accent-soft);
+        animation: pulse 2s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 4px var(--accent-soft);
+        }
+        50% {
+          box-shadow: 0 0 0 7px rgba(232, 90, 60, 0.15);
+        }
+      }
+      .nav-cta {
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 100px;
+        background: var(--ink);
+        color: var(--bg);
+        text-decoration: none;
+        transition: transform 0.2s;
+      }
+      .nav-cta:hover {
+        transform: scale(1.04);
+      }
+
+      /* ============ HERO ============ */
+      .hero {
+        padding-top: 140px;
+        padding-bottom: 60px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-grain {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(
+            circle at 20% 30%,
+            rgba(232, 90, 60, 0.08),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 70%,
+            rgba(15, 76, 92, 0.06),
+            transparent 50%
+          );
+        pointer-events: none;
+      }
+      .hero-inner {
+        position: relative;
+        z-index: 1;
+      }
+      .hero h1 {
+        font-size: clamp(44px, 9vw, 88px);
+        font-weight: 400;
+        letter-spacing: -0.035em;
+        line-height: 0.98;
+        margin: 24px 0 28px;
+        max-width: 14ch;
+      }
+      .hero h1 em {
+        font-style: italic;
+        font-weight: 300;
+        color: var(--accent);
+      }
+      .hero h1 .strike {
+        position: relative;
+        display: inline-block;
+        color: var(--ink-soft);
+      }
+      .hero h1 .strike::after {
+        content: "";
+        position: absolute;
+        left: -2%;
+        right: -2%;
+        top: 55%;
+        height: 3px;
+        background: var(--accent);
+        transform: rotate(-2deg);
+      }
+      .hero-sub {
+        font-size: clamp(17px, 2.2vw, 20px);
+        color: var(--ink-soft);
+        max-width: 46ch;
+        margin-bottom: 36px;
+        line-height: 1.5;
+      }
+      .hero-cta-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .btn-primary {
+        background: var(--ink);
+        color: var(--bg);
+        padding: 14px 26px;
+        border-radius: 100px;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: transform 0.2s, background 0.2s;
+        border: none;
+        cursor: pointer;
+      }
+      .btn-primary:hover {
+        background: var(--accent);
+        transform: translateY(-2px);
+      }
+      .btn-secondary {
+        color: var(--ink);
+        padding: 14px 22px;
+        font-size: 15px;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: gap 0.2s;
+      }
+      .btn-secondary:hover {
+        gap: 10px;
+      }
+      .btn-secondary::after {
+        content: "→";
+      }
+
+      /* ============ STAT BAR ============ */
+      .stat-bar {
+        margin-top: 80px;
+        padding: 32px 0;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .stat-num {
+        font-family: "Fraunces", serif;
+        font-size: clamp(36px, 6vw, 56px);
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--ink);
+      }
+      .stat-num em {
+        font-style: italic;
+        color: var(--accent);
+        font-weight: 300;
+      }
+      .stat-label {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 8px;
+        letter-spacing: 0.02em;
+      }
+      @media (max-width: 640px) {
+        .stat-bar {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+        .stat-bar > div {
+          border-bottom: 1px solid var(--line);
+          padding-bottom: 24px;
+        }
+        .stat-bar > div:last-child {
+          border-bottom: none;
+          padding-bottom: 0;
+        }
+      }
+
+      /* ============ PROBLEM SECTION ============ */
+      .problem {
+        background: var(--bg-warm);
+      }
+      .problem-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: start;
+      }
+      @media (max-width: 840px) {
+        .problem-grid {
+          grid-template-columns: 1fr;
+          gap: 40px;
+        }
+      }
+
+      .problem h2 {
+        font-size: clamp(32px, 5vw, 48px);
+        margin: 16px 0 24px;
+        max-width: 14ch;
+      }
+      .problem-text {
+        color: var(--ink-soft);
+        font-size: 17px;
+        margin-bottom: 20px;
+      }
+      .quote-block {
+        margin-top: 32px;
+        padding: 24px;
+        border-left: 3px solid var(--accent);
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 0 12px 12px 0;
+      }
+      .quote-block p {
+        font-family: "Fraunces", serif;
+        font-style: italic;
+        font-size: 18px;
+        color: var(--ink);
+        line-height: 1.4;
+      }
+      .quote-attr {
+        font-family: "Inter Tight", sans-serif;
+        font-style: normal;
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 12px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      /* Risk card */
+      .risk-card {
+        background: #fff;
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        box-shadow: var(--shadow-md);
+        position: relative;
+      }
+      .risk-card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 20px;
+      }
+      .risk-tag {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 6px 12px;
+        border-radius: 100px;
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .risk-time {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .risk-med {
+        font-family: "Fraunces", serif;
+        font-size: 28px;
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+      .risk-dose {
+        font-size: 14px;
+        color: var(--ink-soft);
+        margin-bottom: 24px;
+      }
+      .risk-meter {
+        height: 6px;
+        border-radius: 100px;
+        background: var(--line);
+        overflow: hidden;
+        margin-bottom: 8px;
+      }
+      .risk-meter-fill {
+        height: 100%;
+        width: 78%;
+        background: linear-gradient(90deg, var(--accent), #ff8260);
+        border-radius: 100px;
+        animation: fill 1.4s ease-out;
+      }
+      @keyframes fill {
+        from {
+          width: 0;
+        }
+        to {
+          width: 78%;
+        }
+      }
+      .risk-meter-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .risk-warning {
+        margin-top: 20px;
+        padding: 14px;
+        background: var(--accent-soft);
+        border-radius: 12px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .risk-warning-icon {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        font-family: Georgia, serif;
+      }
+      .risk-warning-text {
+        font-size: 13px;
+        color: var(--ink);
+        line-height: 1.45;
+      }
+      .risk-warning-text strong {
+        font-weight: 600;
+      }
+
+      /* ============ SOLUTION HERO ============ */
+      .solution-hero {
+        text-align: center;
+        padding-bottom: 40px;
+      }
+      .solution-hero h2 {
+        font-size: clamp(40px, 7vw, 72px);
+        font-weight: 400;
+        letter-spacing: -0.03em;
+        max-width: 18ch;
+        margin: 20px auto 24px;
+      }
+      .solution-hero h2 em {
+        font-style: italic;
+        color: var(--accent);
+        font-weight: 300;
+      }
+      .solution-hero p {
+        font-size: 18px;
+        color: var(--ink-soft);
+        max-width: 52ch;
+        margin: 0 auto;
+      }
+
+      /* ============ PHONE MOCKUPS ============ */
+      .dual-phones {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+        align-items: start;
+        margin-top: 32px;
+      }
+      @media (max-width: 840px) {
+        .dual-phones {
+          grid-template-columns: 1fr;
+          gap: 64px;
+        }
+      }
+
+      .persona-card {
+        position: relative;
+      }
+      .persona-head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 24px;
+      }
+      .persona-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Fraunces", serif;
+        font-size: 20px;
+        font-weight: 500;
+        color: white;
+      }
+      .persona-avatar.patient {
+        background: linear-gradient(135deg, #c8923e, #e85a3c);
+      }
+      .persona-avatar.caregiver {
+        background: linear-gradient(135deg, #0f4c5c, #2f7d5b);
+      }
+      .persona-name {
+        font-family: "Fraunces", serif;
+        font-size: 22px;
+        font-weight: 500;
+      }
+      .persona-role {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .phone-frame {
+        background: var(--ink);
+        border-radius: 42px;
+        padding: 10px;
+        box-shadow: var(--shadow-lg);
+        max-width: 300px;
+        margin: 0 auto;
+        position: relative;
+      }
+      .phone-notch {
+        position: absolute;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90px;
+        height: 24px;
+        background: var(--ink);
+        border-radius: 100px;
+        z-index: 2;
+      }
+      .phone-screen {
+        background: var(--bg);
+        border-radius: 34px;
+        overflow: hidden;
+        aspect-ratio: 9/19.5;
+        position: relative;
+      }
+      .phone-statusbar {
+        height: 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 24px 0 28px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .phone-statusbar .right {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+      }
+      .phone-statusbar .bars {
+        display: flex;
+        gap: 2px;
+        align-items: flex-end;
+      }
+      .phone-statusbar .bars span {
+        width: 3px;
+        background: var(--ink);
+        border-radius: 1px;
+      }
+      .phone-statusbar .bars span:nth-child(1) {
+        height: 5px;
+      }
+      .phone-statusbar .bars span:nth-child(2) {
+        height: 7px;
+      }
+      .phone-statusbar .bars span:nth-child(3) {
+        height: 9px;
+      }
+      .phone-statusbar .bars span:nth-child(4) {
+        height: 11px;
+      }
+      .phone-battery {
+        width: 24px;
+        height: 11px;
+        border: 1px solid var(--ink);
+        border-radius: 3px;
+        position: relative;
+        padding: 1px;
+      }
+      .phone-battery::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2px;
+        height: 5px;
+        background: var(--ink);
+        border-radius: 0 1px 1px 0;
+      }
+      .phone-battery div {
+        height: 100%;
+        width: 80%;
+        background: var(--ink);
+        border-radius: 1px;
+      }
+
+      .phone-content {
+        padding: 8px 16px 20px;
+      }
+
+      /* Patient screen */
+      .greeting {
+        font-family: "Fraunces", serif;
+        font-size: 20px;
+        font-weight: 500;
+        margin-bottom: 2px;
+      }
+      .greeting-sub {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 18px;
+      }
+
+      .reminder-card {
+        background: linear-gradient(160deg, #fff, #fbe5dd);
+        border-radius: 20px;
+        padding: 18px;
+        margin-bottom: 14px;
+        box-shadow: 0 4px 12px rgba(232, 90, 60, 0.12);
+        position: relative;
+        overflow: hidden;
+      }
+      .reminder-card::before {
+        content: "";
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 80px;
+        height: 80px;
+        background: radial-gradient(
+          circle,
+          rgba(232, 90, 60, 0.15),
+          transparent 70%
+        );
+      }
+      .reminder-time {
+        font-size: 11px;
+        color: var(--accent);
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+      .reminder-msg {
+        font-family: "Fraunces", serif;
+        font-size: 15px;
+        line-height: 1.3;
+        font-style: italic;
+        color: var(--ink);
+        margin-bottom: 10px;
+      }
+      .reminder-from {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        color: var(--ink-soft);
+      }
+      .reminder-from-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ffb87b, #ff6b9d);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 10px;
+      }
+      .reminder-actions {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .btn-taken {
+        background: var(--green);
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 14px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .btn-snooze {
+        background: white;
+        color: var(--ink-soft);
+        border: 1px solid var(--line);
+        padding: 14px;
+        border-radius: 14px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .unwell-pill {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px;
+        background: white;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        font-size: 13px;
+        color: var(--ink);
+        margin-bottom: 14px;
+        cursor: pointer;
+      }
+      .unwell-pill-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--teal-soft);
+        color: var(--teal);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+      .unwell-pill-text {
+        flex: 1;
+      }
+      .unwell-pill-text strong {
+        display: block;
+        font-weight: 600;
+        font-size: 13px;
+      }
+      .unwell-pill-text span {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .unwell-pill-arrow {
+        color: var(--muted);
+      }
+
+      .progress-mini {
+        background: white;
+        border-radius: 16px;
+        padding: 14px;
+        border: 1px solid var(--line);
+      }
+      .progress-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 8px;
+      }
+      .progress-row span:first-child {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .progress-row span:last-child {
+        font-family: "Fraunces", serif;
+        font-size: 18px;
+        font-weight: 500;
+      }
+      .progress-row span:last-child em {
+        font-style: italic;
+        color: var(--green);
+      }
+      .progress-bar-mini {
+        height: 5px;
+        border-radius: 100px;
+        background: var(--line);
+        overflow: hidden;
+      }
+      .progress-bar-mini div {
+        height: 100%;
+        width: 75%;
+        background: linear-gradient(90deg, var(--green), #4fb07a);
+      }
+
+      /* Caregiver screen */
+      .cg-header {
+        margin-bottom: 16px;
+      }
+      .cg-status {
+        background: #fff;
+        border-radius: 18px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        margin-bottom: 12px;
+      }
+      .cg-status-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+      .cg-status-label {
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .cg-risk-badge {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 100px;
+        background: #fff4e6;
+        color: var(--gold);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+      .cg-percent {
+        font-family: "Fraunces", serif;
+        font-size: 42px;
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+      .cg-percent em {
+        font-style: italic;
+        color: var(--green);
+      }
+      .cg-percent-label {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      .cg-week {
+        display: flex;
+        gap: 5px;
+        margin-top: 14px;
+      }
+      .day-cell {
+        flex: 1;
+        aspect-ratio: 1;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        font-weight: 600;
+        color: white;
+      }
+      .day-cell.done {
+        background: var(--green);
+      }
+      .day-cell.partial {
+        background: var(--gold);
+      }
+      .day-cell.miss {
+        background: var(--accent);
+      }
+      .day-cell.today {
+        background: var(--ink);
+        position: relative;
+      }
+      .day-cell.today::after {
+        content: "";
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--ink);
+      }
+      .day-cell.future {
+        background: var(--line);
+        color: var(--muted);
+      }
+
+      .cg-alert {
+        background: linear-gradient(135deg, #fbe5dd, #fff);
+        border-radius: 18px;
+        padding: 14px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(232, 90, 60, 0.25);
+      }
+      .cg-alert-top {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .cg-alert-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      .cg-alert-time {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      .cg-alert-msg {
+        font-family: "Fraunces", serif;
+        font-size: 14px;
+        line-height: 1.3;
+        color: var(--ink);
+        margin-bottom: 12px;
+      }
+      .cg-alert-msg strong {
+        font-weight: 600;
+      }
+      .cg-action-row {
+        display: flex;
+        gap: 6px;
+      }
+      .cg-action-btn {
+        flex: 1;
+        padding: 10px 6px;
+        border-radius: 10px;
+        border: none;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-family: inherit;
+      }
+      .cg-action-btn.call {
+        background: var(--teal);
+        color: white;
+      }
+      .cg-action-btn.video {
+        background: white;
+        color: var(--teal);
+        border: 1px solid var(--teal-soft);
+      }
+      .cg-action-btn.dr {
+        background: white;
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+
+      .cg-refill {
+        background: white;
+        border-radius: 16px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .cg-refill-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: var(--teal-soft);
+        color: var(--teal);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+      .cg-refill-text {
+        flex: 1;
+        font-size: 11px;
+      }
+      .cg-refill-text strong {
+        display: block;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 1px;
+      }
+      .cg-refill-text span {
+        color: var(--muted);
+      }
+      .cg-refill-btn {
+        background: var(--ink);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+      }
+
+      /* persona description */
+      .persona-desc {
+        margin-top: 24px;
+        padding: 0 8px;
+      }
+      .persona-desc h3 {
+        font-size: 20px;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+      .persona-desc p {
+        font-size: 14px;
+        color: var(--ink-soft);
+        line-height: 1.5;
+      }
+      .persona-features {
+        margin-top: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .persona-features li {
+        list-style: none;
+        font-size: 13px;
+        color: var(--ink-soft);
+        padding-left: 20px;
+        position: relative;
+      }
+      .persona-features li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 8px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      .persona-card.caregiver .persona-features li::before {
+        background: var(--teal);
+      }
+
+      /* ============ HOW IT WORKS ============ */
+      .how {
+        background: var(--ink);
+        color: var(--bg);
+      }
+      .how h2 {
+        color: var(--bg);
+        font-size: clamp(36px, 6vw, 56px);
+        margin: 16px 0 24px;
+        max-width: 18ch;
+      }
+      .how h2 em {
+        font-style: italic;
+        color: #ff8260;
+        font-weight: 300;
+      }
+      .how .eyebrow {
+        color: #ff8260;
+      }
+      .how .eyebrow::before {
+        background: #ff8260;
+      }
+      .how-sub {
+        color: rgba(250, 247, 242, 0.7);
+        font-size: 17px;
+        max-width: 52ch;
+        margin-bottom: 56px;
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+      }
+      @media (max-width: 840px) {
+        .steps {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 520px) {
+        .steps {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .step {
+        position: relative;
+        padding-top: 32px;
+      }
+      .step-num {
+        font-family: "Fraunces", serif;
+        font-size: 14px;
+        font-weight: 400;
+        color: #ff8260;
+        font-style: italic;
+        margin-bottom: 12px;
+        letter-spacing: 0.1em;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .step-line {
+        position: absolute;
+        top: 8px;
+        left: 32px;
+        right: -12px;
+        height: 1px;
+        background: rgba(250, 247, 242, 0.15);
+      }
+      .step:last-child .step-line {
+        display: none;
+      }
+      @media (max-width: 840px) {
+        .step:nth-child(2n) .step-line {
+          display: none;
+        }
+      }
+      @media (max-width: 520px) {
+        .step-line {
+          display: none;
+        }
+      }
+      .step h3 {
+        font-family: "Fraunces", serif;
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--bg);
+        margin-bottom: 10px;
+        margin-top: 16px;
+        line-height: 1.15;
+      }
+      .step p {
+        font-size: 14px;
+        color: rgba(250, 247, 242, 0.65);
+        line-height: 1.5;
+      }
+
+      /* ============ ESCALATION ============ */
+      .escalation {
+        padding-bottom: 0;
+      }
+      .esc-flow {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        margin-top: 48px;
+        position: relative;
+      }
+      @media (max-width: 840px) {
+        .esc-flow {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .esc-node {
+        text-align: center;
+        padding: 32px 16px;
+        position: relative;
+      }
+      .esc-node:not(:last-child)::after {
+        content: "→";
+        position: absolute;
+        right: -12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 28px;
+        color: var(--muted);
+        z-index: 1;
+      }
+      @media (max-width: 840px) {
+        .esc-node:not(:last-child)::after {
+          content: "↓";
+          right: 50%;
+          top: auto;
+          bottom: -12px;
+          transform: translateX(50%);
+        }
+      }
+      .esc-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+      }
+      .esc-icon.patient {
+        background: linear-gradient(135deg, #c8923e, #e85a3c);
+        color: white;
+      }
+      .esc-icon.caregiver {
+        background: linear-gradient(135deg, #0f4c5c, #2f7d5b);
+        color: white;
+      }
+      .esc-icon.doctor {
+        background: linear-gradient(135deg, #2f7d5b, #5ba47c);
+        color: white;
+      }
+      .esc-icon.emergency {
+        background: linear-gradient(135deg, #e85a3c, #ff6b4a);
+        color: white;
+        animation: pulse-icon 2s ease-in-out infinite;
+      }
+      @keyframes pulse-icon {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.06);
+        }
+      }
+      .esc-node h4 {
+        font-family: "Fraunces", serif;
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+      .esc-node p {
+        font-size: 13px;
+        color: var(--ink-soft);
+        line-height: 1.4;
+      }
+
+      /* ============ METRICS ============ */
+      .metrics {
+        background: var(--bg);
+        padding-top: 60px;
+      }
+      .metrics-title {
+        font-size: clamp(36px, 6vw, 56px);
+        font-weight: 400;
+        letter-spacing: -0.03em;
+        margin: 16px 0 20px;
+        max-width: 16ch;
+      }
+      .metrics-title em {
+        font-style: italic;
+        color: var(--accent);
+        font-weight: 300;
+      }
+      .metrics-sub {
+        color: var(--ink-soft);
+        font-size: 17px;
+        max-width: 52ch;
+        margin-bottom: 56px;
+      }
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      @media (max-width: 960px) {
+        .metrics-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .metric-card {
+        background: #fff;
+        border-radius: var(--radius-lg);
+        padding: 32px 28px;
+        border: 1px solid var(--line);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .metric-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+      }
+      .metric-tag {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 24px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      .metric-card:nth-child(1) .metric-tag {
+        color: var(--green);
+      }
+      .metric-card:nth-child(2) .metric-tag {
+        color: var(--accent);
+      }
+      .metric-card:nth-child(3) .metric-tag {
+        color: var(--teal);
+      }
+
+      .metric-num {
+        font-family: "Fraunces", serif;
+        font-size: 64px;
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        color: var(--ink);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: baseline;
+        gap: 2px;
+      }
+      .metric-num em {
+        font-style: italic;
+        font-weight: 300;
+      }
+      .metric-card:nth-child(1) .metric-num em {
+        color: var(--green);
+      }
+      .metric-card:nth-child(2) .metric-num em {
+        color: var(--accent);
+      }
+      .metric-card:nth-child(3) .metric-num em {
+        color: var(--teal);
+      }
+      .metric-num .pct {
+        font-size: 32px;
+        font-weight: 400;
+        color: var(--ink-soft);
+        margin-left: 2px;
+      }
+      .metric-num .slash {
+        font-size: 32px;
+        font-weight: 300;
+        color: var(--muted);
+        margin: 0 4px;
+        font-style: italic;
+      }
+
+      .metric-headline {
+        font-family: "Fraunces", serif;
+        font-size: 19px;
+        line-height: 1.25;
+        font-weight: 500;
+        color: var(--ink);
+        margin-bottom: 14px;
+        letter-spacing: -0.01em;
+      }
+      .metric-body {
+        font-size: 14px;
+        line-height: 1.55;
+        color: var(--ink-soft);
+        flex: 1;
+        margin-bottom: 20px;
+      }
+      .metric-foot {
+        font-size: 12px;
+        color: var(--muted);
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+        font-style: italic;
+        line-height: 1.45;
+      }
+
+      @media (max-width: 520px) {
+        .metric-num {
+          font-size: 52px;
+        }
+        .metric-card {
+          padding: 28px 24px;
+        }
+      }
+
+      /* ============ CTA ============ */
+      .cta-section {
+        text-align: center;
+        background: var(--bg-warm);
+        padding: 80px 24px;
+      }
+      .cta-section h2 {
+        font-size: clamp(36px, 6vw, 56px);
+        font-weight: 400;
+        letter-spacing: -0.03em;
+        max-width: 18ch;
+        margin: 16px auto 24px;
+      }
+      .cta-section h2 em {
+        font-style: italic;
+        color: var(--accent);
+        font-weight: 300;
+      }
+      .cta-section p {
+        font-size: 18px;
+        color: var(--ink-soft);
+        max-width: 42ch;
+        margin: 0 auto 32px;
+      }
+      .cta-row {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      /* ============ FOOTER ============ */
+      footer {
+        padding: 40px 24px;
+        text-align: center;
+        border-top: 1px solid var(--line);
+        font-size: 13px;
+        color: var(--muted);
+      }
+      footer .logo {
+        justify-content: center;
+        margin-bottom: 12px;
+        font-size: 18px;
+      }
+      footer p {
+        max-width: 40ch;
+        margin: 0 auto 8px;
+      }
+
+      /* ============ ANIMATIONS ============ */
+      .fade-in {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+      }
+      .fade-in.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* small screen adjustments */
+      @media (max-width: 520px) {
+        section {
+          padding: 56px 0;
+        }
+        .container {
+          padding: 0 20px;
+        }
+        .hero {
+          padding-top: 110px;
+        }
+        .stat-bar {
+          margin-top: 48px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav id="nav">
+      <div class="nav-inner">
+        <div class="logo"><span class="logo-dot"></span>Pulse</div>
+        <a href="#cta" class="nav-cta">Get early access</a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-grain"></div>
+      <div class="container hero-inner">
+        <span class="eyebrow">Medication adherence, reimagined</span>
+        <h1>
+          Missing a pill <br />
+          is <span class="strike">never</span> <em>never</em> harmless.
+        </h1>
+        <p class="hero-sub">
+          <strong>700,000 chronic patients</strong> in Singapore skip their
+          medication — most of them think it doesn't matter. Pulse gives
+          patients, caregivers, and doctors one shared signal so the small
+          misses never become big complications.
+        </p>
+        <div class="hero-cta-row">
+          <a href="#solution" class="btn-primary">See how it works</a>
+          <a href="#problem" class="btn-secondary">The problem</a>
+        </div>
+
+        <div class="stat-bar">
+          <div>
+            <div class="stat-num"><em>60%</em></div>
+            <div class="stat-label">
+              of chronic patients in Singapore don't adhere
+            </div>
+          </div>
+          <div>
+            <div class="stat-num">700k+</div>
+            <div class="stat-label">
+              Singaporeans living with chronic conditions
+            </div>
+          </div>
+          <div>
+            <div class="stat-num"><em>1 in 4</em></div>
+            <div class="stat-label">
+              missed-dose hospital visits are preventable
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEM -->
+    <section class="problem" id="problem">
+      <div class="container">
+        <div class="problem-grid">
+          <div class="fade-in">
+            <span class="eyebrow">The real problem</span>
+            <h2>It's not forgetting. It's "playing doctor."</h2>
+            <p class="problem-text">
+              We started thinking patients forget. We were wrong.
+            </p>
+            <p class="problem-text">
+              Interviews revealed the real behaviour: patients
+              <strong>underestimate the risk</strong> of a missed dose. They
+              self-diagnose — "skipping once won't matter" — and silently break
+              the treatment plan. Caregivers don't know. Doctors don't know.
+              Until something goes wrong.
+            </p>
+            <div class="quote-block">
+              <p>
+                "I felt fine, so I stopped taking it for two days. Then I had
+                chest tightness on Monday."
+              </p>
+              <div class="quote-attr">
+                — Warfarin patient, 68, interviewed Q3
+              </div>
+            </div>
+          </div>
+
+          <div class="risk-card fade-in">
+            <div class="risk-card-head">
+              <span class="risk-tag">Missed dose</span>
+              <span class="risk-time">Today · 8:00 AM</span>
+            </div>
+            <div class="risk-med">Warfarin 5mg</div>
+            <div class="risk-dose">Blood thinner · Once daily</div>
+
+            <div class="risk-meter">
+              <div class="risk-meter-fill"></div>
+            </div>
+            <div class="risk-meter-label">
+              <span>Adherence this week</span>
+              <span>4 / 7 days</span>
+            </div>
+
+            <div class="risk-warning">
+              <div class="risk-warning-icon">!</div>
+              <div class="risk-warning-text">
+                <strong>Risk just climbed.</strong> Missing two consecutive
+                doses increases your risk of stroke and heart attack. Caregiver
+                alerted.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOLUTION -->
+    <section id="solution">
+      <div class="container">
+        <div class="solution-hero fade-in">
+          <span class="eyebrow">Meet pulse</span>
+          <h2>One <em>heartbeat</em> for the whole care circle.</h2>
+          <p>
+            Two apps. One shared rhythm. Pulse turns medication into a
+            connection — between a patient, the people who love them, and the
+            doctors who keep them safe.
+          </p>
+        </div>
+
+        <div class="dual-phones">
+          <!-- PATIENT PHONE -->
+          <div class="persona-card patient fade-in">
+            <div class="persona-head">
+              <div class="persona-avatar patient">G</div>
+              <div>
+                <div class="persona-name">Grandpa Lim</div>
+                <div class="persona-role">Patient · 72 · Warfarin daily</div>
+              </div>
+            </div>
+
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <div class="phone-statusbar">
+                  <span>8:02</span>
+                  <div class="right">
+                    <div class="bars">
+                      <span></span><span></span><span></span><span></span>
+                    </div>
+                    <div class="phone-battery"><div></div></div>
+                  </div>
+                </div>
+
+                <div class="phone-content">
+                  <div class="greeting">Good morning, Grandpa.</div>
+                  <div class="greeting-sub">1 medication due now</div>
+
+                  <div class="reminder-card">
+                    <div class="reminder-time">⏰ Now · 8:00 AM</div>
+                    <div class="reminder-msg">
+                      "Gōnggōng, remember your Warfarin! Love you."
+                    </div>
+                    <div class="reminder-from">
+                      <div class="reminder-from-avatar">M</div>
+                      <span>From Mei Ling, your granddaughter</span>
+                    </div>
+                    <div class="reminder-actions">
+                      <button class="btn-taken">✓ Taken</button>
+                      <button class="btn-snooze">Snooze 8m</button>
+                    </div>
+                  </div>
+
+                  <div class="unwell-pill">
+                    <div class="unwell-pill-icon">♡</div>
+                    <div class="unwell-pill-text">
+                      <strong>Feeling side effects?</strong>
+                      <span>Read what to do · Tell Mei Ling</span>
+                    </div>
+                    <div class="unwell-pill-arrow">→</div>
+                  </div>
+
+                  <div class="progress-mini">
+                    <div class="progress-row">
+                      <span>This week</span>
+                      <span><em>6</em> / 7 days</span>
+                    </div>
+                    <div class="progress-bar-mini"><div></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="persona-desc">
+              <h3>For the patient</h3>
+              <p>
+                Reminders that feel like a hug, not a nag. Familiar voices and
+                faces of loved ones gently keep adherence on track.
+              </p>
+              <ul class="persona-features">
+                <li>AI-generated reminders in family members' voices</li>
+                <li>
+                  Large, friendly "Taken / Snooze" actions — built for older
+                  hands
+                </li>
+                <li>One-tap side-effect guide that pings the caregiver</li>
+                <li>
+                  Daily progress, next dose, next doctor's visit — all in one
+                  glance
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- CAREGIVER PHONE -->
+          <div class="persona-card caregiver fade-in">
+            <div class="persona-head">
+              <div class="persona-avatar caregiver">M</div>
+              <div>
+                <div class="persona-name">Mei Ling</div>
+                <div class="persona-role">Caregiver · Granddaughter</div>
+              </div>
+            </div>
+
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <div class="phone-statusbar">
+                  <span>8:12</span>
+                  <div class="right">
+                    <div class="bars">
+                      <span></span><span></span><span></span><span></span>
+                    </div>
+                    <div class="phone-battery"><div></div></div>
+                  </div>
+                </div>
+
+                <div class="phone-content">
+                  <div class="cg-header">
+                    <div class="greeting">Grandpa's week</div>
+                    <div class="greeting-sub">Tracking 3 medications</div>
+                  </div>
+
+                  <div class="cg-status">
+                    <div class="cg-status-top">
+                      <span class="cg-status-label">Adherence</span>
+                      <span class="cg-risk-badge">⚠ Watch</span>
+                    </div>
+                    <div class="cg-percent"><em>86</em>%</div>
+                    <div class="cg-percent-label">
+                      Last 7 days · slipped from 95%
+                    </div>
+                    <div class="cg-week">
+                      <div class="day-cell done">M</div>
+                      <div class="day-cell done">T</div>
+                      <div class="day-cell partial">W</div>
+                      <div class="day-cell miss">T</div>
+                      <div class="day-cell done">F</div>
+                      <div class="day-cell today">S</div>
+                      <div class="day-cell future">S</div>
+                    </div>
+                  </div>
+
+                  <div class="cg-alert">
+                    <div class="cg-alert-top">
+                      <div class="cg-alert-dot"></div>
+                      <span class="cg-alert-time">Live alert · 2 min ago</span>
+                    </div>
+                    <div class="cg-alert-msg">
+                      Grandpa missed his <strong>8 AM Warfarin</strong>. Second
+                      skip this week.
+                    </div>
+                    <div class="cg-action-row">
+                      <button class="cg-action-btn call">📞 Call</button>
+                      <button class="cg-action-btn video">📹 Video</button>
+                      <button class="cg-action-btn dr">+ Doctor</button>
+                    </div>
+                  </div>
+
+                  <div class="cg-refill">
+                    <div class="cg-refill-icon">℞</div>
+                    <div class="cg-refill-text">
+                      <strong>Metformin running low</strong>
+                      <span>5 days left · order refill</span>
+                    </div>
+                    <button class="cg-refill-btn">Refill</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="persona-desc">
+              <h3>For the caregiver</h3>
+              <p>
+                The peace of mind of being there — without being there. See risk
+                before it becomes an emergency.
+              </p>
+              <ul class="persona-features">
+                <li>At-a-glance adherence dashboard with risk profile</li>
+                <li>Real-time alerts on missed doses and patient symptoms</li>
+                <li>One tap to call, video, or update on behalf of patient</li>
+                <li>
+                  Escalate to doctor or ambulance instantly when it matters
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how">
+      <div class="container">
+        <span class="eyebrow">How it works</span>
+        <h2>From a missed pill to a <em>safer</em> patient — together.</h2>
+        <p class="how-sub">
+          Pulse closes the loop between patient, caregiver, and the doctor.
+          Every dose becomes a data point. Every miss becomes a chance to
+          intervene — and to learn.
+        </p>
+
+        <div class="steps">
+          <div class="step fade-in">
+            <div class="step-num">01</div>
+            <div class="step-line"></div>
+            <h3>Smart reminder</h3>
+            <p>
+              AI-generated voice or video of a loved one nudges the patient at
+              the right time.
+            </p>
+          </div>
+          <div class="step fade-in">
+            <div class="step-num">02</div>
+            <div class="step-line"></div>
+            <h3>Real-time signal</h3>
+            <p>
+              Taken or missed, every action becomes a shared signal across the
+              care circle.
+            </p>
+          </div>
+          <div class="step fade-in">
+            <div class="step-num">03</div>
+            <div class="step-line"></div>
+            <h3>Caregiver alert</h3>
+            <p>
+              If a dose is missed or a symptom is logged, the caregiver is
+              pinged instantly.
+            </p>
+          </div>
+          <div class="step fade-in">
+            <div class="step-num">04</div>
+            <h3>Track for the doctor</h3>
+            <p>
+              Every miss and intervention is logged — ready to inform the next
+              consultation.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESCALATION FLOW -->
+    <section class="escalation">
+      <div class="container">
+        <div
+          style="text-align: center; max-width: 56ch; margin: 0 auto"
+          class="fade-in"
+        >
+          <span class="eyebrow">Escalation, by design</span>
+          <h2 style="font-size: clamp(32px, 5vw, 44px); margin: 16px 0 16px">
+            A signal that travels the right distance.
+          </h2>
+          <p style="color: var(--ink-soft); font-size: 17px">
+            Not every missed dose needs a doctor. But every doctor's visit
+            could've been better informed. Pulse routes the signal to the right
+            person, at the right level.
+          </p>
+        </div>
+
+        <div class="esc-flow">
+          <div class="esc-node fade-in">
+            <div class="esc-icon patient">👤</div>
+            <h4>Patient</h4>
+            <p>Reminder ignored or symptom logged</p>
+          </div>
+          <div class="esc-node fade-in">
+            <div class="esc-icon caregiver">👨‍👩‍👧</div>
+            <h4>Caregiver</h4>
+            <p>Real-time alert. One-tap call, video, or refill.</p>
+          </div>
+          <div class="esc-node fade-in">
+            <div class="esc-icon doctor">⚕</div>
+            <h4>Doctor</h4>
+            <p>Adherence patterns inform the next consultation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NORTH STAR METRICS -->
+    <section class="metrics">
+      <div class="container">
+        <div style="max-width: 56ch" class="fade-in">
+          <span class="eyebrow">How we measure success</span>
+          <h2 class="metrics-title">Three numbers <em>we</em> live by.</h2>
+          <p class="metrics-sub">
+            If Pulse is working, these are the metrics that prove it — across
+            health outcomes, behaviour change, and daily habit.
+          </p>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card fade-in">
+            <div class="metric-tag">Outcome</div>
+            <div class="metric-num"><em>≥80</em><span class="pct">%</span></div>
+            <div class="metric-headline">
+              Patients reaching the clinical adherence threshold
+            </div>
+            <p class="metric-body">
+              The clinical standard for "adherent." We measure the share of
+              enrolled chronic patients sustaining ≥80% medication adherence
+              rate (MAR) over a 30-day window.
+            </p>
+            <div class="metric-foot">
+              Why it matters → Below this line, treatment efficacy drops sharply
+              and hospitalisation risk climbs.
+            </div>
+          </div>
+
+          <div class="metric-card fade-in">
+            <div class="metric-tag">Behavioural</div>
+            <div class="metric-num">Δ<em>+</em></div>
+            <div class="metric-headline">
+              Adherence lift after caregiver or AI intervention
+            </div>
+            <p class="metric-body">
+              % of patients whose adherence improves in the 7 days following a
+              caregiver nudge or an AI-generated alert. Tests whether the
+              escalation loop actually changes behaviour.
+            </p>
+            <div class="metric-foot">
+              Why it matters → Validates the core thesis: that timely
+              intervention moves the needle.
+            </div>
+          </div>
+
+          <div class="metric-card fade-in">
+            <div class="metric-tag">Engagement</div>
+            <div class="metric-num">
+              <em>DAU</em><span class="slash">/</span>MAU
+            </div>
+            <div class="metric-headline">
+              Stickiness across patient and caregiver apps
+            </div>
+            <p class="metric-body">
+              Daily over monthly active users — tracked separately for the
+              patient and caregiver experiences. A chronic condition is daily,
+              so the app must be too.
+            </p>
+            <div class="metric-foot">
+              Why it matters → If engagement fades, every downstream metric will
+              follow.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="cta">
+      <span class="eyebrow">Join the pilot</span>
+      <h2>Better adherence. <em>Healthier</em> Singapore.</h2>
+      <p>
+        Pulse aligns with Healthier SG — empowering patients to take charge of
+        their health, supported by the people who care about them.
+      </p>
+      <div class="cta-row">
+        <a href="#" class="btn-primary">Get early access</a>
+        <a href="/portal/index.html" class="btn-secondary">For clinicians</a>
+      </div>
+    </section>
+
+    <footer>
+      <div class="logo"><span class="logo-dot"></span>Pulse</div>
+      <p>
+        A medication adherence companion for chronic patients, caregivers, and
+        the wider Singapore care ecosystem.
+      </p>
+      <p style="margin-top: 16px; font-size: 11px">
+        © 2026 Pulse. Concept prototype.
+      </p>
+    </footer>
+
+    <script>
+      // Nav background on scroll
+      const nav = document.getElementById("nav");
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > 20) nav.classList.add("scrolled");
+        else nav.classList.remove("scrolled");
+      });
+
+      // Fade-in observer
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+
+      document
+        .querySelectorAll(".fade-in")
+        .forEach((el) => observer.observe(el));
+
+      // Demo button feedback
+      document.querySelectorAll(".btn-taken").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          btn.textContent = "✓ Logged";
+          btn.style.background = "#1F5E42";
+        });
+      });
+    </script>
+  </body>
+</html>
