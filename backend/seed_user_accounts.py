@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from app.core.database import SessionLocal
 from app.core.security import hash_password
-from app.models.models import User, Patient
+from app.models.models import CaregiverPatientLink, User, Patient
 
 DEMO_PASSWORD = "Demo1234!"
 
@@ -24,6 +24,19 @@ ACCOUNTS = [
     {"email": "tanmeiling@caregiver.medinudge.sg", "full_name": "Tan Mei Ling", "role": "caregiver", "phone": "+6591234001"},
     {"email": "ahmadrahimi@caregiver.medinudge.sg", "full_name": "Ahmad Rahimi", "role": "caregiver", "phone": "+6591234003"},
     {"email": "priyarajan@caregiver.medinudge.sg", "full_name": "Priya Rajan", "role": "caregiver", "phone": "+6591234004"},
+]
+
+CAREGIVER_LINKS = [
+    {
+        "caregiver_email": "tanmeiling@caregiver.medinudge.sg",
+        "patient_name": "Tan Wei Liang",
+        "relationship": "father",
+    },
+    {
+        "caregiver_email": "tanmeiling@caregiver.medinudge.sg",
+        "patient_name": "Chen Mei Fong",
+        "relationship": "mother",
+    },
 ]
 
 
@@ -59,6 +72,50 @@ def seed():
         print("\nAccounts:")
         for acct in ACCOUNTS:
             print(f"  {acct['role']:10} | {acct['email']:45} | {acct['full_name']}")
+    finally:
+        db.close()
+
+
+def seed_caregiver_links():
+    """Seed demo caregiver-to-patient relationships without hardcoded patient IDs."""
+    db = SessionLocal()
+    try:
+        created = 0
+        for link in CAREGIVER_LINKS:
+            caregiver = db.query(User).filter(User.email == link["caregiver_email"]).first()
+            if not caregiver:
+                print(f"  WARNING: Caregiver user {link['caregiver_email']} not found, skipping link")
+                continue
+
+            patient = db.query(Patient).filter(Patient.full_name == link["patient_name"]).first()
+            if not patient:
+                print(f"  WARNING: Patient {link['patient_name']} not found, skipping link")
+                continue
+
+            existing = (
+                db.query(CaregiverPatientLink)
+                .filter(
+                    CaregiverPatientLink.caregiver_user_id == caregiver.id,
+                    CaregiverPatientLink.patient_id == patient.id,
+                )
+                .first()
+            )
+            if existing:
+                if existing.link_relationship != link["relationship"]:
+                    existing.link_relationship = link["relationship"]
+                continue
+
+            db.add(
+                CaregiverPatientLink(
+                    caregiver_user_id=caregiver.id,
+                    patient_id=patient.id,
+                    link_relationship=link["relationship"],
+                )
+            )
+            created += 1
+
+        db.commit()
+        print(f"  Seeded {created} caregiver-patient links")
     finally:
         db.close()
 
@@ -124,4 +181,5 @@ def seed_demo_notes():
 
 if __name__ == "__main__":
     seed()
+    seed_caregiver_links()
     seed_demo_notes()

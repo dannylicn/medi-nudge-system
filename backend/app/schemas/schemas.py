@@ -1,7 +1,7 @@
 """Pydantic schemas for all API request/response models."""
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 import re
 
 
@@ -34,12 +34,20 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class AccessiblePatient(BaseModel):
+    patient_id: int
+    name: str
+    relationship: str
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    user_id: Optional[int] = None
     role: str = "admin"
     patient_id: Optional[int] = None
     full_name: str = ""
+    accessible_patients: list[AccessiblePatient] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------

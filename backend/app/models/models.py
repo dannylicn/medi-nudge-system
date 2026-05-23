@@ -351,6 +351,29 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
 
+    caregiver_patient_links: Mapped[list["CaregiverPatientLink"]] = relationship(
+        "CaregiverPatientLink",
+        back_populates="caregiver_user",
+    )
+
+
+# ---------------------------------------------------------------------------
+# CaregiverPatientLink
+# ---------------------------------------------------------------------------
+
+class CaregiverPatientLink(Base):
+    __tablename__ = "caregiver_patient_links"
+    __table_args__ = (UniqueConstraint("caregiver_user_id", "patient_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    caregiver_user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    patient_id: Mapped[int] = mapped_column(Integer, ForeignKey("patients.id"), nullable=False)
+    link_relationship: Mapped[Optional[str]] = mapped_column("relationship", String(50), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+
+    caregiver_user: Mapped["User"] = relationship("User", back_populates="caregiver_patient_links")
+    patient: Mapped["Patient"] = relationship("Patient")
+
 
 # ---------------------------------------------------------------------------
 # OnboardingToken (one-time QR deep-link tokens)
