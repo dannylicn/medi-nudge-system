@@ -99,7 +99,7 @@ export const getDashboardSummary = () => api.get("/api/dashboard/summary");
 export const getPatientAiSummary = (patientId, params) =>
   api.get(`/api/patients/${patientId}/ai-summary`, { params });
 
-// Caregiver Notes
+// Care Notes
 export const getCaregiverNotes = (patientId) =>
   api.get(`/api/patients/${patientId}/caregiver-notes`);
 export const createCaregiverNote = (patientId, data) =>

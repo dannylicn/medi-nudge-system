@@ -77,7 +77,7 @@ export default function PatientDetailPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiTab, setAiTab] = useState("summary");
 
-  // Caregiver Notes
+  // Care Notes
   const [caregiverNotes, setCaregiverNotes] = useState([]);
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [noteForm, setNoteForm] = useState({ category: "general", content: "" });
@@ -449,10 +449,10 @@ export default function PatientDetailPage() {
         )}
       </div>
 
-      {/* Caregiver Notes */}
+      {/* Care Notes */}
       <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-display text-sm font-bold text-on-surface">Caregiver Notes</h3>
+          <h3 className="font-display text-sm font-bold text-on-surface">Care Notes</h3>
           <button onClick={() => setShowNoteForm(!showNoteForm)} className="text-xs bg-primary text-white rounded-full px-3 py-1.5 hover:opacity-90">
             {showNoteForm ? "Cancel" : "+ Add Note"}
           </button>
@@ -479,7 +479,7 @@ export default function PatientDetailPage() {
           </form>
         )}
         {caregiverNotes.length === 0 ? (
-          <p className="text-sm text-on-surface/30 text-center py-4">No caregiver notes yet</p>
+          <p className="text-sm text-on-surface/30 text-center py-4">No care notes yet</p>
         ) : (
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {caregiverNotes.map((n) => (
