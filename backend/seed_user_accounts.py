@@ -1,10 +1,12 @@
 """Create patient, caregiver, and nurse user accounts for demo."""
 import sys, os
+from datetime import datetime, timedelta
+
 sys.path.insert(0, os.path.dirname(__file__))
 
 from app.core.database import SessionLocal
 from app.core.security import hash_password
-from app.models.models import CaregiverPatientLink, User, Patient
+from app.models.models import CaregiverPatientLink, DoseLog, Medication, PatientMedication, User, Patient
 
 DEMO_PASSWORD = "Demo1234!"
 
@@ -39,6 +41,19 @@ CAREGIVER_LINKS = [
     },
 ]
 
+TAN_MEI_LING_PROFILE = {
+    "email": "tanmeiling@caregiver.medinudge.sg",
+    "full_name": "Tan Mei Ling",
+    "phone_number": "+6591234011",
+    "language_preference": "en",
+    "risk_level": "normal",
+    "conditions": ["Hypertension"],
+    "medication_generic_name": "Amlodipine",
+    "dosage": "5mg",
+    "frequency": "once_daily",
+    "reminder_times": ["08:00"],
+}
+
 
 def seed():
     db = SessionLocal()
@@ -72,6 +87,132 @@ def seed():
         print("\nAccounts:")
         for acct in ACCOUNTS:
             print(f"  {acct['role']:10} | {acct['email']:45} | {acct['full_name']}")
+    finally:
+        db.close()
+
+
+def seed_tan_mei_ling_self_profile():
+    """Seed Tan Mei Ling's lightweight own patient profile for iOS self care."""
+    db = SessionLocal()
+    try:
+        caregiver = db.query(User).filter(User.email == TAN_MEI_LING_PROFILE["email"]).first()
+        if not caregiver:
+            print("  WARNING: Tan Mei Ling caregiver user not found, skipping self profile")
+            return
+
+        patient = (
+            db.query(Patient)
+            .filter(Patient.phone_number == TAN_MEI_LING_PROFILE["phone_number"])
+            .first()
+        )
+        if not patient:
+            patient = Patient(
+                full_name=TAN_MEI_LING_PROFILE["full_name"],
+                phone_number=TAN_MEI_LING_PROFILE["phone_number"],
+                language_preference=TAN_MEI_LING_PROFILE["language_preference"],
+                risk_level=TAN_MEI_LING_PROFILE["risk_level"],
+                conditions=TAN_MEI_LING_PROFILE["conditions"],
+                onboarding_state="complete",
+                is_active=True,
+                consent_obtained_at=datetime.utcnow() - timedelta(days=14),
+            )
+            db.add(patient)
+            db.flush()
+        else:
+            patient.full_name = TAN_MEI_LING_PROFILE["full_name"]
+            patient.language_preference = TAN_MEI_LING_PROFILE["language_preference"]
+            patient.risk_level = TAN_MEI_LING_PROFILE["risk_level"]
+            patient.conditions = TAN_MEI_LING_PROFILE["conditions"]
+            patient.onboarding_state = "complete"
+            patient.is_active = True
+
+        caregiver.own_patient_id = patient.id
+
+        medication = (
+            db.query(Medication)
+            .filter(Medication.generic_name == TAN_MEI_LING_PROFILE["medication_generic_name"])
+            .first()
+        )
+        if not medication:
+            print("  WARNING: Amlodipine medication not found, skipping Tan Mei Ling medication")
+            db.commit()
+            return
+
+        patient_medication = (
+            db.query(PatientMedication)
+            .filter(
+                PatientMedication.patient_id == patient.id,
+                PatientMedication.medication_id == medication.id,
+            )
+            .first()
+        )
+        if not patient_medication:
+            patient_medication = PatientMedication(
+                patient_id=patient.id,
+                medication_id=medication.id,
+                dosage=TAN_MEI_LING_PROFILE["dosage"],
+                frequency=TAN_MEI_LING_PROFILE["frequency"],
+                reminder_times=TAN_MEI_LING_PROFILE["reminder_times"],
+                refill_interval_days=30,
+                is_active=True,
+            )
+            db.add(patient_medication)
+            db.flush()
+        else:
+            patient_medication.dosage = TAN_MEI_LING_PROFILE["dosage"]
+            patient_medication.frequency = TAN_MEI_LING_PROFILE["frequency"]
+            patient_medication.reminder_times = TAN_MEI_LING_PROFILE["reminder_times"]
+            patient_medication.refill_interval_days = 30
+            patient_medication.is_active = True
+
+        now = datetime.utcnow().replace(minute=0, second=0, microsecond=0)
+        missed_day_offsets = {4, 11}
+        created_logs = 0
+        for day_offset in range(14, 0, -1):
+            logged_at = (now - timedelta(days=day_offset)).replace(hour=8)
+            existing = (
+                db.query(DoseLog)
+                .filter(
+                    DoseLog.patient_medication_id == patient_medication.id,
+                    DoseLog.logged_at == logged_at,
+                )
+                .first()
+            )
+            status = "missed" if day_offset in missed_day_offsets else "taken"
+            if existing:
+                existing.status = status
+                existing.source = "system_detected"
+                continue
+
+            db.add(
+                DoseLog(
+                    patient_id=patient.id,
+                    medication_id=medication.id,
+                    patient_medication_id=patient_medication.id,
+                    status=status,
+                    source="system_detected",
+                    logged_at=logged_at,
+                )
+            )
+            created_logs += 1
+
+        last_taken_log = (
+            db.query(DoseLog)
+            .filter(
+                DoseLog.patient_medication_id == patient_medication.id,
+                DoseLog.status == "taken",
+            )
+            .order_by(DoseLog.logged_at.desc())
+            .first()
+        )
+        if last_taken_log:
+            patient_medication.last_taken_at = last_taken_log.logged_at
+
+        db.commit()
+        print(
+            "  Seeded Tan Mei Ling self profile "
+            f"(patient_id={patient.id}, created_logs={created_logs})"
+        )
     finally:
         db.close()
 
@@ -181,5 +322,6 @@ def seed_demo_notes():
 
 if __name__ == "__main__":
     seed()
+    seed_tan_mei_ling_self_profile()
     seed_caregiver_links()
     seed_demo_notes()
