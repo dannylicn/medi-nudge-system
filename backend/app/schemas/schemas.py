@@ -46,6 +46,7 @@ class TokenResponse(BaseModel):
     user_id: Optional[int] = None
     role: str = "admin"
     patient_id: Optional[int] = None
+    own_patient_id: Optional[int] = None
     full_name: str = ""
     accessible_patients: list[AccessiblePatient] = Field(default_factory=list)
 

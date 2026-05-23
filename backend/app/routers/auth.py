@@ -10,6 +10,21 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 def _accessible_patients_for_user(db: Session, user: User) -> list[AccessiblePatient]:
+    accessible: list[AccessiblePatient] = []
+    seen_patient_ids: set[int] = set()
+
+    if user.own_patient_id is not None:
+        own_patient = db.query(Patient).filter(Patient.id == user.own_patient_id).first()
+        if own_patient:
+            accessible.append(
+                AccessiblePatient(
+                    patient_id=own_patient.id,
+                    name=own_patient.full_name,
+                    relationship="self",
+                )
+            )
+            seen_patient_ids.add(own_patient.id)
+
     links = (
         db.query(CaregiverPatientLink)
         .join(Patient, CaregiverPatientLink.patient_id == Patient.id)
@@ -17,22 +32,26 @@ def _accessible_patients_for_user(db: Session, user: User) -> list[AccessiblePat
         .order_by(CaregiverPatientLink.id.asc())
         .all()
     )
-    if links:
-        return [
+    for link in links:
+        if link.patient_id in seen_patient_ids:
+            continue
+        accessible.append(
             AccessiblePatient(
-                patient_id=link.patient_id,
+                patient_id=link.patient.id,
                 name=link.patient.full_name,
                 relationship=link.link_relationship or "caregiver",
             )
-            for link in links
-        ]
+        )
+        seen_patient_ids.add(link.patient_id)
+
+    if accessible:
+        return accessible
 
     if user.patient_id is None:
-        return []
-
+        return accessible
     patient = db.query(Patient).filter(Patient.id == user.patient_id).first()
     if not patient:
-        return []
+        return accessible
 
     return [
         AccessiblePatient(
@@ -54,6 +73,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         user_id=user.id,
         role=user.role,
         patient_id=user.patient_id,
+        own_patient_id=user.own_patient_id,
         full_name=user.full_name,
         accessible_patients=_accessible_patients_for_user(db, user),
     )
