@@ -4,6 +4,7 @@
 - If you are unsure about something after /compact, SAY "I lost context, let me re-read the project files" instead of guessing.
 - If you find yourself about to suggest something new (new API, new library, new service), CHECK the repo first. If it's not there, don't suggest it.
 - When I say "deploy", follow the exact deploy steps in CLAUDE.md. Do not invent new steps.
+- When deploying frontend, sync to s3://medi-nudge-frontend-staging/portal/ only. NEVER overwrite the root index.html. The root index.html is the Adheris landing page, not the React app.
 
 # Medi-Nudge System
 
