@@ -48,3 +48,15 @@ frontend/dist/
 # Claude Code local state
 .claude/memory/
 _state.md
+
+# Codex agent working files
+.agents/
+openspec/
+
+# Design assets
+*.zip
+adheris-v35/
+frontend/src_backup/
+frontend/*.backup
+frontend/tailwind.config.js.backup
+frontend/index.html.backup
