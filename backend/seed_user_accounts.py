@@ -12,8 +12,8 @@ DEMO_PASSWORD = "Demo1234!"
 
 ACCOUNTS = [
     # Nurse/Doctor accounts (web portal)
-    {"email": "nurse.sarah@sgh.com.sg", "full_name": "Sarah Tan (Nurse)", "role": "admin"},
-    {"email": "dr.lim@sgh.com.sg", "full_name": "Dr. Lim Wei Ming", "role": "admin"},
+    {"email": "nurse.sarah@medinudge.sg", "full_name": "Sarah Tan (Nurse)", "role": "admin"},
+    {"email": "dr.lim@medinudge.sg", "full_name": "Dr. Lim Wei Ming", "role": "admin"},
 
     # Patient accounts (iOS app) — linked by phone_number lookup
     {"email": "tanweiliang@patient.medinudge.sg", "full_name": "Tan Wei Liang", "role": "patient", "phone": "+6591234001"},
