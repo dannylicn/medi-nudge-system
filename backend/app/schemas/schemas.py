@@ -107,6 +107,7 @@ class PatientCreate(BaseModel):
 
 class PatientUpdate(BaseModel):
     full_name: Optional[str] = None
+    phone_number: Optional[str] = None
     age: Optional[int] = None
     language_preference: Optional[str] = None
     conditions: Optional[list[str]] = None
@@ -119,6 +120,13 @@ class PatientUpdate(BaseModel):
     caregiver_telegram_id: Optional[str] = None   # auto-populated once caregiver links bot
     nudge_delivery_mode: Optional[str] = None
     selected_voice_id: Optional[str] = None
+
+    @field_validator("phone_number")
+    @classmethod
+    def normalise_phone(cls, v: Optional[str]) -> Optional[str]:
+        if v is None or v.strip() == "":
+            return None
+        return validate_e164(v.strip())
 
     @field_validator("language_preference")
     @classmethod
@@ -422,6 +430,79 @@ class DoseLogOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+DOSE_EVENT_STATUSES = {"taken", "missed", "skipped", "snoozed"}
+DOSE_EVENT_SOURCES = {"ios", "patient_reply", "campaign_confirmed", "caregiver", "system_detected"}
+
+
+class DoseEventCreate(BaseModel):
+    status: str
+    source: str = "ios"
+    scheduled_time: Optional[datetime] = None
+    logged_at: Optional[datetime] = None
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        if v not in DOSE_EVENT_STATUSES:
+            raise ValueError(f"status must be one of {DOSE_EVENT_STATUSES}")
+        return v
+
+    @field_validator("source")
+    @classmethod
+    def validate_source(cls, v: str) -> str:
+        if v not in DOSE_EVENT_SOURCES:
+            raise ValueError(f"source must be one of {DOSE_EVENT_SOURCES}")
+        return v
+
+
+class CaregiverLinkCreate(BaseModel):
+    patient_id: int
+    relationship: Optional[str] = None
+
+    @field_validator("relationship")
+    @classmethod
+    def validate_relationship(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
+        value = v.strip()
+        if not value:
+            return None
+        if len(value) > 50:
+            raise ValueError("relationship must be 50 characters or fewer")
+        return value
+
+
+class CaregiverLinkOut(BaseModel):
+    patient_id: int
+    name: str
+    relationship: Optional[str]
+
+
+class DeviceTokenCreate(BaseModel):
+    token: str
+    platform: str = "ios"
+
+    @field_validator("token")
+    @classmethod
+    def validate_token(cls, v: str) -> str:
+        token = v.strip()
+        if not re.match(r"^[0-9a-fA-F]{64}$", token):
+            raise ValueError("token must be exactly 64 hex characters")
+        return token.lower()
+
+    @field_validator("platform")
+    @classmethod
+    def validate_platform(cls, v: str) -> str:
+        platform = v.strip().lower()
+        if platform != "ios":
+            raise ValueError("platform must be ios")
+        return platform
+
+
+class AckResponse(BaseModel):
+    status: str = "ok"
 
 
 # ---------------------------------------------------------------------------

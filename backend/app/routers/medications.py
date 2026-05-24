@@ -6,11 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session, joinedload
 from app.core.database import get_db
 from app.core.security import get_current_user
-from app.models.models import Medication, PatientMedication, Patient, DispensingRecord, User
+from app.models.models import DoseLog, Medication, PatientMedication, Patient, DispensingRecord, User
 from app.schemas.schemas import (
     MedicationCreate, MedicationOut,
     PatientMedicationCreate, PatientMedicationOut,
     DispensingRecordCreate, DispensingRecordOut,
+    DoseEventCreate, DoseLogOut,
 )
 
 router = APIRouter(tags=["medications"])
@@ -102,6 +103,66 @@ def update_patient_medication(
     db.commit()
     db.refresh(pm)
     return pm
+
+
+@router.post(
+    "/api/patients/{patient_id}/medications/{pm_id}/dose-events",
+    response_model=DoseLogOut,
+    status_code=201,
+)
+def create_dose_event(
+    patient_id: int,
+    pm_id: int,
+    payload: DoseEventCreate,
+    db: Session = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    patient_medication = (
+        db.query(PatientMedication)
+        .filter(PatientMedication.id == pm_id, PatientMedication.patient_id == patient_id)
+        .first()
+    )
+    if not patient_medication:
+        raise HTTPException(status_code=404, detail="PatientMedication not found")
+
+    logged_at = payload.logged_at or payload.scheduled_time or datetime.utcnow()
+    event = DoseLog(
+        patient_id=patient_id,
+        medication_id=patient_medication.medication_id,
+        patient_medication_id=patient_medication.id,
+        status=payload.status,
+        source=payload.source,
+        logged_at=logged_at,
+    )
+    db.add(event)
+
+    if payload.status == "taken":
+        patient_medication.last_taken_at = logged_at
+        patient_medication.consecutive_missed_doses = 0
+    elif payload.status == "missed":
+        patient_medication.consecutive_missed_doses = (
+            patient_medication.consecutive_missed_doses or 0
+        ) + 1
+    # "snoozed" records intent to take later; it should not count as taken or missed.
+
+    db.commit()
+    db.refresh(event)
+
+    medication = db.query(Medication).filter(Medication.id == event.medication_id).first()
+    return DoseLogOut(
+        id=event.id,
+        patient_id=event.patient_id,
+        medication_id=event.medication_id,
+        status=event.status,
+        source=event.source,
+        logged_at=event.logged_at,
+        created_at=event.created_at,
+        medication_name=medication.name if medication else None,
+    )
 
 
 # ---------------------------------------------------------------------------

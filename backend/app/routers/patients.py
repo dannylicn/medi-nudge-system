@@ -133,6 +133,14 @@ def update_patient(
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
+    if payload.phone_number and payload.phone_number != patient.phone_number:
+        existing = (
+            db.query(Patient)
+            .filter(Patient.phone_number == payload.phone_number, Patient.id != patient_id)
+            .first()
+        )
+        if existing:
+            raise HTTPException(status_code=409, detail="A patient with this phone number already exists")
     for field, value in payload.model_dump(exclude_none=True).items():
         setattr(patient, field, value)
     db.commit()
