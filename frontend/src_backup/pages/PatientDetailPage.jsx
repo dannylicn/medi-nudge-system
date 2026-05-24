@@ -226,11 +226,11 @@ export default function PatientDetailPage() {
           <div>
             <div className="flex items-center gap-3 mb-1">
               <h2 className="font-display text-2xl font-bold tracking-tight text-on-surface">{patient.full_name}</h2>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${patient.is_active ? "bg-green-container text-green" : "bg-error-container text-on-error-container"}`}>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${patient.is_active ? "bg-tertiary-container/10 text-tertiary-container" : "bg-error-container text-on-error-container"}`}>
                 {patient.is_active ? "Active" : "Inactive"}
               </span>
             </div>
-            <p className="text-sm text-muted font-medium mb-4">
+            <p className="text-sm text-outline font-medium mb-4">
               {patient.phone_number} {patient.age ? `| ${patient.age} Years Old` : ""} | {patient.language_preference.toUpperCase()} | {patient.onboarding_state}
             </p>
             <div className="flex flex-wrap gap-3">
@@ -271,7 +271,7 @@ export default function PatientDetailPage() {
       </div>
 
       {triggerResult && (
-        <div className="px-4 py-2.5 bg-green-container border border-green-container rounded-xl font-body text-sm text-on-surface/70">{triggerResult}</div>
+        <div className="px-4 py-2.5 bg-tertiary-container/20 border border-tertiary-container/30 rounded-xl font-body text-sm text-on-surface/70">{triggerResult}</div>
       )}
 
       {/* Telegram QR / Caregiver Invite — hidden, Telegram integration not demo-ready
@@ -285,7 +285,7 @@ export default function PatientDetailPage() {
                   <img src={`data:image/png;base64,${qrCode}`} alt="QR" className="w-40 h-40 rounded-xl border border-outline-variant" />
                   <div className="flex gap-2 flex-wrap">
                     <button onClick={() => { const a = document.createElement("a"); a.href = `data:image/png;base64,${qrCode}`; a.download = `invite-qr-patient-${id}.png`; a.click(); }} className="text-xs bg-primary text-white px-3 py-1.5 rounded-full font-bold hover:opacity-90">Download QR</button>
-                    <button onClick={() => navigator.clipboard.writeText(inviteLink)} className="text-xs bg-surface-container text-on-surface border border-outline-variant px-3 py-1.5 rounded-full hover:bg-surface-container-highest">Copy Link</button>
+                    <button onClick={() => navigator.clipboard.writeText(inviteLink)} className="text-xs bg-surface-container text-on-surface border border-outline-variant px-3 py-1.5 rounded-full hover:bg-surface-container-high">Copy Link</button>
                     <button onClick={handleRegenerateQR} disabled={qrLoading} className="text-xs text-primary hover:underline px-2 py-1.5">{qrLoading ? "..." : "Regenerate"}</button>
                   </div>
                 </div>
@@ -311,7 +311,7 @@ export default function PatientDetailPage() {
               ) : (
                 <div>
                   <p className="text-sm font-medium text-on-surface">{patient.caregiver_name} <span className="text-on-surface/50 text-xs">{patient.caregiver_phone_number}</span></p>
-                  <p className="text-xs mt-1">{patient.caregiver_telegram_id ? <span className="text-green">Telegram linked</span> : <span className="text-on-surface/40">Telegram not linked</span>}</p>
+                  <p className="text-xs mt-1">{patient.caregiver_telegram_id ? <span className="text-tertiary-container">Telegram linked</span> : <span className="text-on-surface/40">Telegram not linked</span>}</p>
                   {!patient.caregiver_telegram_id && (
                     <div className="mt-3 space-y-1.5">
                       <button onClick={handleGenerateCaregiverLink} disabled={caregiverLinkLoading} className="text-xs text-primary border border-primary/30 rounded-full px-3 py-1.5 hover:bg-primary/5">{caregiverLinkLoading ? "..." : "Generate Invite Link"}</button>
@@ -336,17 +336,17 @@ export default function PatientDetailPage() {
         <div className="flex flex-col items-center text-center flex-shrink-0">
           <div className="relative">
             <svg className="w-32 h-32 transform -rotate-90">
-              <circle className="text-surface-container-highest" cx="64" cy="64" fill="transparent" r="56" stroke="currentColor" strokeWidth="6" />
+              <circle className="text-surface-container-high" cx="64" cy="64" fill="transparent" r="56" stroke="currentColor" strokeWidth="6" />
               <circle
-                className={adherenceRate >= 80 ? "text-green" : adherenceRate >= 50 ? "text-secondary" : "text-error"}
+                className={adherenceRate >= 80 ? "text-tertiary-container" : adherenceRate >= 50 ? "text-secondary" : "text-error"}
                 cx="64" cy="64" fill="transparent" r="56" stroke="currentColor"
                 strokeWidth="10" strokeLinecap="round"
                 strokeDasharray="352" strokeDashoffset={352 - (352 * adherenceRate / 100)}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={`font-display text-3xl font-extrabold ${adherenceRate >= 80 ? "text-green" : adherenceRate >= 50 ? "text-secondary" : "text-error"}`}>{adherenceRate}%</span>
-              <span className="text-[9px] text-muted uppercase tracking-widest font-bold">
+              <span className={`font-display text-3xl font-extrabold ${adherenceRate >= 80 ? "text-tertiary-container" : adherenceRate >= 50 ? "text-secondary" : "text-error"}`}>{adherenceRate}%</span>
+              <span className="text-[9px] text-outline uppercase tracking-widest font-bold">
                 {adherenceRate >= 80 ? "On Track" : adherenceRate >= 50 ? "Moderate" : "High Risk"}
               </span>
             </div>
@@ -355,7 +355,7 @@ export default function PatientDetailPage() {
         </div>
         {missedCount > 0 && (
           <div className="flex-1 min-w-0 space-y-3">
-            <p className="text-[10px] text-muted uppercase tracking-widest font-bold">What's impacting adherence</p>
+            <p className="text-[10px] text-outline uppercase tracking-widest font-bold">What's impacting adherence</p>
             <div className="space-y-2">
               {worstMed && (
                 <div className="flex items-center gap-2 p-2.5 bg-surface-container-low rounded-lg">
@@ -449,33 +449,6 @@ export default function PatientDetailPage() {
         )}
       </div>
 
-      {/* Adherence Trend Chart */}
-      {dailyTrend.length > 1 && (
-        <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display text-sm font-bold text-on-surface">Adherence Trend (30 Days)</h3>
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1 text-[10px] text-muted"><span className="w-2 h-2 rounded-full bg-[#0F4C5C]" /> Daily %</span>
-              <span className="flex items-center gap-1 text-[10px] text-muted"><span className="w-6 h-0.5 bg-on-surface/20 inline-block" /> 80% goal</span>
-            </div>
-          </div>
-          <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={dailyTrend} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
-              <XAxis dataKey="day" tick={{ fontSize: 10 }} interval={Math.max(Math.floor(dailyTrend.length / 7) - 1, 0)} />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
-              <Tooltip formatter={(v) => [`${v}%`, "Adherence"]} />
-              <ReferenceLine y={80} stroke="rgba(0,0,0,0.15)" strokeDasharray="4 4" label={{ value: "Goal", position: "right", fontSize: 9, fill: "rgba(0,0,0,0.3)" }} />
-              <Line type="monotone" dataKey="adherence" stroke="#0F4C5C" strokeWidth={2} dot={(props) => {
-                const { cx, cy, payload } = props;
-                if (payload.adherence === null) return null;
-                return <circle cx={cx} cy={cy} r={3} fill={payload.adherence < 50 ? "#E85A3C" : "#0F4C5C"} stroke="none" />;
-              }} connectNulls />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
       {/* Care Notes */}
       <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
@@ -515,7 +488,7 @@ export default function PatientDetailPage() {
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${
                     n.category === "missed_dose" ? "bg-error-container text-on-error-container" :
                     n.category === "wrong_dose" ? "bg-error-container text-on-error-container" :
-                    n.category === "side_effect" ? "bg-gold-container text-gold" :
+                    n.category === "side_effect" ? "bg-yellow-100 text-yellow-800" :
                     n.category === "behavior" ? "bg-secondary-container text-secondary" :
                     "bg-surface-container-highest text-on-surface/60"
                   }`}>{n.category.replace(/_/g, " ")}</span>
@@ -528,6 +501,33 @@ export default function PatientDetailPage() {
           </div>
         )}
       </div>
+
+      {/* 3. Adherence Trend Chart */}
+      {dailyTrend.length > 1 && (
+        <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display text-sm font-bold text-on-surface">Adherence Trend (30 Days)</h3>
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1 text-[10px] text-outline"><span className="w-2 h-2 rounded-full bg-[#006565]" /> Daily %</span>
+              <span className="flex items-center gap-1 text-[10px] text-outline"><span className="w-6 h-0.5 bg-on-surface/20 inline-block" /> 80% goal</span>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={180}>
+            <LineChart data={dailyTrend} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
+              <XAxis dataKey="day" tick={{ fontSize: 10 }} interval={Math.max(Math.floor(dailyTrend.length / 7) - 1, 0)} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+              <Tooltip formatter={(v) => [`${v}%`, "Adherence"]} />
+              <ReferenceLine y={80} stroke="rgba(0,0,0,0.15)" strokeDasharray="4 4" label={{ value: "Goal", position: "right", fontSize: 9, fill: "rgba(0,0,0,0.3)" }} />
+              <Line type="monotone" dataKey="adherence" stroke="#006565" strokeWidth={2} dot={(props) => {
+                const { cx, cy, payload } = props;
+                if (payload.adherence === null) return null;
+                return <circle cx={cx} cy={cy} r={3} fill={payload.adherence < 50 ? "#ba1a1a" : "#006565"} stroke="none" />;
+              }} connectNulls />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {/* 4. Active Medications */}
       <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm">
@@ -551,7 +551,7 @@ export default function PatientDetailPage() {
                   )}
                 </p>
                 <p className="text-xs text-on-surface/50 mt-1">{m.dosage || "No dosage"} | {m.frequency?.replace(/_/g, " ")} | refill {m.refill_interval_days ?? "30"}d</p>
-                <p className={`text-[10px] mt-2 font-bold ${m.is_active ? "text-green" : "text-on-surface/30"}`}>{m.is_active ? "Active" : "Inactive"}</p>
+                <p className={`text-[10px] mt-2 font-bold ${m.is_active ? "text-tertiary-container" : "text-on-surface/30"}`}>{m.is_active ? "Active" : "Inactive"}</p>
               </div>
             ))}
           </div>
@@ -594,8 +594,8 @@ export default function PatientDetailPage() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-display text-sm font-bold text-on-surface">Pharmacy Refill Timeline</h3>
             <div className="flex gap-3">
-              <span className="flex items-center gap-1.5 text-[10px] font-bold text-muted uppercase tracking-wider"><span className="w-2 h-2 rounded-full bg-tertiary-container" /> On Time</span>
-              <span className="flex items-center gap-1.5 text-[10px] font-bold text-muted uppercase tracking-wider"><span className="w-2 h-2 rounded-full bg-error" /> Late</span>
+              <span className="flex items-center gap-1.5 text-[10px] font-bold text-outline uppercase tracking-wider"><span className="w-2 h-2 rounded-full bg-tertiary-container" /> On Time</span>
+              <span className="flex items-center gap-1.5 text-[10px] font-bold text-outline uppercase tracking-wider"><span className="w-2 h-2 rounded-full bg-error" /> Late</span>
             </div>
           </div>
           {dispensingRecords.length === 0 ? (
@@ -613,9 +613,9 @@ export default function PatientDetailPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div>
                         <h4 className="text-sm font-bold text-on-surface">{medName}</h4>
-                        <p className="text-xs text-muted mt-0.5">{r.days_supply}d supply{r.quantity ? ` | ${r.quantity} units` : ""} | {r.source}</p>
+                        <p className="text-xs text-outline mt-0.5">{r.days_supply}d supply{r.quantity ? ` | ${r.quantity} units` : ""} | {r.source}</p>
                       </div>
-                      <span className="text-[10px] text-muted">{new Date(r.dispensed_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
+                      <span className="text-[10px] text-outline">{new Date(r.dispensed_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
                     </div>
                   </div>
                 );
@@ -652,11 +652,11 @@ export default function PatientDetailPage() {
                             {name}
                             {isCrit && <span className="ml-1.5 bg-error text-white text-[7px] px-1 py-0.5 rounded-full font-bold">CRITICAL</span>}
                           </span>
-                          <span className={`text-xs font-bold flex-shrink-0 ml-2 ${rate >= 80 ? "text-green" : rate >= 50 ? "text-gold" : "text-error"}`}>{rate}%</span>
+                          <span className={`text-xs font-bold flex-shrink-0 ml-2 ${rate >= 80 ? "text-green-600" : rate >= 50 ? "text-yellow-600" : "text-error"}`}>{rate}%</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="flex-1 bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
-                            <div className={`h-full rounded-full ${rate >= 80 ? "bg-green" : rate >= 50 ? "bg-gold" : "bg-error"}`} style={{ width: `${rate}%` }} />
+                            <div className={`h-full rounded-full ${rate >= 80 ? "bg-green-500" : rate >= 50 ? "bg-yellow-500" : "bg-error"}`} style={{ width: `${rate}%` }} />
                           </div>
                           <span className="text-[9px] text-on-surface/40">{counts.taken}/{total}</span>
                         </div>
@@ -677,9 +677,9 @@ export default function PatientDetailPage() {
                   <div className={`w-2 h-2 rounded-full flex-shrink-0 ${d.status === "taken" ? "bg-tertiary-container" : "bg-error"}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-on-surface truncate">{d.medication_name}</p>
-                    <p className="text-[10px] text-muted">{new Date(d.logged_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                    <p className="text-[10px] text-outline">{new Date(d.logged_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
                   </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${d.status === "taken" ? "bg-green-container text-green" : "bg-error-container text-on-error-container"}`}>{d.status}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${d.status === "taken" ? "bg-tertiary-container/10 text-tertiary-container" : "bg-error-container text-on-error-container"}`}>{d.status}</span>
                 </div>
               ))}
             </div>
@@ -709,7 +709,7 @@ export default function PatientDetailPage() {
                   )}
                 </p>
                 <p className="text-xs text-on-surface/50 mt-1">{m.dosage || "No dosage"} | {m.frequency?.replace(/_/g, " ")} | refill {m.refill_interval_days ?? "30"}d</p>
-                <p className={`text-[10px] mt-2 font-bold ${m.is_active ? "text-green" : "text-on-surface/30"}`}>{m.is_active ? "Active" : "Inactive"}</p>
+                <p className={`text-[10px] mt-2 font-bold ${m.is_active ? "text-tertiary-container" : "text-on-surface/30"}`}>{m.is_active ? "Active" : "Inactive"}</p>
               </div>
             ))}
           </div>

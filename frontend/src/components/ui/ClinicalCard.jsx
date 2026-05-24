@@ -1,15 +1,16 @@
 /**
- * ClinicalCard — tonal layering wrapper (Clinical Serenity design system)
+ * ClinicalCard — Adheris content surface
  *
- * Renders a surface-container-lowest card with ambient shadow.
- * Use nested surface-container-low divs inside for sub-sections.
+ * White card with soft ambient shadow and 1px outline border for definition.
+ * Same prop API as before.
  *
- * Props:
- *   children, className
+ * Props: children, className
  */
 export default function ClinicalCard({ children, className = "" }) {
   return (
-    <div className={`bg-surface-container-lowest rounded-2xl shadow-ambient p-6 ${className}`}>
+    <div
+      className={`bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft p-6 ${className}`}
+    >
       {children}
     </div>
   );

@@ -3,8 +3,8 @@ import { getEscalations, updateEscalation } from "../lib/api";
 
 const PRIORITY_CHIP = {
   urgent: "bg-error-container text-on-error-container",
-  high: "bg-accent-container text-accent",
-  medium: "bg-gold-container text-gold",
+  high: "bg-orange-100 text-orange-800",
+  medium: "bg-yellow-100 text-yellow-800",
   low: "bg-surface-container-highest text-on-surface/60",
 };
 
@@ -66,9 +66,9 @@ export default function EscalationsPage() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-6">
       <div className="mb-6">
-        <h1 className="font-display text-[26px] font-medium text-on-surface tracking-[-0.02em]">Escalation Queue</h1>
+        <h1 className="font-display text-2xl font-bold text-on-surface tracking-tight">Escalation Queue</h1>
         <p className="font-body text-sm text-on-surface/50">{cases.length} cases</p>
       </div>
 
