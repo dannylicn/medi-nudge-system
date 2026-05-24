@@ -7,8 +7,6 @@ import {
 import { useAuth } from "../hooks/useAuth";
 import TableSortHeader from "../components/ui/TableSortHeader";
 
-const RISK_RANK = { high: 0, normal: 1, low: 2 };
-
 /* ============================================================
    Greeting helpers — derive a friendly first name from the
    user object (fallback to "Care Team" if no name/email).
@@ -42,18 +40,6 @@ function todayLabel() {
   }
 }
 
-const RISK_CHIP = {
-  high: "bg-error-container text-on-error-container",
-  normal: "bg-secondary-container text-secondary",
-  low: "bg-tertiary-container text-on-tertiary-container",
-};
-
-const RISK_BAR = {
-  high: "bg-error",
-  normal: "bg-secondary",
-  low: "bg-tertiary-container",
-};
-
 const PRIORITY_STYLE = {
   urgent: "bg-error-container/30 border-l-4 border-error",
   high: "bg-error-container/20 border-l-4 border-error/60",
@@ -78,7 +64,6 @@ export default function DashboardPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState(urlSearch);
-  const [riskFilter, setRiskFilter] = useState("");
   const [patientsLoading, setPatientsLoading] = useState(false);
   const PAGE_SIZE = 15;
 
@@ -119,10 +104,6 @@ export default function DashboardPage() {
           va = data?.patient_compliance?.[a.id]?.compliance_score ?? -1;
           vb = data?.patient_compliance?.[b.id]?.compliance_score ?? -1;
           break;
-        case "risk":
-          va = RISK_RANK[a.risk_level] ?? 99;
-          vb = RISK_RANK[b.risk_level] ?? 99;
-          break;
         case "language":
           va = (a.language_preference || "").toLowerCase();
           vb = (b.language_preference || "").toLowerCase();
@@ -157,7 +138,7 @@ export default function DashboardPage() {
   const fetchPatients = async () => {
     setPatientsLoading(true);
     try {
-      const { data } = await getPatients({ page, page_size: PAGE_SIZE, search: search || undefined, risk_level: riskFilter || undefined });
+      const { data } = await getPatients({ page, page_size: PAGE_SIZE, search: search || undefined });
       setPatients(data.items);
       setTotal(data.total);
     } catch { /* no-op */ } finally { setPatientsLoading(false); }
@@ -166,7 +147,7 @@ export default function DashboardPage() {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadDashboard(); getConditions().then(({ data }) => setConditionsList(data)).catch(() => {}); }, []);
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { fetchPatients(); }, [page, riskFilter]);
+  useEffect(() => { fetchPatients(); }, [page]);
   useEffect(() => { const t = setTimeout(fetchPatients, 350); return () => clearTimeout(t); }, [search]);
 
   const handleEnrol = async (e) => {
@@ -227,7 +208,7 @@ export default function DashboardPage() {
           <div className="bg-surface-container-lowest p-6 rounded-3xl shadow-ambient flex flex-col justify-between">
             <div>
               <div className="w-10 h-10 rounded-full bg-error-container text-error flex items-center justify-center mb-4 text-lg font-bold">!!</div>
-              <p className="text-on-surface/50 font-body text-sm font-medium">High Risk Patients</p>
+              <p className="text-on-surface/50 font-body text-sm font-medium">Needs Attention</p>
             </div>
             <div>
               <h3 className="text-3xl font-display font-bold text-on-surface">{data.high_risk_count}</h3>
@@ -262,7 +243,7 @@ export default function DashboardPage() {
                 + Enrol Patient
               </button>
             </div>
-            {/* Search + filter */}
+            {/* Search */}
             <div className="flex gap-3 mb-4">
               <input
                 type="text"
@@ -280,16 +261,6 @@ export default function DashboardPage() {
                 }}
                 className="bg-surface-container-highest rounded-full px-4 py-2 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed w-64 transition-shadow"
               />
-              <select
-                value={riskFilter}
-                onChange={(e) => { setRiskFilter(e.target.value); setPage(1); }}
-                className="bg-surface-container-highest rounded-full px-4 py-2 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed"
-              >
-                <option value="">All Risks</option>
-                <option value="high">High Risk</option>
-                <option value="normal">Normal</option>
-                <option value="low">Low</option>
-              </select>
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -298,7 +269,6 @@ export default function DashboardPage() {
                 <tr className="bg-surface-container-low text-muted text-[11px] font-bold uppercase tracking-[0.13em] font-body">
                   <TableSortHeader label="Patient"     sortKey="name"       active={sort.key} dir={sort.dir} onSort={onSort} />
                   <TableSortHeader label="Doses Taken" sortKey="doses"      active={sort.key} dir={sort.dir} onSort={onSort} />
-                  <TableSortHeader label="Risk"        sortKey="risk"       active={sort.key} dir={sort.dir} onSort={onSort} />
                   <TableSortHeader label="Language"    sortKey="language"   active={sort.key} dir={sort.dir} onSort={onSort} />
                   <TableSortHeader label="Onboarding"  sortKey="onboarding" active={sort.key} dir={sort.dir} onSort={onSort} />
                   <TableSortHeader label="Active"      sortKey="active"     active={sort.key} dir={sort.dir} onSort={onSort} />
@@ -306,9 +276,9 @@ export default function DashboardPage() {
               </thead>
               <tbody className="divide-y divide-outline-variant/30">
                 {patientsLoading ? (
-                  <tr><td colSpan={6} className="px-6 py-10 text-center text-on-surface/30 font-body text-sm">Loading...</td></tr>
+                  <tr><td colSpan={5} className="px-6 py-10 text-center text-on-surface/30 font-body text-sm">Loading...</td></tr>
                 ) : sortedPatients.length === 0 ? (
-                  <tr><td colSpan={6} className="px-6 py-10 text-center text-on-surface/30 font-body text-sm">No patients found</td></tr>
+                  <tr><td colSpan={5} className="px-6 py-10 text-center text-on-surface/30 font-body text-sm">No patients found</td></tr>
                 ) : (
                   sortedPatients.map((p, i) => (
                     <tr key={p.id} className={`hover:bg-surface-container-low/50 transition-colors ${i % 2 === 0 ? "bg-surface-container-lowest" : ""}`}>
@@ -331,11 +301,6 @@ export default function DashboardPage() {
                             </div>
                           );
                         })()}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${RISK_CHIP[p.risk_level] || "bg-surface-container-highest text-on-surface/60"}`}>
-                          {p.risk_level}
-                        </span>
                       </td>
                       <td className="px-4 py-3 text-xs text-on-surface/60 uppercase">{p.language_preference}</td>
                       <td className="px-4 py-3 text-xs text-on-surface/50">{p.onboarding_state}</td>
@@ -392,7 +357,7 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-8 h-8 rounded-full bg-error-container text-error flex items-center justify-center text-sm font-bold">!!</div>
                 <div>
-                  <p className="text-on-surface/50 font-body text-xs font-medium">High Risk Patients</p>
+                  <p className="text-on-surface/50 font-body text-xs font-medium">Needs Attention</p>
                   <h3 className="text-2xl font-display font-bold text-on-surface">{data.high_risk_count}</h3>
                 </div>
               </div>

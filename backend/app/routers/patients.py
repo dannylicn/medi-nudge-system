@@ -1,6 +1,7 @@
 """Patient management routes."""
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_current_user
@@ -59,6 +60,7 @@ def create_patient(
 def list_patients(
     is_active: bool | None = Query(default=None),
     risk_level: str | None = Query(default=None),
+    search: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=50, ge=1, le=200),
     db: Session = Depends(get_db),
@@ -69,6 +71,15 @@ def list_patients(
         q = q.filter(Patient.is_active == is_active)
     if risk_level:
         q = q.filter(Patient.risk_level == risk_level)
+    clean_search = search.strip() if search else ""
+    if clean_search:
+        pattern = f"%{clean_search}%"
+        q = q.filter(
+            or_(
+                Patient.full_name.ilike(pattern),
+                Patient.phone_number.ilike(pattern),
+            )
+        )
     total = q.count()
     items = q.offset((page - 1) * page_size).limit(page_size).all()
     return PatientListResponse(items=items, total=total, page=page, page_size=page_size)

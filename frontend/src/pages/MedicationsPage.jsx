@@ -1,8 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { getMedications, createMedication } from "../lib/api";
 import TableSortHeader from "../components/ui/TableSortHeader";
 
 export default function MedicationsPage() {
+  const [searchParams] = useSearchParams();
+  const search = (searchParams.get("search") || "").trim();
   const [medications, setMedications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -21,8 +24,16 @@ export default function MedicationsPage() {
       s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }
     );
 
+  const filteredMedications = useMemo(() => {
+    if (!search) return medications;
+    const query = search.toLowerCase();
+    return medications.filter((m) =>
+      [m.name, m.generic_name, m.category].some((value) => value?.toLowerCase().includes(query))
+    );
+  }, [medications, search]);
+
   const sortedMedications = useMemo(() => {
-    const copy = [...medications];
+    const copy = [...filteredMedications];
     const dirMul = sort.dir === "asc" ? 1 : -1;
     copy.sort((a, b) => {
       let va, vb;
@@ -39,7 +50,7 @@ export default function MedicationsPage() {
       return 0;
     });
     return copy;
-  }, [medications, sort]);
+  }, [filteredMedications, sort]);
 
   const fetchMedications = async () => {
     setLoading(true);
@@ -82,7 +93,9 @@ export default function MedicationsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-display text-[26px] font-medium text-on-surface tracking-[-0.02em]">Medication Catalog</h1>
-          <p className="font-body text-sm text-on-surface/50">{medications.length} medications</p>
+          <p className="font-body text-sm text-on-surface/50">
+            {search ? `${sortedMedications.length} results for "${search}"` : `${medications.length} medications`}
+          </p>
         </div>
         <button
           onClick={() => setShowForm(true)}

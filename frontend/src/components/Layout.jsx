@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { getMedications, getPatients } from "../lib/api";
 
 /* ============================================================
    Adheris Layout — Option B
@@ -8,8 +9,8 @@ import { useAuth } from "../hooks/useAuth";
    - Hover or pin → expands to 248px with labels (overlays content)
    - White top utility bar with global search, notifications, user identity
    - Sign out lives in the top-right user dropdown (NOT the rail foot)
-   - Global search submits to /dashboard?search=<query> — DashboardPage
-     reads that param and filters via getPatients({ search })
+   - Global search routes to the most relevant portal page and passes search
+     queries through URLs where the page supports filtering.
    ============================================================ */
 
 const NAV = [
@@ -44,13 +45,49 @@ export default function Layout({ children }) {
     return () => document.removeEventListener("mousedown", onClick);
   }, [menuOpen]);
 
-  // Submit global search → navigate to dashboard with ?search=… query param.
-  // DashboardPage syncs this to its local `search` state via useSearchParams.
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = async (e) => {
     e.preventDefault();
     const q = searchQuery.trim();
-    if (q) navigate(`/dashboard?search=${encodeURIComponent(q)}`);
-    else navigate("/dashboard");
+    if (!q) {
+      navigate("/dashboard");
+      return;
+    }
+
+    const lower = q.toLowerCase();
+    const encoded = encodeURIComponent(q);
+    const pageMatches = [
+      { terms: ["escalation", "escalations", "alert", "alerts", "urgent"], path: "/escalations" },
+      { terms: ["analytics", "analysis", "report", "reports", "trend", "trends", "heatmap"], path: "/analytics" },
+      { terms: ["med", "meds", "medication", "medications", "medicine", "medicines", "drug", "drugs", "rx"], path: `/medications?search=${encoded}` },
+      { terms: ["patient", "patients", "dashboard"], path: `/dashboard?search=${encoded}` },
+    ];
+    const matchedPage = pageMatches.find(({ terms }) => terms.some((term) => lower.includes(term)));
+    if (matchedPage) {
+      navigate(matchedPage.path);
+      return;
+    }
+
+    try {
+      const [{ data: meds }, { data: patientResults }] = await Promise.all([
+        getMedications(),
+        getPatients({ search: q, page: 1, page_size: 1 }),
+      ]);
+      const medicationMatch = meds.some((m) =>
+        [m.name, m.generic_name, m.category].some((value) => value?.toLowerCase().includes(lower))
+      );
+      if (medicationMatch) {
+        navigate(`/medications?search=${encoded}`);
+        return;
+      }
+      if (patientResults.total > 0) {
+        navigate(`/dashboard?search=${encoded}`);
+        return;
+      }
+    } catch {
+      // Fall through to patient registry search if classification fails.
+    }
+
+    navigate(`/dashboard?search=${encoded}`);
   };
 
   const handleLogout = () => {
