@@ -56,7 +56,3 @@ openspec/
 # Design assets
 *.zip
 adheris-v35/
-frontend/src_backup/
-frontend/*.backup
-frontend/tailwind.config.js.backup
-frontend/index.html.backup
