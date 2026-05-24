@@ -83,10 +83,16 @@ cd frontend && npm install && npm run dev
 Deploy commands reference Terraform outputs and AWS profile. See `infra/` for Terraform config.
 Do NOT hardcode AWS account IDs, subnet IDs, security group IDs, or resource ARNs in committed files.
 
+## LANDING PAGE WARNING — READ BEFORE EVERY FRONTEND DEPLOY
+- The root `index.html` in S3 (`s3://medi-nudge-frontend-staging/`) is the Adheris landing page, NOT the React app.
+- The React app lives under `s3://medi-nudge-frontend-staging/portal/`.
+- ALWAYS sync frontend build to the `/portal/` prefix. NEVER sync to the S3 root.
+- NEVER run `aws s3 sync dist s3://medi-nudge-frontend-staging/` — this overwrites the landing page.
+
 ```bash
-# Frontend: build, upload to S3 frontend bucket, invalidate CloudFront
+# Frontend: build, upload to S3 frontend bucket under /portal/, invalidate CloudFront
 cd frontend && npm run build
-aws s3 sync dist s3://<frontend-bucket> --region ap-southeast-1
+aws s3 sync dist s3://medi-nudge-frontend-staging/portal/ --region ap-southeast-1
 aws cloudfront create-invalidation --distribution-id <cf-dist-id> --paths "/*"
 
 # Backend: build Docker, push to ECR, restart ECS
