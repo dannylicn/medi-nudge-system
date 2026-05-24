@@ -25,56 +25,104 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center px-4">
-      {/* Glassmorphism card */}
-      <div className="bg-surface-container-lowest/80 backdrop-blur-[20px] rounded-2xl shadow-float w-full max-w-sm p-8">
-        <h1 className="font-display text-3xl font-bold text-primary tracking-tight mb-1">
-          MediNudge
-        </h1>
-        <p className="font-body text-sm text-on-surface/50 mb-8">Care Coordinator Portal</p>
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] bg-surface">
+      {/* ============ Left panel — brand narrative ============ */}
+      <div className="relative hidden lg:flex flex-col justify-between bg-surface-container-low px-16 py-16 overflow-hidden">
+        {/* Soft radial wash */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 20%, rgba(232,90,60,.10), transparent 55%), radial-gradient(circle at 80% 80%, rgba(15,76,92,.08), transparent 55%)",
+          }}
+        />
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block font-body text-xs font-medium text-on-surface/70 mb-1.5">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-surface-container-highest rounded-xl px-3.5 py-2.5 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed transition-shadow"
-              required
-              autoComplete="email"
-            />
+        <div className="relative">
+          <div className="adheris-brand text-[26px]">
+            <span className="adheris-brand-dot" />
+            Adheris
           </div>
-          <div>
-            <label className="block font-body text-xs font-medium text-on-surface/70 mb-1.5">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-surface-container-highest rounded-xl px-3.5 py-2.5 font-body text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-fixed transition-shadow"
-              required
-              autoComplete="current-password"
-            />
-          </div>
+        </div>
 
-          {error && (
-            <p className="font-body text-sm text-error bg-error-container px-3.5 py-2.5 rounded-xl">
-              {error}
-            </p>
-          )}
+        <div className="relative">
+          <div className="eyebrow mb-3">For care teams</div>
+          <h1 className="font-display text-[56px] font-normal leading-[1.02] tracking-[-0.03em] max-w-[12ch] text-on-surface">
+            Medication adherence that <em>actually works.</em>
+          </h1>
+          <p className="mt-6 font-body text-base text-ink-soft max-w-[40ch] leading-relaxed">
+            A medication adherence system for chronic-disease patients in
+            Singapore — built for the nurses and doctors who keep them on
+            track.
+          </p>
+        </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-br from-primary to-primary-container text-white rounded-pill py-2.5 font-body text-sm font-semibold disabled:opacity-60 transition-opacity"
-          >
-            {loading ? "Signing in…" : "Sign in"}
-          </button>
-        </form>
+        {/* spacer keeps the brand anchored to the top and the copy centered */}
+        <div className="relative" />
+      </div>
+
+      {/* ============ Right panel — sign-in card ============ */}
+      <div className="flex items-center justify-center px-6 py-16 lg:px-16">
+        <div className="w-full max-w-sm bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-ambient p-8">
+          <div className="eyebrow">Sign in</div>
+          <h2 className="font-display text-3xl font-normal text-on-surface mt-2 mb-1 tracking-tightish">
+            Welcome back.
+          </h2>
+          <p className="font-body text-sm text-ink-soft mb-7">
+            Care Coordinator Portal · v2.4
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label
+                htmlFor="email"
+                className="block font-body text-[11px] font-semibold tracking-eyebrow uppercase text-muted mb-1.5"
+              >
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="w-full rounded-xl border border-outline-variant bg-surface px-3.5 py-2.5 font-body text-sm text-on-surface outline-none focus:border-accent focus:ring-[3px] focus:ring-accent/15 transition"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="password"
+                className="block font-body text-[11px] font-semibold tracking-eyebrow uppercase text-muted mb-1.5"
+              >
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                className="w-full rounded-xl border border-outline-variant bg-surface px-3.5 py-2.5 font-body text-sm text-on-surface outline-none focus:border-accent focus:ring-[3px] focus:ring-accent/15 transition"
+              />
+            </div>
+
+            {error && (
+              <p className="font-body text-sm text-accent bg-error-container px-3.5 py-2.5 rounded-xl">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-ink text-surface rounded-pill py-3 font-body text-sm font-semibold disabled:opacity-60 transition-colors hover:bg-accent"
+            >
+              {loading ? "Signing in…" : "Sign in →"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

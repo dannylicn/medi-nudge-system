@@ -1,6 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { getMedications, createMedication } from "../lib/api";
-import TableSortHeader from "../components/ui/TableSortHeader";
 
 export default function MedicationsPage() {
   const [medications, setMedications] = useState([]);
@@ -13,33 +12,6 @@ export default function MedicationsPage() {
     category: "",
     default_refill_days: 30,
   });
-
-  // ============ Sort state ============
-  const [sort, setSort] = useState({ key: "name", dir: "asc" });
-  const onSort = (key) =>
-    setSort((s) =>
-      s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }
-    );
-
-  const sortedMedications = useMemo(() => {
-    const copy = [...medications];
-    const dirMul = sort.dir === "asc" ? 1 : -1;
-    copy.sort((a, b) => {
-      let va, vb;
-      switch (sort.key) {
-        case "name":     va = (a.name || "").toLowerCase();         vb = (b.name || "").toLowerCase();         break;
-        case "generic":  va = (a.generic_name || "").toLowerCase(); vb = (b.generic_name || "").toLowerCase(); break;
-        case "category": va = (a.category || "").toLowerCase();     vb = (b.category || "").toLowerCase();     break;
-        case "refill":   va = a.default_refill_days ?? 0;           vb = b.default_refill_days ?? 0;           break;
-        default:         va = 0; vb = 0;
-      }
-      if (typeof va === "number" && typeof vb === "number") return (va - vb) * dirMul;
-      if (va < vb) return -1 * dirMul;
-      if (va > vb) return  1 * dirMul;
-      return 0;
-    });
-    return copy;
-  }, [medications, sort]);
 
   const fetchMedications = async () => {
     setLoading(true);
@@ -78,10 +50,10 @@ export default function MedicationsPage() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-6 max-w-4xl w-full mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-display text-[26px] font-medium text-on-surface tracking-[-0.02em]">Medication Catalog</h1>
+          <h1 className="font-display text-2xl font-bold text-on-surface tracking-tight">Medication Catalog</h1>
           <p className="font-body text-sm text-on-surface/50">{medications.length} medications</p>
         </div>
         <button
@@ -95,12 +67,12 @@ export default function MedicationsPage() {
       {/* Medications table */}
       <div className="bg-surface-container-low rounded-2xl overflow-hidden shadow-ambient">
         <table className="w-full font-body text-sm">
-          <thead className="bg-surface-container-low text-muted text-[11px] font-bold uppercase tracking-[0.13em]">
+          <thead className="bg-surface-container-lowest text-on-surface/40 text-xs uppercase tracking-widest">
             <tr>
-              <TableSortHeader label="Brand Name"   sortKey="name"     active={sort.key} dir={sort.dir} onSort={onSort} className="px-5 py-3.5" />
-              <TableSortHeader label="Generic Name" sortKey="generic"  active={sort.key} dir={sort.dir} onSort={onSort} className="px-5 py-3.5" />
-              <TableSortHeader label="Category"     sortKey="category" active={sort.key} dir={sort.dir} onSort={onSort} className="px-5 py-3.5" />
-              <TableSortHeader label="Refill Days"  sortKey="refill"   active={sort.key} dir={sort.dir} onSort={onSort} className="px-5 py-3.5" />
+              <th className="px-5 py-3.5 text-left">Brand Name</th>
+              <th className="px-5 py-3.5 text-left">Generic Name</th>
+              <th className="px-5 py-3.5 text-left">Category</th>
+              <th className="px-5 py-3.5 text-left">Refill Days</th>
             </tr>
           </thead>
           <tbody>
@@ -108,12 +80,12 @@ export default function MedicationsPage() {
               <tr>
                 <td colSpan={4} className="px-5 py-10 text-center text-on-surface/30">Loading…</td>
               </tr>
-            ) : sortedMedications.length === 0 ? (
+            ) : medications.length === 0 ? (
               <tr>
                 <td colSpan={4} className="px-5 py-10 text-center text-on-surface/30">No medications in catalog</td>
               </tr>
             ) : (
-              sortedMedications.map((m, i) => (
+              medications.map((m, i) => (
                 <tr
                   key={m.id}
                   className={`transition-colors hover:bg-surface-container-highest/40 ${

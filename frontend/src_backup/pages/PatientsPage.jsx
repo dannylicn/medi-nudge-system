@@ -4,7 +4,7 @@ import { getPatients, createPatient, getConditions, triggerNudgeCampaigns, trigg
 
 const RISK_CHIP = {
   high: "bg-error-container text-on-error-container",
-  medium: "bg-gold-container text-gold",
+  medium: "bg-yellow-100 text-yellow-800",
   low: "bg-tertiary-container text-on-tertiary-container",
 };
 

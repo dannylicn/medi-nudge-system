@@ -51,9 +51,9 @@ export default function AnalyticsPage() {
   }, [days]);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-6 max-w-5xl w-full mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-[26px] font-medium text-on-surface tracking-[-0.02em]">Analytics</h1>
+        <h1 className="font-display text-2xl font-bold text-on-surface tracking-tight">Analytics</h1>
         <select
           value={days}
           onChange={(e) => setDays(Number(e.target.value))}
@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
             <h2 className="font-display text-base font-bold text-on-surface mb-5">Refill Adherence Rate</h2>
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={adherence}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E6DFD2" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e3e5" />
                 <XAxis dataKey="week" tick={{ fontSize: 11, fontFamily: "Inter" }} />
                 <YAxis
                   tickFormatter={(v) => `${v}%`}
@@ -85,7 +85,7 @@ export default function AnalyticsPage() {
                 <Line
                   type="monotone"
                   dataKey="adherence_rate"
-                  stroke="#0F4C5C"
+                  stroke="#006565"
                   strokeWidth={2.5}
                   dot={false}
                 />
@@ -102,7 +102,7 @@ export default function AnalyticsPage() {
             ) : (
               <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={doseAdherence}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E6DFD2" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e3e5" />
                   <XAxis dataKey="week" tick={{ fontSize: 11, fontFamily: "Inter" }} />
                   <YAxis
                     tickFormatter={(v) => `${v}%`}
@@ -110,7 +110,7 @@ export default function AnalyticsPage() {
                     tick={{ fontSize: 11, fontFamily: "Inter" }}
                   />
                   <Tooltip formatter={(v) => [`${v}%`, "Adherence"]} />
-                  <Line type="monotone" dataKey="adherence_rate" stroke="#0F4C5C" strokeWidth={2.5} dot={false} name="Adherence %" />
+                  <Line type="monotone" dataKey="adherence_rate" stroke="#006565" strokeWidth={2.5} dot={false} name="Adherence %" />
                 </LineChart>
               </ResponsiveContainer>
             )}
@@ -138,12 +138,12 @@ export default function AnalyticsPage() {
                       <tr key={m.medication_id} className={i % 2 === 0 ? "bg-surface-container-lowest" : "bg-surface-container-low"}>
                         <td className="px-4 py-2.5 font-medium text-on-surface">{m.medication_name}</td>
                         <td className="px-4 py-2.5 text-right text-on-surface/60">{m.total}</td>
-                        <td className="px-4 py-2.5 text-right text-green font-semibold">{m.taken}</td>
+                        <td className="px-4 py-2.5 text-right text-tertiary-container font-semibold">{m.taken}</td>
                         <td className="px-4 py-2.5 text-right text-error font-semibold">{m.missed}</td>
                         <td className="px-4 py-2.5 text-right">
                           <span className={`px-2 py-0.5 rounded-pill text-xs font-semibold ${
                             m.adherence_rate >= 80 ? "bg-tertiary-container text-on-tertiary-container" :
-                            m.adherence_rate >= 50 ? "bg-gold-container text-gold" :
+                            m.adherence_rate >= 50 ? "bg-yellow-100 text-yellow-800" :
                             "bg-error-container text-on-error-container"
                           }`}>
                             {m.adherence_rate}%
@@ -163,13 +163,13 @@ export default function AnalyticsPage() {
               <h2 className="font-display text-base font-bold text-on-surface mb-5">Critical vs Non-Critical Medication Adherence</h2>
               <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={criticalAdherence}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E6DFD2" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e3e5" />
                   <XAxis dataKey="week" tick={{ fontSize: 11, fontFamily: "Inter" }} />
                   <YAxis tickFormatter={(v) => `${v}%`} domain={[0, 100]} tick={{ fontSize: 11, fontFamily: "Inter" }} />
                   <Tooltip formatter={(v) => [`${v}%`]} />
                   <Legend />
-                  <Line type="monotone" dataKey="critical_adherence" stroke="#E85A3C" strokeWidth={2.5} dot={false} name="Critical Medications" />
-                  <Line type="monotone" dataKey="non_critical_adherence" stroke="#0F4C5C" strokeWidth={2.5} dot={false} name="Non-Critical Medications" />
+                  <Line type="monotone" dataKey="critical_adherence" stroke="#ba1a1a" strokeWidth={2.5} dot={false} name="Critical Medications" />
+                  <Line type="monotone" dataKey="non_critical_adherence" stroke="#006565" strokeWidth={2.5} dot={false} name="Non-Critical Medications" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -225,15 +225,15 @@ export default function AnalyticsPage() {
             <h2 className="font-display text-base font-bold text-on-surface mb-5">Escalation Volume by Week</h2>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={escalations}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E6DFD2" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e3e5" />
                 <XAxis dataKey="week" tick={{ fontSize: 11, fontFamily: "Inter" }} />
                 <YAxis tick={{ fontSize: 11, fontFamily: "Inter" }} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="urgent" fill="#E85A3C" name="Urgent" />
-                <Bar dataKey="high" fill="#F08267" name="High" />
-                <Bar dataKey="medium" fill="#C8923E" name="Medium" />
-                <Bar dataKey="low" fill="#7A8595" name="Low" />
+                <Bar dataKey="urgent" fill="#ba1a1a" name="Urgent" />
+                <Bar dataKey="high" fill="#f97316" name="High" />
+                <Bar dataKey="medium" fill="#206393" name="Medium" />
+                <Bar dataKey="low" fill="#bdc9c8" name="Low" />
               </BarChart>
             </ResponsiveContainer>
           </div>

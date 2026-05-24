@@ -1,28 +1,29 @@
 /**
- * StatusChip — borderless status pill (Clinical Serenity design system)
+ * StatusChip — Adheris status pill
  *
- * variant:
- *   "on-track"       — tertiary-container (green)
- *   "non-adherence"  — error-container (soft red)
- *   "pending"        — yellow-100
- *   "info"           — secondary-container (blue)
- *   default          — surface-container-highest (neutral)
+ * variants:
+ *   "on-track"      — green-soft (positive)
+ *   "non-adherence" — coral-soft (urgent / missed)
+ *   "pending"       — gold-soft (warning / awaiting)
+ *   "info"          — teal-soft (informational)
+ *   default         — warm cream (neutral)
  *
- * Props:
- *   children, variant, className
+ * Same prop API as before.
  */
 const VARIANT_CLASSES = {
-  "on-track": "bg-tertiary-container text-on-tertiary-container",
-  "non-adherence": "bg-error-container text-on-error-container",
-  pending: "bg-yellow-100 text-yellow-800",
-  info: "bg-secondary-container text-secondary",
-  default: "bg-surface-container-highest text-on-surface/60",
+  "on-track":      "bg-green-container text-green",
+  "non-adherence": "bg-error-container text-accent",
+  pending:         "bg-gold-container text-gold",
+  info:            "bg-secondary-container text-secondary",
+  default:         "bg-surface-container-low text-on-surface/70",
 };
 
 export default function StatusChip({ children, variant = "default", className = "" }) {
   const cls = VARIANT_CLASSES[variant] ?? VARIANT_CLASSES.default;
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-pill font-body text-xs font-semibold ${cls} ${className}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-pill font-body text-[10.5px] font-semibold uppercase tracking-[0.08em] ${cls} ${className}`}
+    >
       {children}
     </span>
   );
